@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5-story">
+<meta name="ba-version" content="v5.1-fix">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>보드게임 모음 — 체스·오목·장기</title>
@@ -777,6 +777,26 @@
   .ba-btns button{min-width:120px;padding:12px 16px;border-radius:14px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font:800 15px 'Segoe UI',system-ui,sans-serif;cursor:pointer;}
   .ba-btns button.pri{background:linear-gradient(180deg,#4f86ff,#2a50c8);}
   @media (max-width:400px){#baHud .ba-row{font-size:15px;}#blockaction > div[style*="top:60px"]{padding:7px 10px;left:10px !important;}#baBoss{right:10px;}}
+
+  /* v5.1 touch layout: 대시 lower-left / 점프 upper-right diagonal, generous invisible hit areas */
+  #baPad > div:last-child{position:relative;display:block !important;width:200px;height:150px;}
+  #baPad > div:last-child #baDash{position:absolute;left:0;bottom:0;width:90px;height:80px;}
+  #baPad > div:last-child #baJump{position:absolute;right:0;top:0;width:100px;height:88px;}
+  #baPad button{position:relative;}
+  #baPad > div:last-child button::before{content:'';position:absolute;inset:-16px;border-radius:26px;}
+  #baPad .ba-dpad button::before{content:'';position:absolute;inset:-18px -5px -16px -5px;}
+  #baPadX{bottom:calc(16px + 150px + 18px + env(safe-area-inset-bottom)) !important;}
+  #baDash.latched{box-shadow:0 0 0 3px #ffe08a,0 0 24px rgba(255,200,80,.95) !important;filter:brightness(1.22);}
+  #baDash.latched::after{content:'ON';position:absolute;top:4px;right:6px;font:900 10px system-ui,sans-serif;color:#fff7c8;letter-spacing:.5px;}
+  #baLeft.sprint,#baRight.sprint{background:repeating-linear-gradient(90deg,rgba(255,220,120,.85) 0 6px,rgba(255,140,40,.55) 6px 14px) !important;background-size:28px 100% !important;animation:baSpd5 .35s linear infinite;box-shadow:0 0 20px rgba(255,190,80,.85) !important;}
+  #baLeft.sprint{animation-direction:reverse;}
+  @keyframes baSpd5{from{background-position:0 0}to{background-position:28px 0}}
+  #baSpeed5{position:absolute;inset:0;z-index:6;pointer-events:none;opacity:0;transition:opacity .15s;
+    background:repeating-linear-gradient(0deg,transparent 0 22px,rgba(255,255,255,.16) 22px 24px,transparent 24px 61px);
+    -webkit-mask-image:linear-gradient(90deg,#000 0,transparent 18%,transparent 82%,#000 100%);mask-image:linear-gradient(90deg,#000 0,transparent 18%,transparent 82%,#000 100%);animation:baSpd6 .25s linear infinite;}
+  #baSpeed5.show{opacity:1;}
+  #baSpeed5 b{position:absolute;left:16px;bottom:calc(16px + 76px + 64px + env(safe-area-inset-bottom));font:900 13px system-ui,sans-serif;color:#ffe9a8;text-shadow:0 1px 3px #000;letter-spacing:1px;}
+  @keyframes baSpd6{from{background-position:0 0}to{background-position:0 61px}}
 </style>
 
 
@@ -6999,6 +7019,7 @@ const BlockAction = (() => {
       power: () => { [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, f * 1.01, 0.09, 'square', 0.055, i * 0.055)); },
       pickup: () => { tone(660, 990, 0.08, 'triangle', 0.08); tone(990, 1480, 0.12, 'triangle', 0.07, 0.07); },
       throw: () => { noise(0.12, 0.08, 'bandpass', 600, 2400, 0, 2); },
+      fwhoosh: () => { noise(0.17, 0.11, 'bandpass', 420, 2800, 0, 1.6); noise(0.12, 0.05, 'highpass', 5200, 2600, 0.03); tone(190, 95, 0.12, 'sine', 0.07); },
       fuse: () => { noise(0.05, 0.05, 'highpass', 5000, 3000); },
       hiss: () => { noise(1.3, 0.16, 'highpass', 2600, 6000, 0, 0.6); },
       boom: () => { noise(0.9, 0.5, 'lowpass', 1400, 60); tone(110, 32, 0.6, 'sine', 0.4); noise(0.25, 0.25, 'highpass', 2500, 800); },
@@ -7531,63 +7552,135 @@ const BlockAction = (() => {
     const g = new THREE.BufferGeometry(); const p = [a, b, c, a, c, d].flatMap(v => [v.x, v.y, v.z]);
     g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1], 2)); g.computeVertexNormals(); return g;
   }
+  // v5.1: rebuilt from the real-truck reference — custom faceted BufferGeometry, neutral studio reflections
+  let truckEnv = null;
+  function truckEnvMap() {
+    if (truckEnv || !renderer) return truckEnv;
+    try {
+      const sc = new THREE.Scene();
+      const cv = document.createElement('canvas'); cv.width = 16; cv.height = 256; const x = cv.getContext('2d');
+      const gr = x.createLinearGradient(0, 0, 0, 256); gr.addColorStop(0, '#f2f4f6'); gr.addColorStop(0.42, '#c9ccd0'); gr.addColorStop(0.52, '#7d8085'); gr.addColorStop(1, '#2a2b2d');
+      x.fillStyle = gr; x.fillRect(0, 0, 16, 256);
+      const dt = new THREE.CanvasTexture(cv); dt.encoding = THREE.sRGBEncoding;
+      sc.add(new THREE.Mesh(new THREE.SphereGeometry(40, 24, 16), new THREE.MeshBasicMaterial({ map: dt, side: THREE.BackSide })));
+      const box = (w, h, px, py, pz, k) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(1, 1, 1).multiplyScalar(k), side: THREE.DoubleSide })); m.position.set(px, py, pz); m.lookAt(0, 0, 0); sc.add(m); };
+      box(30, 4, 0, 26, 0, 2.2); box(4, 18, -22, 10, 12, 1.5); box(4, 18, 22, 10, 12, 1.4); box(20, 3, 0, 6, -26, 1.2);
+      const pm = new THREE.PMREMGenerator(renderer); truckEnv = pm.fromScene(sc, 0.03).texture; pm.dispose();
+    } catch (e) { truckEnv = null; }
+    return truckEnv;
+  }
+  function triGeo(tris) {   // tris: array of [Vector3,Vector3,Vector3] → flat-shaded geometry with planar uvs (x,y)
+    const p = [], uv = [];
+    tris.forEach(t => t.forEach(v => { p.push(v.x, v.y, v.z); uv.push(v.x * 0.45 + v.z * 0.2, v.y * 0.45); }));
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); g.computeVertexNormals(); return g;
+  }
+  function polyTris(pts) { const out = []; for (let i = 1; i < pts.length - 1; i++) out.push([pts[0], pts[i], pts[i + 1]]); return out; }
   function makeCybertruck() {
     const g = new THREE.Group(), body = new THREE.Group(); g.add(body);
-    const Wd = 1.22, V = (x, y) => new THREE.Vector2(x, y);
-    const nose = [1.5, 0.56], peak = [0.5, 0.97], tail = [-1.5, 0.7];
-    const yF = x => nose[1] + (nose[0] - x) * (peak[1] - nose[1]) / (nose[0] - peak[0]);
-    const yR = x => peak[1] - (peak[0] - x) * (peak[1] - tail[1]) / (peak[0] - tail[0]);
-    const WF = 0.96, WR = -0.94, R = 0.235, BL = 0.25;   // wheel centres / radius
-    const arch = (c, s) => s > 0 ? [V(c + 0.4, BL), V(c + 0.27, 0.53), V(c - 0.27, 0.53), V(c - 0.4, BL)] : [];
-    const pts = [V(-1.47, BL + 0.04), V(WR - 0.4, BL), V(WR - 0.27, 0.53), V(WR + 0.27, 0.53), V(WR + 0.4, BL),
-      V(WF - 0.4, BL), V(WF - 0.27, 0.53), V(WF + 0.27, 0.53), V(WF + 0.4, BL),
-      V(1.44, BL + 0.03), V(1.53, 0.42), V(nose[0] + 0.02, nose[1]), V(peak[0], peak[1]), V(tail[0], tail[1]), V(-1.53, 0.46)];
-    const shape = new THREE.Shape(pts);
-    // side-window opening (see-through, the driver shows inside)
-    const win = [V(1.12, 0.63), V(1.04, yF(1.04) - 0.045), V(peak[0], peak[1] - 0.055), V(-0.3, yR(-0.3) - 0.045), V(-0.34, 0.63)];
-    shape.holes.push(new THREE.Path(win.slice().reverse()));
-    const steel = std({ color: 0xc6c9cc, map: brushedTex(), metalness: 0.5, roughness: 0.4, envMapIntensity: 0.35 });
-    const hull = new THREE.Mesh(prism(shape, Wd), steel); hull.castShadow = true; hull.receiveShadow = true; body.add(hull);
-    // dark tinted glass (both sides + windshield + rear glass)
-    const glass = std({ color: 0x0b0e14, metalness: 0.35, roughness: 0.06, transparent: true, opacity: 0.55, envMapIntensity: 1.6, depthWrite: false });
-    const wshape = new THREE.Shape(win);
-    [1, -1].forEach(s => { const m = new THREE.Mesh(new THREE.ShapeGeometry(wshape), glass); m.position.z = s * (Wd / 2 + 0.003); if (s < 0) m.rotation.y = Math.PI, m.scale.x = -1; m.renderOrder = 4; body.add(m); });
-    const hz = Wd / 2 - 0.07, o = 0.006, V3 = (x, y, z) => new THREE.Vector3(x, y, z);
-    const ws = new THREE.Mesh(quad(V3(1.14, yF(1.14) + o, hz), V3(peak[0] + 0.03, peak[1] + o, hz), V3(peak[0] + 0.03, peak[1] + o, -hz), V3(1.14, yF(1.14) + o, -hz)), std({ color: 0x0b0d10, metalness: 0.3, roughness: 0.05, envMapIntensity: 0.6 }));
-    ws.material.side = THREE.DoubleSide; body.add(ws);
-    const rg = new THREE.Mesh(quad(V3(peak[0] - 0.03, peak[1] + o, hz), V3(-0.1, yR(-0.1) + o, hz), V3(-0.1, yR(-0.1) + o, -hz), V3(peak[0] - 0.03, peak[1] + o, -hz)), ws.material); body.add(rg);
-    // vault (bed cover) seam + tailgate seam, door seams, black arch cladding
-    const seam = new THREE.MeshBasicMaterial({ color: 0x23262c });
-    const vs = new THREE.Mesh(quad(V3(-0.42, yR(-0.42) + o * 1.5, Wd / 2), V3(-0.4, yR(-0.4) + o * 1.5, Wd / 2), V3(-0.4, yR(-0.4) + o * 1.5, -Wd / 2), V3(-0.42, yR(-0.42) + o * 1.5, -Wd / 2)), seam); body.add(vs);
+    const V3 = (x, y, z) => new THREE.Vector3(x, y, z), V = (x, y) => new THREE.Vector2(x, y);
+    const Wd = 1.22, Wt = 0.98, hw = Wd / 2, ht = Wt / 2;
+    // side profile (x: +front). apex sits at the top of the windshield, ~1/3 back from the nose
+    const NOSE = [1.5, 0.6], APEX = [0.46, 1.0], TAIL = [-1.5, 0.74], FB = [1.47, 0.3], RB = [-1.5, 0.3];
+    const BELT_F = [1.0, 0.7], BELT_R = [-0.56, 0.775];   // side-window sill line (A-pillar base → C)
+    const lerp3 = (a, b, t) => a.clone().lerp(b, t);
+    const WF = 0.97, WR = -0.97, R = 0.28, BL = 0.3;
+    const env = truckEnvMap();
+    const steel = std({ color: 0xd6d8db, map: brushedTex(), metalness: 0.9, roughness: 0.35, envMapIntensity: 1.25 });
+    if (env) steel.envMap = env; steel.flatShading = true; steel.side = THREE.DoubleSide;
+    const glass = std({ color: 0x050608, metalness: 0.3, roughness: 0.1, envMapIntensity: 0.7 }); if (env) glass.envMap = env; glass.flatShading = true; glass.side = THREE.DoubleSide;
+    const sideGlass = std({ color: 0x050608, metalness: 0.3, roughness: 0.08, transparent: true, opacity: 0.6, depthWrite: false, envMapIntensity: 0.7 }); if (env) sideGlass.envMap = env; sideGlass.side = THREE.DoubleSide;
+    const black = std({ color: 0x1c1d20, metalness: 0.15, roughness: 0.75 }); black.flatShading = true; black.side = THREE.DoubleSide;
+    const inner = new THREE.MeshBasicMaterial({ color: 0x070708, side: THREE.DoubleSide });
+    const add = (geo, mat, shadow) => { const m = new THREE.Mesh(geo, mat); if (shadow) { m.castShadow = true; m.receiveShadow = true; } body.add(m); return m; };
+    // ---- key 3D points ----
+    const nL = V3(NOSE[0], NOSE[1], hw), nR = V3(NOSE[0], NOSE[1], -hw);
+    const aL = V3(APEX[0], APEX[1], ht), aR = V3(APEX[0], APEX[1], -ht);
+    const tL = V3(TAIL[0], TAIL[1], hw), tR = V3(TAIL[0], TAIL[1], -hw);
+    const fbL = V3(FB[0], FB[1], hw), fbR = V3(FB[0], FB[1], -hw), rbL = V3(RB[0], RB[1], hw), rbR = V3(RB[0], RB[1], -hw);
+    // hood + windshield: one flat plane nose → apex (glass from the cowl up)
+    const cw = 0.4;   // cowl position along the slope
+    const cL = lerp3(nL, aL, cw), cR = lerp3(nR, aR, cw);
+    add(triGeo([[nL, nR, cR], [nL, cR, cL]]), steel, true);
+    const o = 0.004, up = V3(0.36, 1, 0).normalize().multiplyScalar(o);
+    add(triGeo([[cL.clone().add(up), cR.clone().add(up), aR.clone().add(up)], [cL.clone().add(up), aR.clone().add(up), aL.clone().add(up)]]), glass);
+    // tonneau: apex → tail, short rear glass then the long stainless bed cover
+    const rw = 0.2, gL = lerp3(aL, tL, rw), gR = lerp3(aR, tR, rw);
+    add(triGeo([[gL, gR, tR], [gL, tR, tL]]), steel, true);
+    const up2 = V3(-0.14, 1, 0).normalize().multiplyScalar(o);
+    add(triGeo([[aL.clone().add(up2), aR.clone().add(up2), gR.clone().add(up2)], [aL.clone().add(up2), gR.clone().add(up2), gL.clone().add(up2)]]), glass);
+    // front face (nose crease → bumper) + rear face
+    add(triGeo([[nL, fbL, fbR], [nL, fbR, nR]]), steel, true);
+    add(triGeo([[tL, tR, rbR], [tL, rbR, rbL]]), steel, true);
+    // flat stainless sides with wheel-arch cut-outs (outline incl. hex arches), plus the leaning greenhouse facets
+    const arch = (c, k) => [V(c + 0.5 * k, BL), V(c + 0.36 * k, 0.64), V(c - 0.36 * k, 0.64), V(c - 0.5 * k, BL)];
+    // build outline bottom edge left→right: tail-bottom → rear arch → front arch → front-bottom
+    const bottom = [V(RB[0], RB[1]), V(WR - 0.42, BL), V(WR - 0.28, 0.65), V(WR + 0.28, 0.65), V(WR + 0.42, BL), V(WF - 0.42, BL), V(WF - 0.28, 0.65), V(WF + 0.28, 0.65), V(WF + 0.42, BL), V(FB[0], FB[1])];
+    const outline = [...bottom, V(NOSE[0], NOSE[1]), V(BELT_F[0], BELT_F[1]), V(BELT_R[0], BELT_R[1]), V(TAIL[0], TAIL[1])];
+    const sideGeo = new THREE.ShapeGeometry(new THREE.Shape(outline));
+    [1, -1].forEach(s => { const m = add(sideGeo, steel, true); m.position.z = s * hw; });
     [1, -1].forEach(s => {
-      [0.42, -0.36].forEach(x => { const d = new THREE.Mesh(new THREE.PlaneGeometry(0.007, 0.42), seam); d.position.set(x, 0.5, s * (Wd / 2 + 0.002)); if (s < 0) d.rotation.y = Math.PI; body.add(d); });
-      const cl = new THREE.Mesh(new THREE.PlaneGeometry(2.96, 0.035), seam); cl.position.set(0, BL + 0.03, s * (Wd / 2 + 0.002)); if (s < 0) cl.rotation.y = Math.PI; body.add(cl);
-      [WF, WR].forEach(c => { const sh = new THREE.Shape([V(c + 0.47, BL - 0.03), V(c + 0.32, 0.59), V(c - 0.32, 0.59), V(c - 0.47, BL - 0.03)]); sh.holes.push(new THREE.Path(arch(c, 1).slice().reverse()));
-        const m = new THREE.Mesh(prism(sh, 0.03), std({ color: 0x1b1c20, roughness: 0.7, metalness: 0.1 })); m.position.z = s * (Wd / 2 + 0.012); body.add(m); });
+      const z = s * hw, zt = s * ht;
+      const N = V3(NOSE[0], NOSE[1], z), A = V3(APEX[0], APEX[1], zt), T = V3(TAIL[0], TAIL[1], z), BF = V3(BELT_F[0], BELT_F[1], z), BR = V3(BELT_R[0], BELT_R[1], z);
+      add(triGeo([[N, BF, A]]), steel, true);           // A-pillar / fender top facet
+      add(triGeo([[BR, T, A]]), steel, true);           // sail panel → bed rail
+      add(triGeo([[BF, BR, A]]), sideGlass);            // side glass (both doors, the driver shows through)
+      // black B-pillar strip on the glass
+      const bx = 0.18, b0 = V3(bx, BELT_F[1] + (BELT_R[1] - BELT_F[1]) * ((BELT_F[0] - bx) / (BELT_F[0] - BELT_R[0])), z), tA = (bx - BELT_R[0]) / (APEX[0] - BELT_R[0]);
+      const b1 = lerp3(BR, A, Math.min(0.98, tA)), push = V3(0, 0, s * 0.006);
+      const wv = V3(0.05, 0, 0);
+      add(triGeo([[b0.clone().add(push), b0.clone().add(wv).add(push), b1.clone().add(wv).add(push)], [b0.clone().add(push), b1.clone().add(wv).add(push), b1.clone().add(push)]]), black);
+      // crisp beltline crease + door seams (thin dark lines on the flat panel)
+      const ln = (x0, y0, x1, y1, t) => { const d = Math.hypot(x1 - x0, y1 - y0), m = new THREE.Mesh(new THREE.PlaneGeometry(d, t || 0.008), new THREE.MeshBasicMaterial({ color: 0x3a3d42 })); m.position.set((x0 + x1) / 2, (y0 + y1) / 2, z + s * 0.003); m.rotation.z = Math.atan2(y1 - y0, x1 - x0); if (s < 0) m.rotation.y = Math.PI, m.rotation.z = -m.rotation.z; body.add(m); };
+      ln(WR + 0.5, 0.5, WF - 0.5, 0.5, 0.006); ln(-0.52, 0.34, -0.52, 0.77); ln(0.2, 0.34, 0.2, 0.735); ln(0.62, 0.34, 0.62, 0.715);
+      // angular black wheel-arch flares (hex cladding) + rocker band
+      [WF, WR].forEach(c => {
+        // flat angular flare ring: outer hex-ish outline around the arch opening, as a quad strip (+ a thin outward lip)
+        const zf = s * (hw + 0.022), zi = s * (hw - 0.005);
+        const O = [[c + 0.45, 0.12], [c + 0.45, 0.42], [c + 0.3, 0.69], [c - 0.3, 0.69], [c - 0.45, 0.42], [c - 0.45, 0.12]];
+        const I = [[c + 0.35, 0.12], [c + 0.35, 0.38], [c + 0.23, 0.61], [c - 0.23, 0.61], [c - 0.35, 0.38], [c - 0.35, 0.12]];
+        const tr = [];
+        for (let k = 0; k < O.length - 1; k++) { const o0 = V3(O[k][0], O[k][1], zf), o1 = V3(O[k + 1][0], O[k + 1][1], zf), i0 = V3(I[k][0], I[k][1], zf), i1 = V3(I[k + 1][0], I[k + 1][1], zf);
+          tr.push([o0, o1, i1], [o0, i1, i0]);
+          const b0 = V3(O[k][0], O[k][1], zi), b1 = V3(O[k + 1][0], O[k + 1][1], zi); tr.push([o0, b0, b1], [o0, b1, o1]); }
+        add(triGeo(tr), black, true);
+        const liner = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape([V(c + 0.35, 0.05), V(c + 0.35, 0.38), V(c + 0.23, 0.61), V(c - 0.23, 0.61), V(c - 0.35, 0.38), V(c - 0.35, 0.05)])), inner); liner.position.z = s * (hw - 0.27); body.add(liner);
+      });
+      const rk = add(new THREE.BoxGeometry(WF - WR - 0.9, 0.19, 0.05), black, true); rk.position.set((WF + WR) / 2, 0.215, s * (hw + 0.006));
     });
-    // full-width LED light bars
-    const ledW = new THREE.MeshBasicMaterial({ color: LIN(0xffffff).multiplyScalar(2.4), toneMapped: false });
+    // black bumpers front / rear + underbody
+    const fbm = add(new THREE.BoxGeometry(0.5, 0.19, Wd + 0.012), black, true); fbm.position.set(FB[0] - 0.24, 0.215, 0);
+    const rbm = add(new THREE.BoxGeometry(0.5, 0.19, Wd + 0.012), black, true); rbm.position.set(RB[0] + 0.26, 0.215, 0);
+    const ub = add(new THREE.BoxGeometry(2.9, 0.06, Wd - 0.1), inner); ub.position.set(0, 0.2, 0);
+    const cab = add(new THREE.BoxGeometry(1.6, 0.2, Wd - 0.06), inner); cab.position.set(0.2, 0.42, 0);   // dark cabin floor seen through the glass
+    // thin full-width LED bar right at the hood / front-face crease, red bar at the tail
+    const ledW = new THREE.MeshBasicMaterial({ color: LIN(0xffffff).multiplyScalar(2.6), toneMapped: false });
     const ledR = new THREE.MeshBasicMaterial({ color: LIN(0xff2020).multiplyScalar(2.2), toneMapped: false });
-    const fb = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.012, Wd * 1.0), ledW); fb.position.set(nose[0] + 0.015, nose[1] - 0.008, 0); body.add(fb);
-    const rb = new THREE.Mesh(new THREE.BoxGeometry(0.03, 0.026, Wd * 0.98), ledR); rb.position.set(tail[0] - 0.02, tail[1] - 0.03, 0); body.add(rb);
-    const fGlow = glowSprite(LIN(0xdfefff), 1.1); fGlow.material.opacity = 0.55; fGlow.position.set(nose[0] + 0.1, nose[1], 0.4); fGlow.scale.set(0.5, 0.22, 1); body.add(fGlow);
-    const rGlow = glowSprite(LIN(0xff3030), 1); rGlow.material.opacity = 0.5; rGlow.position.set(tail[0] - 0.08, tail[1] - 0.03, 0.4); rGlow.scale.set(0.45, 0.2, 1); body.add(rGlow);
-    // headlight beams (additive cones)
+    const fb = new THREE.Mesh(new THREE.BoxGeometry(0.016, 0.02, Wd * 0.99), ledW); fb.position.set(NOSE[0] + 0.004, NOSE[1] - 0.016, 0); body.add(fb);
+    const rb = new THREE.Mesh(new THREE.BoxGeometry(0.014, 0.022, Wd * 0.97), ledR); rb.position.set(TAIL[0] - 0.006, TAIL[1] - 0.03, 0); body.add(rb);
+    const fGlow = glowSprite(LIN(0xe6f0ff), 1.1); fGlow.material.opacity = 0.45; fGlow.position.set(NOSE[0] + 0.08, NOSE[1] - 0.01, 0.45); fGlow.scale.set(0.42, 0.12, 1); body.add(fGlow);
+    const rGlow = glowSprite(LIN(0xff3030), 1); rGlow.material.opacity = 0.45; rGlow.position.set(TAIL[0] - 0.06, TAIL[1] - 0.03, 0.45); rGlow.scale.set(0.4, 0.14, 1); body.add(rGlow);
     const beamM = new THREE.MeshBasicMaterial({ color: LIN(0xcfe4ff), transparent: true, opacity: 0.0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false, side: THREE.DoubleSide });
-    const beam = new THREE.Mesh(new THREE.ConeGeometry(0.55, 2.6, 20, 1, true), beamM); beam.rotation.z = Math.PI / 2; beam.position.set(nose[0] + 1.3, nose[1] - 0.06, 0); body.add(beam);
-    // wheels: chunky off-road tyres + flat faceted aero covers
-    const tireM = std({ color: 0xffffff, map: tireTex(), bumpMap: tireTex(), bumpScale: 0.02, roughness: 0.92, metalness: 0 });
-    const capM = std({ color: 0x2b2d31, metalness: 0.45, roughness: 0.45, envMapIntensity: 0.4 }), ringM = std({ color: 0x8c9096, metalness: 0.6, roughness: 0.35, envMapIntensity: 0.4 });
-    const hubM = std({ color: 0x9aa0a8, metalness: 0.9, roughness: 0.25 });
+    const beam = new THREE.Mesh(new THREE.ConeGeometry(0.55, 2.6, 20, 1, true), beamM); beam.rotation.z = Math.PI / 2; beam.position.set(NOSE[0] + 1.3, NOSE[1] - 0.08, 0); body.add(beam);
+    // neutral key light so the night scene never tints the steel purple
+    const key = new THREE.PointLight(0xffffff, 0.55, 4.5, 2); key.position.set(1.2, 2.2, 2.2); g.add(key);
+    // wheels: chunky all-terrain tyres (lathe profile, block tread) + flat hex-faceted black aero covers
+    const tireM = std({ color: 0xffffff, map: tireTex(), bumpMap: tireTex(), bumpScale: 0.03, roughness: 0.9, metalness: 0 });
+    const tw = 0.24, prof = [];
+    for (let i = 0; i <= 8; i++) { const a = -Math.PI / 2 + (i / 8) * Math.PI; prof.push(V(R * 0.7 + (R * 0.3) * (Math.abs(Math.cos(a)) > 0.3 ? 1 : 0.94) * (0.9 + 0.1 * Math.cos(a)), (tw / 2) * Math.sin(a))); }
+    const tireGeo = new THREE.LatheGeometry(prof, 40); tireGeo.rotateZ(Math.PI / 2); tireGeo.rotateY(Math.PI / 2);   // axis → z
+    const lugGeo = new THREE.BoxGeometry(0.034, 0.018, tw * 0.4), lugM = std({ color: 0x141416, roughness: 0.95 });
+    const sideM = std({ color: 0x26272a, roughness: 0.85, metalness: 0 });
+    const coverM = std({ color: 0x303236, metalness: 0.5, roughness: 0.45, envMapIntensity: 0.9 }); if (env) coverM.envMap = env; coverM.flatShading = true;
+    const rimM = std({ color: 0x111214, roughness: 0.6 });
     const wheels = [];
     [WF, WR].forEach(x => [1, -1].forEach(s => {
-      const w = new THREE.Group(); w.position.set(x, R, s * (Wd / 2 - 0.1));
-      const t = new THREE.Mesh(new THREE.CylinderGeometry(R, R, 0.2, 40), [tireM, tireM, tireM]); t.rotation.x = Math.PI / 2; t.castShadow = true; w.add(t);
-      const sw = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.93, R * 0.93, 0.205, 40), std({ color: 0x1a1b1e, roughness: 0.85 })); sw.rotation.x = Math.PI / 2; w.add(sw);
-      const rim = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.7, R * 0.7, 0.012, 36), ringM); rim.rotation.x = Math.PI / 2; rim.position.z = s * 0.104; w.add(rim);
-      const cv = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.66, R * 0.62, 0.014, 36), capM); cv.rotation.x = Math.PI / 2; cv.position.z = s * 0.112; w.add(cv);
-      for (let k = 0; k < 3; k++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(R * 1.2, 0.006, 0.004), ringM); sp.rotation.z = k * Math.PI / 3; sp.position.z = s * 0.12; w.add(sp); }
-      const hb = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.13, R * 0.13, 0.02, 24), hubM); hb.rotation.x = Math.PI / 2; hb.position.z = s * 0.122; w.add(hb);
+      const w = new THREE.Group(); w.position.set(x, R, s * (hw - 0.13));
+      const t = new THREE.Mesh(tireGeo, tireM); t.castShadow = true; w.add(t);
+      const sw = new THREE.Mesh(new THREE.RingGeometry(R * 0.74, R * 0.97, 40), sideM); sw.position.z = s * tw * 0.44; if (s < 0) sw.rotation.y = Math.PI; w.add(sw);
+      // (tread is in the tyre texture; no gear-like lug blocks)
+      const rim = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.74, R * 0.74, tw * 0.9, 6), rimM); rim.rotation.x = Math.PI / 2; w.add(rim);
+      const cv = new THREE.Mesh(new THREE.CylinderGeometry(R * 0.22, R * 0.74, 0.03, 6, 1), coverM); cv.rotation.x = s * Math.PI / 2; cv.position.z = s * (tw * 0.47); w.add(cv);
+      for (let k = 0; k < 6; k++) { const sp = new THREE.Mesh(new THREE.BoxGeometry(R * 0.62, 0.008, 0.006), rimM); sp.rotation.z = k * Math.PI / 3 + Math.PI / 6; sp.position.set(Math.cos(k * Math.PI / 3 + Math.PI / 6) * R * 0.36, Math.sin(k * Math.PI / 3 + Math.PI / 6) * R * 0.36, s * (tw * 0.47 + 0.028)); w.add(sp); }
       g.add(w); wheels.push(w);
     }));
     // star-mode FX: rainbow aura, electric arcs, speed streaks
@@ -7596,7 +7689,9 @@ const BlockAction = (() => {
     for (let i = 0; i < 3; i++) { const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(new Array(8 * 3).fill(0), 3)); const l = new THREE.Line(geo, arcM); l.frustumCulled = false; g.add(l); arcs.push(l); }
     const streakM = new THREE.MeshBasicMaterial({ color: LIN(0xffffff), transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false });
     const streaks = []; for (let i = 0; i < 7; i++) { const s = new THREE.Mesh(new THREE.PlaneGeometry(1, 0.025), streakM); s.position.set(-2 - Math.random() * 2, 0.2 + Math.random() * 1, 0.7); s.userData.sp = 0.5 + Math.random(); g.add(s); streaks.push(s); }
-    g.userData = { body, wheels, beam, aura, arcs, arcM, streaks, streakM, fGlow, prof: { yF, yR, peak, nose, tail, Wd } };
+    const yF = x => NOSE[1] + (NOSE[0] - x) * (APEX[1] - NOSE[1]) / (NOSE[0] - APEX[0]);
+    const yR = x => APEX[1] - (APEX[0] - x) * (APEX[1] - TAIL[1]) / (APEX[0] - TAIL[0]);
+    g.userData = { body, wheels, beam, aura, arcs, arcM, streaks, streakM, fGlow, prof: { yF, yR, peak: APEX, nose: NOSE, tail: TAIL, Wd } };
     return g;
   }
 
@@ -7660,7 +7755,7 @@ const BlockAction = (() => {
     const yaw = p.face > 0 ? 0 : Math.PI; m.rotation.y = tLerp(m.rotation.y, yaw, 0.25 * k);
     ud.body.rotation.z = tLerp(ud.body.rotation.z, (p.ground ? 0 : Math.max(-0.12, Math.min(0.12, p.vy * 0.6))) * (p.face > 0 ? 1 : 1) - tr.sus * 0.6, 0.2 * k);
     ud.body.position.y = tr.sus;
-    tr.spin += p.vx * k / 0.235; ud.wheels.forEach(w => { w.rotation.z = -tr.spin * (p.face > 0 ? 1 : -1); });
+    tr.spin += p.vx * k / 0.27; ud.wheels.forEach(w => { w.rotation.z = -tr.spin * (p.face > 0 ? 1 : -1); });
     const warn = tr.t <= TRUCK_WARN, blink = warn && (clock >> (tr.t < 60 ? 1 : 2)) % 2 === 0;
     // rainbow star aura + electric arcs + beams + streaks
     const hue = (clock * 0.012) % 1; ud.aura.material.color.setHSL(hue, 0.9, 0.6); ud.aura.material.opacity = blink ? 0.1 : 0.38 + Math.sin(clock * 0.3) * 0.08;
@@ -7673,7 +7768,6 @@ const BlockAction = (() => {
     const spd = Math.abs(p.vx); ud.streakM.opacity = Math.min(0.5, Math.max(0, (spd - 0.08) * 4));
     ud.streaks.forEach(s => { s.position.x -= (0.15 + spd * 2) * s.userData.sp * k; if (s.position.x < -4.2) { s.position.x = -1.6 - Math.random() * 0.4; s.position.y = 0.15 + Math.random() * 1; } s.scale.x = 0.6 + spd * 6; });
     m.visible = !(warn && tr.t < 60 && (clock >> 1) % 2 === 0 && false);
-    ud.body.children[0].material.emissive && ud.body.children[0].material.emissive.setHSL(hue, 0.8, blink ? 0 : 0.022);
   }
 
   // ===================== v4: procedural BGM (original tracks, WebAudio, lookahead scheduler) =====================
@@ -8250,6 +8344,11 @@ const BlockAction = (() => {
   let state = 'boot';    // select | intro | play | dying | clear | over | pause
   let stageIdx = 0, cpReached = false;
   let pl = null, items = [], fballs = [], pops = [], boss = null;
+  const THR_REL = 5, THR_END = 16;
+  function spawnFireball(p, x, y) {
+    const m = makeFireball(); W3.group.add(m); m.position.set(x, y + 0.1, ZP);
+    fballs.push({ x, y: y - 0.1, vx: p.face * 0.2 + p.vx * 0.3, vy: -0.04, hw: 0.1, h: 0.2, mesh: m, life: 150 });
+  }
   const cam = { x: 8, y: 6, fy: 2, d: 16, H: 10, Wv: 16, shake: 0, lockX: null };
   const SPEC = { walker: { hw: 0.34, h: 0.9, sp: 0.022 }, spiky: { hw: 0.32, h: 0.66, sp: 0.016, edge: true }, bat: { hw: 0.3, h: 0.4, sp: 0.03 },
     guard: { hw: 0.36, h: 1.0, sp: 0.026, edge: true, hp: 2 }, boss: { hw: 0.78, h: 2.2, sp: 0.03, hp: 5 },
@@ -8325,8 +8424,8 @@ const BlockAction = (() => {
   function readInput() {
     const i = { left: K('ArrowLeft') || K('KeyA'), right: K('ArrowRight') || K('KeyD'),
       jump: K('Space') || K('ArrowUp') || K('KeyW') || K('KeyZ'),
-      run: K('ShiftLeft') || K('ShiftRight') || K('KeyK') || K('KeyX') || K('KeyJ') || K('KeyF'), tnt: K('KeyE') || K('KeyC'), utnt: K('KeyR') || K('KeyV'), down: K('ArrowDown') || K('KeyS') };
-    i.jumpP = i.jump && !prevIn.jump; i.runP = i.run && !prevIn.run; i.tntP = i.tnt && !prevIn.tnt; i.utntP = i.utnt && !prevIn.utnt; i.downP = i.down && !prevIn.down; prevIn = i; return i;
+      raw: K('ShiftLeft') || K('ShiftRight') || K('KeyK') || K('KeyX') || K('KeyJ') || K('KeyF'), tnt: K('KeyE') || K('KeyC'), utnt: K('KeyR') || K('KeyV'), down: K('ArrowDown') || K('KeyS') };
+    i.run = i.raw || RUN5.run(); i.jumpP = i.jump && !prevIn.jump; i.runP = (i.raw && !prevIn.raw) || RUN5.pulse(); i.tntP = i.tnt && !prevIn.tnt; i.utntP = i.utnt && !prevIn.utnt; i.downP = i.down && !prevIn.down; prevIn = i; return i;
   }
 
   // ---------- blocks & items ----------
@@ -8479,7 +8578,8 @@ const BlockAction = (() => {
     const lockMove = p.pound || p.poundRec > 0 || (p.crouch && p.ground);
     const dir = lockMove ? 0 : (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
     if (p.crouch && p.ground && !p.slide) { const d2 = (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (d2) p.face = d2; }
-    const max = p.truck ? C.run * 1.5 : (inp.run ? C.run : C.walk);
+    if (p.ground) p.airRun = inp.run && Math.abs(p.vx) > C.walk * 1.02; else if (!p.airRun && inp.run) p.airRun = true;
+    const max = p.truck ? C.run * 1.5 : ((inp.run || (!p.ground && p.airRun)) ? C.run : C.walk);
     if (p.pound) { p.vx *= 0.7; }
     else if (p.slide && p.ground) { const s = Math.sign(p.vx); p.vx -= s * C.fric * 0.32; if (Math.sign(p.vx) !== s) p.vx = 0; }
     else if (dir) {
@@ -8501,7 +8601,7 @@ const BlockAction = (() => {
       if (inp.jumpP && !p.ground) { p.vy = 0.17; snd('swim'); spawnParts(p.x, p.y + 0.5, ZP, 0xcff0ff, NP(4), 0.03, 0.05); }
       if (clock % 24 === 0) spawnParts(p.x, p.y + p.h, ZP, 0xdff6ff, 1, 0.01, 0.04);
     } else if (p.pound) {
-      p.poundT++;
+      p.poundT++; if (p.poundT > 90 || !isFinite(p.y)) { p.pound = 0; p.poundT = 0; slog5('poundTimeout'); }
       if (p.poundT < 13) p.vy = p.poundT < 4 ? 0.02 : 0;                // brief hang + spin
       else { p.vy = -0.5; if (clock % 2 === 0) spawnParts(p.x, p.y + p.h * 0.5, ZP, 0xffffff, 1, 0.01, 0.06); }
     } else {
@@ -8540,11 +8640,27 @@ const BlockAction = (() => {
     if (p.pound && wet0) p.pound = 0;
     // fire
     if (p.fireCd > 0) p.fireCd--;
-    if (p.power === 2 && inp.runP && p.fireCd <= 0 && fballs.length < 2) {
-      const m = makeFireball(); W3.group.add(m);
-      fballs.push({ x: p.x + p.face * 0.4, y: p.y + p.h * 0.6, vx: p.face * 0.2, vy: -0.04, hw: 0.1, h: 0.2, mesh: m, life: 150 });
-      p.fireCd = 10; snd('dash');
+    // v5.1 throw: dash starts a ~0.25s arm throw (alternating arms); the ball leaves the hand on the release frame
+    if (!p.thr) p.thr = [-1, -1];
+    const thrPend = (p.thr[0] >= 0 && p.thr[0] < THR_REL ? 1 : 0) + (p.thr[1] >= 0 && p.thr[1] < THR_REL ? 1 : 0);
+    if (p.power === 2 && inp.runP && p.fireCd <= 0 && fballs.length + thrPend < 2 && state === 'play') {
+      if (p.truck) { spawnFireball(p, p.x + p.face * 0.55, p.y + 0.95); snd('fwhoosh'); }      // out of the cab window
+      else { p.thrArm = (p.thrArm | 0) ^ 1; p.thr[p.thrArm] = 0; }
+      p.fireCd = 9;
     }
+    for (let a = 0; a < 2; a++) if (p.thr[a] >= 0) {
+      p.thr[a]++;
+      if (p.thr[a] === THR_REL && p.power === 2 && !p.truck) {
+        const h = p.hand && p.hand[a] && isFinite(p.hand[a].x) && Math.abs(p.hand[a].x - p.x) < 1.2 && Math.abs(p.hand[a].y - p.y - p.h * 0.6) < 1.2 ? p.hand[a] : null;
+        let hx = h ? h.x + p.face * 0.08 : p.x + p.face * 0.4, hy = h ? h.y : p.y + p.h * 0.75;
+        if (solidAt(Math.floor(hx), Math.floor(hy))) { hx = p.x + p.face * 0.1; hy = p.y + p.h * 0.6; }
+        spawnFireball(p, hx, hy); snd('fwhoosh');
+        spawnParts(hx, hy, ZP + 0.1, 0xffe27a, NP(6), 0.05, 0.05); spawnParts(hx, hy, ZP + 0.1, 0xff7a1a, NP(4), 0.035, 0.03);
+        p.thrFlash = 5; p.thrFlashA = a;
+      }
+      if (p.thr[a] >= THR_END) p.thr[a] = -1;
+    }
+    if (p.thrFlash > 0) p.thrFlash--;
     // hazards
     if (p.y < -2.5) die();
     if (L.lava.has(Math.floor(p.x)) && p.y < (L.lavaY || 0.75)) { if (p.fireRes > 0 || p.truck) lavaWade5(p); else { spawnParts(p.x, 0.8, ZP, 0xff7a20, NP(16), 0.06, 0.12); die(); } }
@@ -8601,13 +8717,13 @@ const BlockAction = (() => {
     // coins
     for (const c of L.coins) if (!c.taken && Math.abs(c.x - pl.x) < 0.5 && c.y > pl.y - 0.2 && c.y < pl.y + pl.h + 0.25) takeCoin(c);
     // enemies vs player
-    for (const e of enemies) {
+    for (const e of enemies) try {
       if (!e.alive || !e.active || state !== 'play') continue;
       if (!overlap(e, pl)) continue;
       if (ALLY[e.kind]) { touchAlly(e); continue; }
       if (pl.truck) continue;
       if (TOUCH5[e.kind]) { TOUCH5[e.kind](e, pl.vy < 0 && pl.prevY >= e.y + e.h * 0.45); continue; }
-      if (e.kind === 'moosh') { if (pl.vy < 0 && pl.prevY >= e.y + e.h * 0.45) { pl.vy = prevIn.jump ? 0.36 : 0.26; pl.jumping = !!prevIn.jump; pl.y = e.y + e.h + 0.01; snd('djump'); } touchMoosh(e); continue; }
+      if (e.kind === 'moosh') { if (pl.vy < 0 && pl.prevY >= e.y + e.h * 0.45) { if (pl.pound) { pl.pound = 0; pl.poundRec = 0; pl.poundT = 0; cam.shake = Math.max(cam.shake, 4); dustRing(e.x, e.y + e.h); } if (!prevIn.jump) { const sd = pl.x >= e.x ? 1 : -1; pl.vx = sd * Math.max(0.07, Math.abs(pl.vx)); } pl.vy = prevIn.jump ? 0.36 : 0.26; pl.jumping = !!prevIn.jump; pl.y = e.y + e.h + 0.01; snd('djump'); } touchMoosh(e); continue; }
       const stompable = e.kind !== 'spiky';
       if (stompable && pl.vy < 0 && pl.prevY >= e.y + e.h * 0.45) {
         const inp2 = prevIn;
@@ -8625,7 +8741,7 @@ const BlockAction = (() => {
         e.kind === 'bat' ? killFlip(e, 100 * G.combo) : killSquash(e, (e.kind === 'pillager' ? 200 : 100) * G.combo);
       } else if (e.kind === 'creeper') { if (e.ai !== 'fuse') { e.ai = 'fuse'; e.aiT = 0; } }
       else hurt();
-    }
+    } catch (err) { entErr5(e, err); }
     if (pl.ground) G.combo = 0;
     if (inp.tntP) throwTNT(false);
     if (inp.utntP) throwTNT(true);
@@ -8691,7 +8807,7 @@ const BlockAction = (() => {
       c.y = c.top - 1.2 + k * 1.3; c.mesh.position.y = c.y; c.mesh.visible = k > 0.05;
       c.mesh.rotation.y += 0.05; c.mesh.scale.set(1 + Math.sin(clock * 0.3) * 0.06, 1 + Math.sin(clock * 0.21) * 0.1, 1);
     });
-    if (live) enemies.forEach(tickEnemy);
+    if (live) safeEnemies5();
     enemies = enemies.filter(e => !e.gone);
     tickMobs2(live);
     pops.forEach(p => {
@@ -8770,7 +8886,7 @@ const BlockAction = (() => {
     cam.runK = snap || cam.runK === undefined ? runK : lerp(cam.runK, runK, fk(0.02));
     let wantW = (6.2 + 1.3 * cam.runK) * a;
     if (a < 1) wantW = Math.max(wantW, 5.8 + 0.6 * cam.runK);
-    if (cam.lockX && L && L.arena) wantW = Math.max(wantW, dragon ? (a >= 1 ? 16 : 8.6) : (a >= 1 ? 14 : 7.2));   // boss fights pull back a bit
+    if (cam.lockX && L && L.arena) wantW = Math.max(wantW, (dragon || L.def.bossKind === 'wither') ? (a >= 1 ? 16 : 8.6) : (a >= 1 ? 14 : 7.2));   // boss fights pull back a bit
     cam.wantW = snap || cam.wantW === undefined ? wantW : lerp(cam.wantW, wantW, fk(0.03)); wantW = cam.wantW;
     const tanH = Math.tan(camera.fov * Math.PI / 360);
     let d = (wantW / a) / (2 * tanH);
@@ -8796,6 +8912,7 @@ const BlockAction = (() => {
     const th = THEMES[L.def.theme];
     const tyMin = -3.5 + Hh / 2, tyMax = th.ceil ? 14.2 - Hh / 2 : 17 - Hh / 2;
     if (dragon && cam.lockX) ty = Math.max(ty, (base !== null ? base : 2) - 0.7 + Hh / 2);   // keep the flying dragon in frame
+    ty = witherFrame5(ty, Hh, a);
     ty = tyMin > tyMax ? (tyMin + tyMax) / 2 : Math.max(tyMin, Math.min(ty, tyMax));
     if (snap) { cam.x = tx; cam.y = ty; }
     else { cam.x = lerp(cam.x, tx, fk(0.1)); cam.y = lerp(cam.y, ty, fk(0.07)); }
@@ -8807,6 +8924,7 @@ const BlockAction = (() => {
     if (skyGroup) skyGroup.position.set(cam.x, cam.y - 4, 0);
     if (W3 && W3.far) W3.far.position.x = cam.x * 0.55;
     if (cam.ov) { cam.x = cam.ov.x; cam.y = cam.ov.y; const ovd = cam.ov.d * (state === 'cut' && camera.aspect < 1 ? Math.min(1.7, Math.pow(1 / camera.aspect, 0.75)) : 1); camera.position.set(cam.ov.x + sx, cam.ov.y + ovd * 0.08 + sy, ovd); camera.lookAt(cam.ov.x + sx * 0.5, cam.ov.y + sy * 0.5, 0); if (skyGroup) skyGroup.position.set(cam.x, cam.y - 4, 0); if (W3 && W3.far) W3.far.position.x = cam.x * 0.55; scene.fog.near = ovd * 0.95; scene.fog.far = ovd * 2.6 + 22; }
+    if (cam.ov3 && window.__BA_DEBUG) { camera.position.set(cam.ov3.p[0], cam.ov3.p[1], cam.ov3.p[2]); camera.lookAt(cam.ov3.t[0], cam.ov3.t[1], cam.ov3.t[2]); }
     // shadow-casting moon follows the view
     LT.moon.position.set(cam.x - 7, cam.y + 13, 9); LT.moon.target.position.set(cam.x, cam.y - 1, 0); LT.moon.target.updateMatrixWorld();
     const sc = LT.moon.shadow.camera, hw = Math.min(20, cam.Wv * 0.6 + 2);
@@ -8884,6 +9002,8 @@ const BlockAction = (() => {
     // torso: breathing + forward lean when running + bob
     Lb.body.scale.y = 1 + Math.sin(AN.breath) * 0.018 * idle;
     Lb.body.rotation.x = lerp(Lb.body.rotation.x, (sprint ? 0.2 : runK * 0.1) * (1 - air) - (skid ? 0.24 : 0) + (crouch ? (p.slide ? -0.35 : 0.5) : 0) + (p.pound && p.poundT >= 13 ? 0.15 : 0), 0.15 * k);
+    Lb.body.rotation.x -= (1 - 0.15 * k) * (AN.thrLean || 0); AN.thrLean = 0;   // undo last frame's throw lean before re-adding
+    animThrow(p, Lb, u, dying);
     // rigid legs: drop the hips by L(1-cos θ) so the planted foot stays on the floor → natural bob twice per stride
     model.position.y = crouch ? lerp(model.position.y, -LEG * (1 - Math.cos(0.8)) * 1.15, 0.4 * k) : p.ground && !skid ? -LEG * (1 - Math.cos(sw)) * (1 - air) + (sprint ? Math.abs(Math.sin(AN.phase)) * 0.012 : 0) : lerp(model.position.y, 0, 0.3 * k);
     // ground-pound spin: flip forward around the body centre
@@ -8910,12 +9030,41 @@ const BlockAction = (() => {
     if (p.truck && !dying) {
       animTruck(dt); const tr = p.truck;
       player.scale.setScalar(0.62); AN.scale = 0.62; player.rotation.z = 0; model.scale.set(1, 1, 1); model.position.y = 0;
-      player.position.set(p.x + p.face * 0.06, p.y + tr.sus + 0.07, ZP); model.rotation.y = AN.turn = p.face * 1.2;
+      player.position.set(p.x + p.face * 0.2, p.y + tr.sus + 0.03, ZP); model.rotation.y = AN.turn = p.face * 1.2;
       Lb.legL.rotation.x = Lb.legR.rotation.x = -1.5; Lb.armL.rotation.x = -1.05 + Math.sin(clock * 0.3) * 0.05; Lb.armR.rotation.x = -1.05 - Math.sin(clock * 0.3) * 0.05; Lb.armL.rotation.z = -0.1; Lb.armR.rotation.z = 0.1;
       Lb.body.rotation.x = -0.08; Lb.head.rotation.x = -0.05 + tr.sus * 0.8; player.visible = true;
       if (blob) blob.visible = false; return;
     }
     if (blob) { blob.visible = player.visible && !dying; const gy = groundBelow(p.x, p.y); blob.position.set(p.x, gy + 0.03, ZP); const h = Math.max(0, p.y - gy); blob.scale.setScalar(Math.max(0.3, 1 - h * 0.12) * AN.scale * 1.2); blob.material.opacity = 0.32 * Math.max(0.2, 1 - h * 0.12); }
+  }
+  // v5.1 fireball throw (upper body only, layered on top of the gait): wind-up back, whip forward with torso
+  // twist + lean, release on frame THR_REL (ball leaves the hand), follow-through, blend back. Alternating arms.
+  const THV = new THREE.Vector3();
+  function thrCurve(f) {   // -> [arm pitch, arm roll, torso twist, lean, weight]
+    const E = t => t * t * (3 - 2 * t);
+    if (f < 3) { const s = E(f / 3); return [-3.55 * s, 0.32 * s, 0.34 * s, -0.06 * s, 1]; }
+    if (f < 6) { const s = E((f - 3) / 3); return [-3.55 + 2.35 * s, 0.32 - 0.22 * s, 0.34 - 0.76 * s, -0.06 + 0.26 * s, 1]; }
+    if (f < 11) { const s = E((f - 6) / 5); return [-1.2 + 0.85 * s, 0.1 - 0.06 * s, -0.42 + 0.12 * s, 0.2 - 0.04 * s, 1]; }
+    const s = E(Math.min(1, (f - 11) / 5)); return [-0.35, 0.04, -0.3, 0.16, 1 - s];
+  }
+  function animThrow(p, Lb, u, dying) {
+    let twist = 0, lean = 0;
+    if (!p.thr || dying || p.truck) { Lb.body.rotation.y = lerp(Lb.body.rotation.y || 0, 0, 0.3); return; }
+    for (let a = 0; a < 2; a++) {
+      const f = p.thr[a]; if (f < 0) continue;
+      const arm = a ? Lb.armR : Lb.armL, sg = a ? 1 : -1, c = thrCurve(f), w = c[4];
+      arm.rotation.x = lerp(arm.rotation.x, c[0], w); arm.rotation.z = lerp(arm.rotation.z, sg * c[1], w);
+      twist += sg * c[2] * w; lean += c[3] * w;
+    }
+    Lb.body.rotation.y = lerp(Lb.body.rotation.y || 0, twist, 0.6); Lb.body.rotation.x += lean; AN.thrLean = lean;
+    // hand world positions for the release frame (fireball spawns from the hand)
+    if (p.thr[0] >= 0 || p.thr[1] >= 0) {
+      player.updateMatrixWorld(true); const P = u.P || 0.046;
+      if (!p.hand) p.hand = [{ x: 0, y: 0 }, { x: 0, y: 0 }];
+      [Lb.armL, Lb.armR].forEach((arm, a) => { THV.set(0, -11 * P, 0); arm.localToWorld(THV); p.hand[a].x = THV.x; p.hand[a].y = THV.y; });
+      // hand flash at release
+      if (p.thrFlash > 0) { const h = p.hand[p.thrFlashA || 0]; if (clock % 2 === 0) spawnParts(h.x, h.y, ZP + 0.15, 0xfff0a0, 1, 0.03, 0.03); }
+    }
   }
   function groundBelow(x, y) { const xi = Math.floor(x); for (let yy = Math.floor(y - 0.01); yy >= 0; yy--) if (solidAt(xi, yy)) return yy + 1; return -6; }
   function animActors(dt) {
@@ -9076,14 +9225,14 @@ const BlockAction = (() => {
     } else if (kind === 'pause') {
       h.textContent = '일시정지'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 목숨 ${G.lives} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
       add('계속하기', resume, 'pri'); add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) { mb.textContent = BGM.isOn() ? '🎵' : '🎵'; mb.classList.toggle('off', !BGM.isOn()); } showOver('pause'); });
-      add('음악 볼륨: ' + (BGM.vol() < 0.2 ? '작게' : BGM.vol() < 0.33 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.2 ? 0.28 : v < 0.33 ? 0.42 : 0.14); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
+      add('음악 볼륨: ' + (BGM.vol() < 0.2 ? '작게' : BGM.vol() < 0.33 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.2 ? 0.28 : v < 0.33 ? 0.42 : 0.14); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); showOver('pause'); }); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
     }
     el.dataset.kind = kind; el.classList.add('show'); setPad(false);
   }
   let pausedFrom = null;
   function pause() { if (state !== 'play' && state !== 'intro') return; pausedFrom = state; state = 'pause'; showOver('pause'); }
   function resume() { if (state !== 'pause') return; state = pausedFrom || 'play'; hideOverlays(); releaseKeys(); }
-  function releaseKeys() { for (const k in keys) keys[k] = false; prevIn = {}; }
+  function releaseKeys() { for (const k in keys) keys[k] = false; prevIn = {}; RUN5.reset(); }
 
   // ---------- boot ----------
   function ensure() {
@@ -9111,7 +9260,7 @@ const BlockAction = (() => {
     LT.amb = new THREE.AmbientLight(0x3c3466, 0.35); scene.add(LT.amb);
     LT.moon = new THREE.DirectionalLight(0xb8c8ff, 0.9); LT.moon.castShadow = true;
     LT.moon.shadow.mapSize.set(2048, 2048); LT.moon.shadow.camera.near = 1; LT.moon.shadow.camera.far = 40;
-    LT.moon.shadow.bias = -0.0006; LT.moon.shadow.normalBias = 0.02; scene.add(LT.moon); scene.add(LT.moon.target);
+    LT.moon.shadow.bias = -0.0006; LT.moon.shadow.normalBias = 0.02; scene.add(LT.moon); scene.add(LT.moon.target); ctxGuard5(); memTrim5(false);
     LT.key = new THREE.DirectionalLight(0xffd6a8, 0.45); scene.add(LT.key); scene.add(LT.key.target);
     LT.rim = new THREE.DirectionalLight(0x9a7cff, 0.7); scene.add(LT.rim); scene.add(LT.rim.target);
     for (let i = 0; i < 5; i++) { const l = new THREE.PointLight(0xff9a40, 0, 7, 2); scene.add(l); lightPool.push(l); }
@@ -9123,7 +9272,7 @@ const BlockAction = (() => {
     bindInput();
     window.addEventListener('resize', onResize);
     dom5(); showSelect(); showMap5();
-    if (window.__BA_DEBUG) { installDebug(); installDebug5(); }
+    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); }
     last = performance.now(); requestAnimationFrame(animate);
   }
   function bindInput() {
@@ -9141,12 +9290,12 @@ const BlockAction = (() => {
     window.addEventListener('blur', releaseKeys);
     const hold = (el, code) => {
       if (!el) return;
-      const down = e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (err) {} keys[code] = true; el.classList.add('on'); vib(8); };
-      const up = () => { keys[code] = false; el.classList.remove('on'); };
+      const down = e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (err) {} keys[code] = true; el.classList.add('on'); vib(8); if (code === 'ArrowLeft' || code === 'ArrowRight') RUN5.dirDown(code); };
+      const up = () => { if (keys[code] && (code === 'ArrowLeft' || code === 'ArrowRight')) RUN5.dirUp(code); keys[code] = false; el.classList.remove('on'); };
       el.addEventListener('pointerdown', down); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
       el.addEventListener('contextmenu', e => e.preventDefault());
     };
-    hold($('baLeft'), 'ArrowLeft'); hold($('baRight'), 'ArrowRight'); hold($('baJump'), 'Space'); hold($('baDash'), 'ShiftLeft'); hold($('baDown'), 'ArrowDown'); hold($('baTnt'), 'KeyE'); hold($('baUtnt'), 'KeyR');
+    hold($('baLeft'), 'ArrowLeft'); hold($('baRight'), 'ArrowRight'); RUN5.bind(); hold($('baDown'), 'ArrowDown'); hold($('baTnt'), 'KeyE'); hold($('baUtnt'), 'KeyR');
     const sndBtn = $('baSnd'); if (sndBtn) sndBtn.onclick = () => { const on = SFX.toggle(); sndBtn.textContent = on ? '🔊' : '🔇'; BGM.refresh(); if (!on) AFX.hum(0); };
     const musBtn = $('baMus'); if (musBtn) { const upd = () => { musBtn.textContent = BGM.isOn() ? '🎵' : '🎵'; musBtn.classList.toggle('off', !BGM.isOn()); }; upd(); musBtn.onclick = () => { AFX.warm(); BGM.toggle(); upd(); }; }
     document.addEventListener('visibilitychange', () => { if (document.hidden) { BGM.update(state, false); if (state === 'play') pause(); } });
@@ -9161,19 +9310,23 @@ const BlockAction = (() => {
   let last = 0, acc = 0;
   function animate(now) {
     requestAnimationFrame(animate);
+    try { watch5(now); } catch (err) { tickErr5(err); }
     if (!active) { last = now; BGM.update(state, false); return; }
     const m = mountEl;
     if (m && (renderer.domElement.width !== Math.floor(m.clientWidth * renderer.getPixelRatio()) || renderer.domElement.height !== Math.floor(m.clientHeight * renderer.getPixelRatio()))) onResize();
     let dt = Math.min(0.1, Math.max(0, (now - last) / 1000)); last = now; FK = Math.min(6, dt * 60);
     acc += dt * (G && G.slow > 0 ? 0.28 : 1); let n = 0;
-    while (acc >= 1 / 60 && n < 6) { tick(); acc -= 1 / 60; n++; }
+    while (acc >= 1 / 60 && n < 6) { try { tick(); SAFE5.tickErrRun = 0; } catch (err) { tickErr5(err); } acc -= 1 / 60; n++; }
     if (n >= 6) acc = 0;
     BGM.update(state, true);
+    try {
     if (state === 'map' && mapFrame5(dt)) return;
     if (!L) return;
     animHero(dt); animActors(dt); animStriders5(); fxTick3();
     placeCamera(false); updLights(); updateHUD(); updBossBar();
+    speedFx5(state === 'play' && RUN5.sprinting());
     renderer.render(scene, camera);
+    } catch (err) { tickErr5(err); }
   }
 
   // ---------- test-only debug hook (installed only when a test sets window.__BA_DEBUG before load) ----------
@@ -10122,10 +10275,10 @@ const BlockAction = (() => {
 
   // ---------- characters & portraits ----------
   const CH5 = {
-    haru: { name: '하루', col: '#60a5fa', mk: () => makeHero(), hf: 0.2, span: 0.62, yaw: -0.2 },
-    bori: { name: '보리', col: '#facc15', mk: () => makeVillager5('bori'), hf: 0.2, span: 0.6, yaw: 0.35 },
+    haru: { name: '꾸꾸', col: '#60a5fa', mk: () => makeHero(), hf: 0.2, span: 0.62, yaw: -0.2 },
+    bori: { name: '뚜뚜', col: '#facc15', mk: () => makeVillager5('bori'), hf: 0.2, span: 0.6, yaw: 0.35 },
     elder: { name: '촌장', col: '#c084fc', mk: () => makeVillager5('elder'), hf: 0.2, span: 0.6, yaw: 0.35 },
-    villager: { name: '마을 사람', col: '#86efac', mk: () => makeVillager5('v'), hf: 0.2, span: 0.6, yaw: 0.35 },
+    villager: { name: '별별이', col: '#86efac', mk: () => makeVillager5('v'), hf: 0.2, span: 0.6, yaw: 0.35 },
     golem: { name: '골렘 왕', col: '#f87171', mk: () => makeBoss(), hf: 0.2, span: 0.55, yaw: 0.35 },
     dragon: { name: '엔더 드래곤', col: '#a855f7', mk: () => makeDragon(), hf: 0.5, span: 1.1, yaw: 0.5 },
     grak: { name: '그락', col: '#f59e0b', mk: () => makePiglinBase('chief'), hf: 0.22, span: 0.62, yaw: 0.35 },
@@ -10270,13 +10423,13 @@ const BlockAction = (() => {
 
   // ---------- in-stage talks ----------
   const TALK5 = {
-    moo: [['moosh', '음머~ 하루 왔구나! ? 블록을 머리로 치면 버섯이랑 TNT가 나와.'], ['moosh', '공중에서 ↓를 누르면 쿵! 내려찍기로 벽돌도 깰 수 있어.'], ['haru', '고마워, 무시룸! 보리를 꼭 구해 올게.']],
+    moo: [['moosh', '음머~ 꾸꾸 왔구나! ? 블록을 머리로 치면 버섯이랑 TNT가 나와.'], ['moosh', '공중에서 ↓를 누르면 쿵! 내려찍기로 벽돌도 깰 수 있어.'], ['haru', '고마워, 무시룸! 뚜뚜를 꼭 구해 올게.']],
     iron: [['iron', '…골렘 왕이 마을을 습격했다고? 그는 원래 우리 골렘들의 왕이었다.'], ['iron', '누군가 그의 눈을 보랏빛으로 물들였다. 나도 함께 싸우겠다.'], ['haru', '든든하다! 같이 가자!']],
     snow: [['snow', '흐흐, 눈덩이라면 자신 있지! 크리퍼들은 내가 맡을게.'], ['snow', '성으로 가려면 성벽 위 발판을 건너야 해. 떨어지지 마!'], ['haru', '알았어! 고마워, 눈골렘!']],
-    king: [['golem', '크르르… 꼬마 용사여, 이 성에서 살아 나가지 못하리라…'], ['golem', '(눈이 보랏빛으로 번뜩인다) 위… 위더 님의… 명령이다…'], ['haru', '골렘 왕, 정신 차려! 보리를 돌려줘!']],
-    grak: [['grak', '꿀꿀! 오버월드 꼬마잖아? 나는 피글린 대장 그락이다.'], ['grak', '금이 있으면 좋은 걸 바꿔 주지. 용암 바다는 낮아질 때 건너!'], ['haru', '보리를 데려간 위더를 찾고 있어.'], ['grak', '위더… 그 녀석이 우리 보루도 빼앗았지. 요새를 지나 보루 깊은 곳에 있을 거다.']],
-    fort: [['bori', '하루! 내 목소리 들려? 요새 너머 보루에 갇혀 있어!'], ['haru', '보리! 조금만 기다려!'], ['bori', '블레이즈 소환기를 조심해! 계속 몬스터가 나와!']],
-    wither: [['wither', '후후후… 오버월드의 꼬마가 여기까지 오다니.'], ['wither', '골렘 왕을 조종한 것도, 마을 사람들을 데려온 것도 나다. 수확 크리스탈로 두 세계를 지배하리라!'], ['haru', '보리와 마을 사람들을 돌려줘!'], ['wither', '덤벼라! 세 개의 머리가 너를 기다린다!']]
+    king: [['golem', '크르르… 꼬마 용사여, 이 성에서 살아 나가지 못하리라…'], ['golem', '(눈이 보랏빛으로 번뜩인다) 위… 위더 님의… 명령이다…'], ['haru', '골렘 왕, 정신 차려! 뚜뚜를 돌려줘!']],
+    grak: [['grak', '꿀꿀! 오버월드 꼬마잖아? 나는 피글린 대장 그락이다.'], ['grak', '금이 있으면 좋은 걸 바꿔 주지. 용암 바다는 낮아질 때 건너!'], ['haru', '뚜뚜를 데려간 위더를 찾고 있어.'], ['grak', '위더… 그 녀석이 우리 보루도 빼앗았지. 요새를 지나 보루 깊은 곳에 있을 거다.']],
+    fort: [['bori', '꾸꾸! 내 목소리 들려? 요새 너머 보루에 갇혀 있어!'], ['haru', '뚜뚜! 조금만 기다려!'], ['bori', '블레이즈 소환기를 조심해! 계속 몬스터가 나와!']],
+    wither: [['wither', '후후후… 오버월드의 꼬마가 여기까지 오다니.'], ['wither', '골렘 왕을 조종한 것도, 마을 주민들을 데려온 것도 나다. 수확 크리스탈로 두 세계를 지배하리라!'], ['haru', '뚜뚜와 마을 주민들을 돌려줘!'], ['wither', '덤벼라! 세 개의 머리가 너를 기다린다!']]
   };
   const TALKS5 = { '1-1': [{ x: 9, id: 'moo' }, { x: 99, id: 'iron' }], '1-2': [{ x: 95, id: 'snow' }], '1-4': [{ x: 'arena', id: 'king' }], '2-1': [{ x: 15, id: 'grak' }], '2-3': [{ x: 8, id: 'fort' }], '2-4': [{ x: 'arena', id: 'wither' }] };
   const TALK = { on: false };
@@ -10395,9 +10548,9 @@ const BlockAction = (() => {
     if (CUT.on && CUT.i >= CUT.steps.length) endCut5();
   }
   function fw5(x, y) { const c = [0xff5a7a, 0xffd04a, 0x6ad8ff, 0xa0ff6a, 0xd07aff][Math.floor(Math.random() * 5)]; spawnParts(x, y, ZP - 1.5, c, NP(26), 0.16, 0.02); const g = glowSprite(LIN(c), 3); g.material.opacity = 0.8; g.position.set(x, y, ZP - 1.5); W3.group.add(g); pops.push({ type: 'fade5', m: g, t: 0 }); sfx5('firework'); }
-  const CREDITS5 = `<h1>블록 액션 · 하루의 모험</h1>
+  const CREDITS5 = `<h1>블록 액션 · 꾸꾸의 모험</h1>
 <h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>
-<h3>CAST</h3><div class="l">하루 — 용감한 주인공</div><div class="l">보리 — 호박 농사꾼 친구</div><div class="l">촌장 — 마을의 어르신</div><div class="l">무시룸 · 철골렘 · 눈골렘 — 든든한 동료들</div><div class="l">골렘 왕 — 되찾은 수호자</div><div class="l">그락 — 피글린 대장</div><div class="l">위더 — 네더의 지배자</div>
+<h3>CAST</h3><div class="l">꾸꾸 — 용감한 주인공</div><div class="l">뚜뚜 — 호박 농사꾼 친구</div><div class="l">촌장 — 마을의 어르신</div><div class="l">무시룸 · 철골렘 · 눈골렘 — 든든한 동료들</div><div class="l">골렘 왕 — 되찾은 수호자</div><div class="l">그락 — 피글린 대장</div><div class="l">위더 — 네더의 지배자</div>
 <h3>WORLD 1</h3><div class="l">성 밖 들판 · 지하 동굴 · 성벽 위 공중 발판 · 성 안 보스전</div>
 <h3>WORLD 2</h3><div class="l">불타는 황무지 · 진홍·뒤틀린 숲 · 네더 요새 · 피의 보루</div>
 <h3>MADE WITH</h3><div class="l">모든 모델·텍스처·음악·효과음을 코드로 직접 생성</div><div class="l">three.js · Web Audio</div>
@@ -10413,7 +10566,7 @@ const BlockAction = (() => {
       return [
         { wait: 40 },
         { say: 'elder', text: '올해도 수확 축제를 무사히 열었구나. 다들 정말 고생 많았다!' },
-        { say: 'bori', text: '하루! 내가 키운 호박 봤어? 마을에서 제일 커!' },
+        { say: 'bori', text: '꾸꾸! 내가 키운 호박 봤어? 마을에서 제일 커!' },
         { say: 'haru', text: '와, 진짜 크다! 축제 끝나면 같이 호박 파이 먹자!' },
         { fn: () => { cam.shake = 14; sfx5('rumble'); vib(30); } }, { wait: 40 },
         { say: 'villager', text: '저, 저게 뭐야?! 땅이 흔들려!' },
@@ -10426,16 +10579,16 @@ const BlockAction = (() => {
         { say: 'golem', text: '모두 데려가라!' },
         { cam: [22, 3.5, 10], t: 40 },
         { fn: () => { ['m1', 'm2'].forEach((k, i) => { CUT.actors[k].tx = 13 + i * 6; CUT.actors[k].sp = 0.12; }); } }, { wait: 50 },
-        { say: 'bori', text: '꺄악! 하루, 도와줘!' },
+        { say: 'bori', text: '꺄악! 꾸꾸, 도와줘!' },
         { fn: () => { const A = CUT.actors; A.bori.fly = 3.2; A.v1.fly = 3.2; A.v2.fly = 3.2; A.bori.tx = 52; A.v1.tx = 54; A.v2.tx = 56; ['bori', 'v1', 'v2'].forEach(k => A[k].sp = 0.07); A.m1.tx = 51; A.m2.tx = 53; A.m1.sp = A.m2.sp = 0.07; king.tx = 58; king.sp = 0.06; } },
-        { say: 'haru', text: '보리! 거기 서!' },
+        { say: 'haru', text: '뚜뚜! 거기 서!' },
         { walk: 'haru', to: 24, sp: 0.1 },
         { fn: () => { cam.shake = 18; flashScreen(0.5, '#ffffff'); sfx5('stomp5'); CUT.hero = { tx: 19, sp: 0.16 }; vib(40); } }, { wait: 50 },
         { cam: [20, 3.3, 8.6], t: 60 },
         { walk: 'elder', to: 20.5, sp: 0.04 },
-        { say: 'elder', text: '하루야, 괜찮니? …골렘 왕의 눈이 보랏빛으로 빛나고 있었어.' },
+        { say: 'elder', text: '꾸꾸야, 괜찮니? …골렘 왕의 눈이 보랏빛으로 빛나고 있었어.' },
         { say: 'elder', text: '골렘 왕은 원래 우리 마을을 지켜 주던 수호자란다. 누군가 그를 조종하고 있는 게 분명해.' },
-        { say: 'haru', text: '제가 골렘 왕의 성까지 가서 보리랑 마을 사람들을 꼭 데려올게요!' },
+        { say: 'haru', text: '제가 골렘 왕의 성까지 가서 뚜뚜랑 마을 주민들을 꼭 데려올게요!' },
         { say: 'elder', text: '들판과 동굴, 성벽을 넘으면 성이 있단다. 무시룸과 골렘들이 도와줄 거야. 조심하거라!' },
         { fn: () => { CUT.every = null; } }, { wait: 20 }
       ]; } },
@@ -10449,16 +10602,16 @@ const BlockAction = (() => {
       return [
         { wait: 30 },
         { say: 'golem', text: '…으윽. 여기는… 내 성인가? 머리가 맑아졌다.' },
-        { say: 'haru', text: '골렘 왕! 정신이 돌아왔구나. 보리는 어디 있어?' },
+        { say: 'haru', text: '골렘 왕! 정신이 돌아왔구나. 뚜뚜는 어디 있어?' },
         { say: 'golem', text: '미안하다, 꼬마 용사여. 보랏빛 목소리가 내 머릿속을 지배했었다.' },
         { fn: () => { cam.shake = 16; sfx5('portal'); flashScreen(0.6, '#b060ff'); } },
         { cam: [25, 4.2, 10.5], t: 60, nb: 1 },
         { tick: () => { const k = Math.min(1, pg.scale.x + 0.02 * CUT.ff); pg.scale.set(k, k, 1); pg.material.opacity = 0.85 * k; return k >= 1; } },
         { say: 'wither', text: '후후후… 골렘 왕은 쓸모가 다했군.' },
-        { say: 'wither', text: '네 친구와 마을 사람들은 네더의 보루에 있다. 구하고 싶다면 와 보거라, 꼬마.' },
-        { say: 'golem', text: '저 목소리는… 위더! 네더의 지배자다. 마을 사람들을 네더로 끌고 갔구나.' },
+        { say: 'wither', text: '네 친구와 마을 주민들은 네더의 보루에 있다. 구하고 싶다면 와 보거라, 꼬마.' },
+        { say: 'golem', text: '저 목소리는… 위더! 네더의 지배자다. 마을 주민들을 네더로 끌고 갔구나.' },
         { say: 'golem', text: '피글린들은 금을 좋아한다. 그리고 용암을 조심해라. 화염 저항 물약이 너를 지켜 줄 거다.' },
-        { say: 'haru', text: '기다려, 보리! 지금 갈게!' },
+        { say: 'haru', text: '기다려, 뚜뚜! 지금 갈게!' },
         { cam: [27, 3.6, 8.8], t: 50, nb: 1 },
         { walk: 'haru', to: px, sp: 0.07 },
         { fn: () => { flashScreen(0.85, '#c080ff'); sfx5('portal'); player.visible = false; spawnParts(px, 3, ZP, 0xc080ff, NP(40), 0.12, 0.05); } },
@@ -10475,8 +10628,8 @@ const BlockAction = (() => {
       let crystal = null;
       return [
         { wait: 30 },
-        { say: 'haru', text: '보리! 찾았다!' },
-        { say: 'bori', text: '하루?! 정말 여기까지 와 줬구나!' },
+        { say: 'haru', text: '뚜뚜! 찾았다!' },
+        { say: 'bori', text: '꾸꾸?! 정말 여기까지 와 줬구나!' },
         { walk: 'haru', to: 20, sp: 0.07 },
         { fn: () => { W3.group.remove(cage); sfx5('cage'); cam.shake = 10; spawnParts(23, 3, ZP, 0x8a8a9a, NP(30), 0.14, 0.08); ['bori', 'v1', 'v2'].forEach(k => CUT.actors[k].hop = 1); } }, { wait: 60 },
         { fn: () => ['bori', 'v1', 'v2'].forEach(k => CUT.actors[k].hop = 0) },
@@ -10489,7 +10642,7 @@ const BlockAction = (() => {
         { fn: () => { crystal = makeCrystal(); crystal.scale.setScalar(0.6); W3.group.add(crystal); const a = { id: 'crystal', g: crystal, x: 26.5, y: 3.2, dir: 1, tx: null, sp: 0.05, ph: 0, yaw: 0, spin: 1 }; CUT.actors.crystal = a; a.fly = 3.4; sfx5('potion'); } },
         { say: 'grak', text: '이건 위더가 훔쳐 간 너희 마을의 수확 크리스탈이다. 돌려주지!' },
         { walk: 'crystal', to: 20.3, sp: 0.06 },
-        { say: 'haru', text: '고마워, 그락! 이제 집에 가자, 보리!' },
+        { say: 'haru', text: '고마워, 그락! 이제 집에 가자, 뚜뚜!' },
         { say: 'bori', text: '응! 호박 파이, 아직 남아 있겠지?' },
         { fn: () => { flashScreen(1, '#ffffff'); } },
         { credits: 1 },
@@ -10500,11 +10653,11 @@ const BlockAction = (() => {
             cutCam5([17, 3.6, 10], true); MUS5.cut = 'ending';
             CUT.every = () => { if (clock % 45 === 0) fw5(rnd(6, 30), rnd(6.5, 9.5)); }; } },
         { wait: 60 },
-        { say: 'elder', text: '하루 덕분에 모두 무사히 돌아왔구나. 축제를 다시 열자꾸나!' },
+        { say: 'elder', text: '꾸꾸 덕분에 모두 무사히 돌아왔구나. 축제를 다시 열자꾸나!' },
         { say: 'golem', text: '이제부터 내가 이 마을을 지키겠다. 다시는 누구에게도 조종당하지 않으리라.' },
         { say: 'moosh', text: '음머~ 축하해! 버섯 수프는 내가 쏠게!' },
         { say: 'grak', text: '꿀꿀, 금 장사하러 가끔 놀러 오마.' },
-        { say: 'bori', text: '하루, 고마워. 너는 진짜 영웅이야!' },
+        { say: 'bori', text: '꾸꾸, 고마워. 너는 진짜 영웅이야!' },
         { fn: () => { ['bori', 'v1', 'v2', 'elder'].forEach(k => CUT.actors[k].hop = 1); } },
         { say: 'haru', text: '헤헤… 다음 모험도 같이 가자!' },
         { cam: [17, 5.2, 13], t: 120, nb: 1 },
@@ -10657,16 +10810,17 @@ const BlockAction = (() => {
     const mid = P.querySelector('.mid'), h = P.querySelector('h3'), p = P.querySelector('p'), btns = P.querySelector('.ba-btns'); btns.innerHTML = '';
     const add = (txt, fn, cls, dis) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.className = cls || ''; b.disabled = !!dis; b.onclick = (ev) => { ev.stopPropagation(); snd('select'); fn(); }; btns.appendChild(b); return b; };
     if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = (n.s >= 4 ? '월드 2 · 네더' : '월드 1 · 성') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)} — ${st.sub}` : st.sub; add('▶ 시작', () => playFromMap5(n.s), 'pri'); }
-    else if (n.k === 'village') { mid.textContent = '월드 1 · 시작'; h.textContent = '하루의 마을'; p.textContent = S.ending ? '모두가 돌아온 평화로운 마을. 축제가 한창이에요!' : '골렘 왕에게 습격당한 마을. 보리와 마을 사람들을 구하러 가자!'; add('📜 프롤로그 보기', () => playCut5('intro'), 'pri'); }
+    else if (n.k === 'village') { mid.textContent = '월드 1 · 시작'; h.textContent = '꾸꾸의 마을'; p.textContent = S.ending ? '모두가 돌아온 평화로운 마을. 축제가 한창이에요!' : '골렘 왕에게 습격당한 마을. 뚜뚜와 마을 주민들을 구하러 가자!'; add('📜 프롤로그 보기', () => playCut5('intro'), 'pri'); }
     else { mid.textContent = '차원문'; h.textContent = '네더 포탈'; p.textContent = '성 깊은 곳에 열린 보랏빛 차원문. 위더가 기다리는 네더로 이어져요.'; add('📜 포탈 장면 보기', () => playCut5('portal'), 'pri', !S.portal); }
     if (S.ending) add('🎬 엔딩 다시보기', () => playCut5('ending'));
     add('📋 스테이지 목록', () => { modeClass5(null); D.map.classList.remove('show'); showSelect(); selectExtras5(); });
     add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); mapPanel5(); if (VOICE.mode() !== 'off') { sayPreview5(); } });
+    add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); mapPanel5(); });
     add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) mb.classList.toggle('off', !BGM.isOn()); mapPanel5(); });
     const clr = MAPN5.filter((m, k) => m.s !== undefined && nodeClear5(k)).length;
     D.mapT.textContent = `🗺 월드맵 · ${clr}/8 클리어`;
   }
-  function sayPreview5() { if (VOICE.mode() === 'tts' && VOICE.ttsOK()) VOICE.speak('안녕! 나는 하루야.', 'haru'); else if (VOICE.usesBlips()) Array.from('안녕나는하루야').forEach((ch, i) => setTimeout(() => VOICE.blip(ch, 'haru'), i * 55)); }
+  function sayPreview5() { if (VOICE.mode() === 'tts' && VOICE.ttsOK()) VOICE.speak('안녕! 나는 꾸꾸야.', 'haru'); else if (VOICE.usesBlips()) Array.from('안녕나는꾸꾸야').forEach((ch, i) => setTimeout(() => VOICE.blip(ch, 'haru'), i * 55)); }
   function selectExtras5() {
     const el = $('baSelect'); if (!el) return; const panel = el.querySelector('.ba-panel');
     if (!el.querySelector('.ba-tomap')) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ba-tomap'; b.textContent = '🗺 월드맵으로'; b.style.cssText = 'margin:4px 0 10px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#f8d36a,#e0a020);color:#2a1a04;font-weight:900;cursor:pointer;'; b.onclick = () => { snd('select'); showMap5(); }; panel.insertBefore(b, panel.querySelector('.ba-cards')); }
@@ -10750,6 +10904,189 @@ const BlockAction = (() => {
       portrait: id => portrait5(id), talk: id => startTalk5(id), clear: () => { G.clearTime = 30; finishClear(); },
       run: (n, steps) => { for (let i = 0; i < (n || 60); i++) tick(); }, fireRes: () => { pl.fireRes = 1200; }, hurtBoss: d => { const b = enemies.find(e => e.kind === 'wither' && e.alive); if (!b) return null; b.inv = 0; return hitWither5(b, d || 1); }, voice: m => { if (m) VOICE.set(m); return VOICE.mode(); }
     };
+  }
+
+  // ======================= v5.1 safety net: GPU context recovery, state watchdog, per-entity guards =======================
+  const SAFE5 = { errs: 0, tickErrRun: 0, entErrs: 0, last: '', log: [], t: {}, lost: 0, losses: 0, rebuilt: 0, lowMem: false, good: null, ticks: 0, lastTicks: 0, tickT: 0 };
+  const TOUCH_DEV5 = (() => { try { return matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window; } catch (e) { return false; } })();
+  function slog5(k, info) { SAFE5.log.push({ k, info: info ? String(info).slice(0, 160) : '', t: Math.round(performance.now()) }); if (SAFE5.log.length > 60) SAFE5.log.shift(); }
+  function tickErr5(err) { SAFE5.errs++; SAFE5.tickErrRun++; SAFE5.last = String(err && err.stack || err).slice(0, 300); if (SAFE5.errs < 6) slog5('tickErr', err && err.message); }
+  function entErr5(e, err) {
+    SAFE5.entErrs++; SAFE5.last = String(err && err.stack || err).slice(0, 300); if (SAFE5.entErrs < 6) slog5('entErr:' + (e && e.kind), err && err.message);
+    if (!e) return; e.__err = (e.__err || 0) + 1;
+    if (e.__err > 20) { e.alive = false; e.active = false; e.gone = true; try { if (e.mesh && e.mesh.parent) e.mesh.parent.remove(e.mesh); } catch (x) {} slog5('entOff', e.kind); }
+  }
+  function safeEnemies5() { for (const e of enemies) { try { tickEnemy(e); } catch (err) { entErr5(e, err); } } }
+  // phones: trim GPU memory up-front (the cause of iOS Safari "frozen frame" context loss)
+  function memTrim5(strong) {
+    if (!renderer) return;
+    const cap = strong ? 1.25 : (TOUCH_DEV5 ? 1.5 : 1.75);
+    if (renderer.getPixelRatio() > cap) { renderer.setPixelRatio(cap); if (mountEl) renderer.setSize(mountEl.clientWidth, mountEl.clientHeight); }
+    if (LT && LT.moon) { const want = strong ? 1024 : (TOUCH_DEV5 ? 1536 : 2048); const ud = LT.moon.userData; if (ud.gqBase !== undefined) ud.gqBase = Math.min(ud.gqBase, want); if (LT.moon.shadow.mapSize.x > want) { LT.moon.shadow.mapSize.set(want, want); if (LT.moon.shadow.map) { LT.moon.shadow.map.dispose(); LT.moon.shadow.map = null; } } }
+  }
+  function ctxBanner5(on) {
+    let b = document.getElementById('baCtx5');
+    if (!b && on) { b = document.createElement('div'); b.id = 'baCtx5'; b.textContent = '화면 복구 중…'; b.style.cssText = 'position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);z-index:30;padding:12px 20px;border-radius:14px;background:rgba(10,8,24,.82);color:#fff;font:800 16px system-ui,sans-serif;pointer-events:none;'; (mountEl && mountEl.parentNode || document.body).appendChild(b); }
+    if (b) b.style.display = on ? 'block' : 'none';
+  }
+  function ctxGuard5() {
+    if (!renderer) return; const cv = renderer.domElement; if (cv.__ctx5) return; cv.__ctx5 = 1;
+    cv.addEventListener('webglcontextlost', ev => { ev.preventDefault(); SAFE5.lost = performance.now(); SAFE5.losses++; slog5('ctxLost'); if (state === 'play' || state === 'intro') { SAFE5.autoPaused = true; pause(); } ctxBanner5(true); }, false);
+    cv.addEventListener('webglcontextrestored', () => { slog5('ctxRestored'); afterCtx5(renderer, null); }, false);
+  }
+  function eachScene5(fn) { [scene, MAP && MAP.scene, P5 && P5.scene].forEach(sc => { if (sc) fn(sc); }); }
+  function afterCtx5(r, oldEnv) {
+    SAFE5.lost = 0; SAFE5.lowMem = true;
+    try {
+      // GPU-side contents (PMREM env maps, shadow maps, portrait target) are gone: rebuild them
+      const prevEnv = oldEnv || envMap; envMap = makeEnv(); truckEnv = null;
+      eachScene5(sc => { if (sc.environment === prevEnv || sc === scene) sc.environment = envMap;
+        sc.traverse(o => { if (o.isLight && o.shadow && o.shadow.map) { o.shadow.map.dispose(); o.shadow.map = null; }
+          const ms = o.material ? (Array.isArray(o.material) ? o.material : [o.material]) : []; ms.forEach(m => { if (m.envMap && m.envMap === prevEnv) { m.envMap = envMap; m.needsUpdate = true; } }); }); });
+      if (P5.rt) { try { P5.rt.dispose(); } catch (e) {} P5.rt = null; }
+      memTrim5(true);
+    } catch (e) { tickErr5(e); }
+    ctxBanner5(false);
+    if (SAFE5.autoPaused && state === 'pause') { SAFE5.autoPaused = false; resume(); }
+  }
+  function rebuildRenderer5() {
+    const old = renderer; if (!old || !mountEl) return; const cv = old.domElement, oldEnv = envMap;
+    let r;
+    try { r = new THREE.WebGLRenderer({ antialias: !SAFE5.lowMem }); } catch (e) { slog5('rebuildFail', e.message); SAFE5.lost = performance.now(); return; }
+    r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.25)); r.setSize(mountEl.clientWidth, mountEl.clientHeight);
+    r.shadowMap.enabled = old.shadowMap.enabled; r.shadowMap.type = old.shadowMap.type; r.outputEncoding = old.outputEncoding; r.toneMapping = old.toneMapping; r.toneMappingExposure = old.toneMappingExposure;
+    if (cv.parentNode) cv.parentNode.replaceChild(r.domElement, cv); else mountEl.appendChild(r.domElement);
+    r.domElement.style.cssText = cv.style.cssText;
+    renderer = r; SAFE5.rebuilt++; slog5('rebuilt');
+    try { old.dispose(); } catch (e) {}
+    ctxGuard5(); afterCtx5(r, oldEnv); onResize();
+  }
+  // ---------- watchdog: any inconsistent lock/timescale/dialogue state for >2 s is repaired ----------
+  function wd5(key, bad, ms, fix, now) {
+    const T = SAFE5.t;
+    if (!bad) { T[key] = 0; return; }
+    if (!T[key]) { T[key] = now; return; }
+    if (now - T[key] > ms) { T[key] = 0; slog5('fix:' + key); try { fix(); } catch (e) { tickErr5(e); } }
+  }
+  function solidHere5(x, y) { try { return solidAt(Math.floor(x), Math.floor(y)); } catch (e) { return false; } }
+  function watch5(now) {
+    const root = document.getElementById('blockaction');
+    const shown = !!(root && root.offsetParent !== null);
+    wd5('inactive', !active && shown && !document.hidden && started, 2000, () => { active = true; last = performance.now(); acc = 0; }, now);
+    if (!active) return;
+    if (renderer) { let lostNow = false; try { const gl = renderer.getContext(); lostNow = !!(gl && gl.isContextLost && gl.isContextLost()); } catch (e) {}
+      if (lostNow && !SAFE5.lost) { SAFE5.lost = now; ctxBanner5(true); }
+      if (!lostNow && SAFE5.lost) afterCtx5(renderer, null);
+      if (lostNow && now - SAFE5.lost > 2500) rebuildRenderer5(); }
+    const st = state;
+    wd5('talkNoTalk', st === 'talk' && !TALK.on, 2000, () => { modeClass5(null); sayHide5(); releaseKeys(); state = 'play'; setPad(true); }, now);
+    wd5('talkNoBox', st === 'talk' && TALK.on && !DLG5.on, 2000, () => endTalk5(), now);
+    wd5('talkOrphan', TALK.on && st !== 'talk' && st !== 'pause', 2000, () => { TALK.on = false; sayHide5(); }, now);
+    wd5('cutNoCut', st === 'cut' && !CUT.on, 2000, () => { abortCut5(); modeClass5(null); if (L && pl) { state = 'play'; setPad(true); } else showMap5(); }, now);
+    wd5('cutOrphan', CUT.on && st !== 'cut' && st !== 'pause', 2000, () => abortCut5(), now);
+    const cls = !!(root && (root.classList.contains('ba-cine') || root.classList.contains('ba-talk') || root.classList.contains('ba-mapm')));
+    wd5('classStale', (st === 'play' || st === 'intro') && cls, 2000, () => modeClass5(null), now);
+    const pad = document.getElementById('baPad');
+    wd5('padHidden', st === 'play' && TOUCH_DEV5 && pad && pad.style.visibility === 'hidden', 2000, () => setPad(true), now);
+    wd5('hitstop', G && G.hitstop > 0, 2000, () => { G.hitstop = 0; }, now);
+    wd5('slow', G && G.slow > 0 && (st !== 'play' || G.slow > 40), 2000, () => { G.slow = 0; }, now);
+    wd5('slowLong', G && G.slow > 0, 3500, () => { G.slow = 0; }, now);
+    wd5('camOv', st === 'play' && cam.ov && !window.__BA_DEBUG, 2000, () => { cam.ov = null; }, now);
+    const ov = document.getElementById('baOver');
+    wd5('pauseNoOv', st === 'pause' && ov && !ov.classList.contains('show') && !SAFE5.lost, 2000, () => resume(), now);
+    if (st === 'play' && pl) {
+      const bad = !isFinite(pl.x) || !isFinite(pl.y) || !isFinite(pl.vx) || !isFinite(pl.vy);
+      if (bad) { const g = SAFE5.good || { x: 2, y: 4 }; Object.assign(pl, { x: g.x, y: g.y, vx: 0, vy: 0 }); slog5('fix:nan'); }
+      else if (pl.ground && !pl.truck) SAFE5.good = { x: pl.x, y: pl.y };
+      wd5('embedded', !pl.truck && !pl.dead && solidHere5(pl.x, pl.y + 0.5) && solidHere5(pl.x, pl.y + 1.2), 2000, () => { let y = Math.ceil(pl.y); for (let k = 0; k < 12 && (solidHere5(pl.x, y + 0.5) || solidHere5(pl.x, y + 1.2)); k++) y++; pl.y = y; pl.vy = 0; }, now);
+      // airborne "bounce loop": in the air for >2.5s inside a small box (e.g. stuck bouncing on an entity) -> break free
+      const A = SAFE5.air || (SAFE5.air = { y0: 0, y1: 0, x: 0 });
+      if (pl.ground || pl.wet || pl.truck || pl.dead) { A.y0 = A.y1 = pl.y; A.x = pl.x; }
+      else { A.y0 = Math.min(A.y0, pl.y); A.y1 = Math.max(A.y1, pl.y); if (A.y1 - A.y0 >= 3 || Math.abs(pl.x - A.x) >= 1.5) { A.y0 = A.y1 = pl.y; A.x = pl.x; } }
+      wd5('airLoop', !pl.ground && !pl.wet && !pl.truck && !pl.dead && A.y1 - A.y0 < 3 && Math.abs(pl.x - A.x) < 1.5 && !(L && L.movers && pl.ride), 2500, () => {
+        pl.pound = 0; pl.poundT = 0; pl.poundRec = 0; let e = null, bd = 9; enemies.forEach(q => { if (q.alive && Math.abs(q.x - pl.x) < bd) { bd = Math.abs(q.x - pl.x); e = q; } });
+        const dir = e ? (pl.x >= e.x ? 1 : -1) : pl.face || 1; pl.vx = dir * 0.12; pl.vy = 0.28; pl.x += dir * 0.4; A.y0 = A.y1 = pl.y; A.x = pl.x; }, now);
+      // the simulation itself stalled (no ticks advancing while the page is visible)
+      if (clock !== SAFE5.lastTicks) { SAFE5.lastTicks = clock; SAFE5.tickT = now; }
+      wd5('stall', now - SAFE5.tickT > 600 && !document.hidden, 2000, () => { acc = 0; last = performance.now(); G.hitstop = 0; G.slow = 0; }, now);
+      wd5('tickErrs', SAFE5.tickErrRun > 3, 2000, () => { SAFE5.tickErrRun = 0; pl.vx = 0; pl.vy = 0; G.hitstop = 0; G.slow = 0; if (SAFE5.good) { pl.x = SAFE5.good.x; pl.y = SAFE5.good.y; } releaseKeys(); }, now);
+    } else { SAFE5.tickT = now; SAFE5.lastTicks = clock; }
+  }
+  // ---------- Wither framing in portrait: keep the boss below the HUD/boss bar ----------
+  function hudFrac5() {
+    const m = mountEl; if (!m) return 0.12; const mr = m.getBoundingClientRect(); let b = mr.top;
+    ['baHud', 'baBoss'].forEach(id => { const el = document.getElementById(id); if (el && el.offsetParent !== null) { const r = el.getBoundingClientRect(); if (r.height > 0) b = Math.max(b, r.bottom); } });
+    return Math.max(0, Math.min(0.4, (b - mr.top) / Math.max(1, mr.height)));
+  }
+  function witherFrame5(ty, Hh, a) {
+    if (!(cam.lockX && L && L.arena && L.def.bossKind === 'wither') || a >= 1) return ty;
+    const w = enemies.find(e => e.kind === 'wither' && e.alive !== false && e.active); if (!w) return ty;
+    const top = w.y + 3.1 * (w.mesh ? w.mesh.scale.y : 1);
+    const need = top + hudFrac5() * Hh + 0.25 - Hh / 2;
+    return Math.max(ty, Math.min(need, pl.y + Hh / 2 - 2.2));
+  }
+  // ---------- touch controls v5.1: thumb-slide between 대시/점프, double-tap sprint, run modes ----------
+  const RUN5 = (() => {
+    const KEY = 'ba_runmode', MODES = ['hold', 'toggle', 'always'], LBL = { hold: '길게 누르기', toggle: '토글', always: '항상 달리기' };
+    let mode = 'hold'; try { const v = localStorage.getItem(KEY); if (MODES.includes(v)) mode = v; } catch (e) {}
+    let latch = false, pulse = false, sprint = null; const lastUp = {}, lastDown = {};
+    const ptr = new Map();   // pointerId → Set of codes this touch has visited
+    let dashHeld = false;
+    function ui() {
+      const d = document.getElementById('baDash'); if (d) { d.classList.toggle('latched', (mode === 'toggle' && latch) || mode === 'always'); d.classList.toggle('on', dashHeld); }
+      const j = document.getElementById('baJump'); if (j) j.classList.toggle('on', !!keys.Space);
+      ['baLeft', 'baRight'].forEach(id => { const b = document.getElementById(id); if (b) b.classList.toggle('sprint', sprint === (id === 'baLeft' ? 'ArrowLeft' : 'ArrowRight')); });
+      const pad = document.getElementById('baPad'); if (pad) pad.classList.toggle('sprinting', !!sprint);
+    }
+    function apply(added) {
+      let j = false, d = false; ptr.forEach(s => { if (s.has('Space')) j = true; if (s.has('ShiftLeft')) d = true; });
+      keys.Space = j;
+      if (added === 'ShiftLeft') { if (mode === 'toggle') latch = !latch; if (mode !== 'hold') pulse = true; vib(8); }
+      if (added === 'Space') vib(8);
+      dashHeld = d; keys.ShiftLeft = mode === 'hold' ? d : false; ui();
+    }
+    function hit(x, y) {
+      let best = null, bd = 1e9;
+      ['baJump', 'baDash'].forEach(id => { const el = document.getElementById(id); if (!el) return; const r = el.getBoundingClientRect(), P = 18;
+        if (x >= r.left - P && x <= r.right + P && y >= r.top - P && y <= r.bottom + P) { const dd = Math.hypot(x - (r.left + r.right) / 2, y - (r.top + r.bottom) / 2); if (dd < bd) { bd = dd; best = id === 'baJump' ? 'Space' : 'ShiftLeft'; } } });
+      return best;
+    }
+    function bindAct(el, code) {
+      if (!el) return;
+      el.addEventListener('pointerdown', ev => { ev.preventDefault(); try { el.setPointerCapture(ev.pointerId); } catch (e) {} let s = ptr.get(ev.pointerId); if (!s) { s = new Set(); ptr.set(ev.pointerId, s); } if (!s.has(code)) { s.add(code); apply(code); } });
+      el.addEventListener('pointermove', ev => { const s = ptr.get(ev.pointerId); if (!s) return; const c = hit(ev.clientX, ev.clientY); if (c && !s.has(c)) { s.add(c); apply(c); } });
+      const up = ev => { if (ptr.delete(ev.pointerId)) apply(null); };
+      el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
+      el.addEventListener('contextmenu', e => e.preventDefault());
+    }
+    return {
+      bind() { bindAct(document.getElementById('baJump'), 'Space'); bindAct(document.getElementById('baDash'), 'ShiftLeft'); ui(); },
+      dirDown(code) { const now = performance.now(); if (now - (lastUp[code] || -1e9) < 320 && now - (lastDown[code] || -1e9) < 520) { sprint = code; vib([6, 30, 6]); } lastDown[code] = now; ui(); },
+      dirUp(code) { lastUp[code] = performance.now(); if (sprint === code) sprint = null; ui(); },
+      run() { return mode === 'always' || (mode === 'toggle' && latch) || (!!sprint && !!keys[sprint]); },
+      pulse() { const p = pulse; pulse = false; return p; },
+      reset() { ptr.clear(); dashHeld = false; pulse = false; sprint = null; ui(); },
+      sprinting: () => !!sprint && !!keys[sprint],
+      mode: () => mode, label: () => LBL[mode],
+      cycle() { mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length]; latch = false; try { localStorage.setItem(KEY, mode); } catch (e) {} ui(); return mode; },
+      dbg: () => ({ mode, latch, sprint, ptr: Array.from(ptr.values()).map(s => Array.from(s)), dashHeld, space: !!keys.Space, shift: !!keys.ShiftLeft }),
+    };
+  })();
+  function speedFx5(on) {
+    let s = document.getElementById('baSpeed5');
+    if (!s && on && mountEl && mountEl.parentNode) { s = document.createElement('div'); s.id = 'baSpeed5'; s.innerHTML = '<b>≫ 달리기</b>'; mountEl.parentNode.appendChild(s); }
+    if (s) s.classList.toggle('show', !!on);
+  }
+  function installDebug51() {
+    const B = window.__ba; if (!B) return;
+    B.safe = () => ({ errs: SAFE5.errs, entErrs: SAFE5.entErrs, last: SAFE5.last, log: SAFE5.log.slice(), losses: SAFE5.losses, rebuilt: SAFE5.rebuilt, lost: SAFE5.lost, pr: renderer && renderer.getPixelRatio() });
+    B.run5 = () => RUN5.dbg(); B.runMode = () => RUN5.mode(); B.cycleRun = () => RUN5.cycle();
+    B.loseCtx = () => { const ext = renderer.getContext().getExtension('WEBGL_lose_context'); if (ext) { ext.loseContext(); B._lc = ext; return true; } return false; };
+    B.restoreCtx = () => { if (B._lc) B._lc.restoreContext(); };
+    B.cam3 = (p, t) => { cam.ov3 = p ? { p, t } : null; };
+    B.setState = s => { state = s; };
+    B.raw = () => ({ state, talk: TALK.on, cut: CUT.on, dlg: DLG5.on, hit: G && G.hitstop, slow: G && G.slow, active });
+    B.poke = f => f({ G, TALK, CUT, DLG5, cam, pl: () => pl, enemies: () => enemies, fballs: () => fballs });
   }
 
   return { ensure, setActive(v) { active = v; if (!v) { releaseKeys(); BGM.update(state, false); } else if (started && state === 'play') { /* resume input cleanly */ releaseKeys(); } } };
