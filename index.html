@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.2-gfx">
+<meta name="ba-version" content="v5.3-polish">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>보드게임 모음 — 체스·오목·장기</title>
@@ -6036,7 +6036,7 @@ const BlockAction = (() => {
   function hmat(k, extra) { const t = HERO_SKIN === 'steve' ? steveTex(k) : heroTex(k); return std(Object.assign({ color: 0xffffff, map: t.map, bumpMap: t.bump, bumpScale: 0.012, roughness: 0.78, envMapIntensity: 0.55 }, extra || {})); }
   makeHero = function () {
     const P = 0.046;  // one "skin pixel" in world units — 32 tall ≈ 1.47 at full scale
-    const R = 0.012;  // bevel radius
+    const R = 0.017;  // bevel radius (v5.3: softer)
     const g = new THREE.Group();
     const model = new THREE.Group(); model.rotation.y = 0.55; g.add(model);
     const skinOpts = { roughness: 0.62, envMapIntensity: 0.4 };
@@ -7000,8 +7000,10 @@ const BlockAction = (() => {
       const o = c.createOscillator(), g = c.createGain(); o.type = type || 'square';
       o.frequency.setValueAtTime(f0, t); if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
       g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.03);
+      o.connect(g); g.connect(pn53(c)); o.start(t); o.stop(t + dur + 0.03);
     }
+    let PANV = 0;
+    function pn53(c) { if (!PANV || !c.createStereoPanner) return out; const p = c.createStereoPanner(); p.pan.value = PANV; p.connect(out); return p; }
     let nbuf = null;
     function noise(dur, gain, ftype, f0, f1, delay, q) {
       const c = ac(); if (!c) return; const t = c.currentTime + (delay || 0);
@@ -7009,7 +7011,7 @@ const BlockAction = (() => {
       const s = c.createBufferSource(); s.buffer = nbuf; const f = c.createBiquadFilter(); f.type = ftype || 'lowpass'; f.Q.value = q || 0.8;
       f.frequency.setValueAtTime(f0, t); if (f1) f.frequency.exponentialRampToValueAtTime(Math.max(30, f1), t + dur);
       const g = c.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-      s.connect(f); f.connect(g); g.connect(out); s.start(t, Math.random()); s.stop(t + dur + 0.05);
+      s.connect(f); f.connect(g); g.connect(pn53(c)); s.start(t, Math.random()); s.stop(t + dur + 0.05);
     }
     const LIB = {
       jump: () => { tone(330, 720, 0.13, 'square', 0.07); tone(660, 1300, 0.09, 'triangle', 0.04); },
@@ -7030,14 +7032,19 @@ const BlockAction = (() => {
       punch: () => { tone(120, 45, 0.18, 'sine', 0.35); noise(0.12, 0.2, 'lowpass', 1600, 200); tone(400, 900, 0.1, 'square', 0.04, 0.08); },
       swim: () => { noise(0.18, 0.08, 'bandpass', 700, 300, 0, 3); },
       splash: () => { noise(0.35, 0.16, 'bandpass', 1400, 400, 0, 1); tone(500, 200, 0.12, 'sine', 0.05); },
-      heal: () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.16, 'sine', 0.06, i * 0.07)); }
+      heal: () => { [523, 659, 784, 1047].forEach((f, i) => tone(f, f, 0.16, 'sine', 0.06, i * 0.07)); },
+      stepG: () => { const v = 0.55 + 0.45 * STEPV53; noise(0.07, 0.05 * v, 'lowpass', 760, 240); tone(120, 80, 0.045, 'sine', 0.035 * v); },
+      stepS: () => { const v = 0.55 + 0.45 * STEPV53; noise(0.04, 0.05 * v, 'bandpass', 2600, 1700, 0, 2.2); tone(250, 170, 0.035, 'triangle', 0.025 * v); },
+      stepB: () => { const v = 0.55 + 0.45 * STEPV53; tone(430, 300, 0.045, 'triangle', 0.035 * v); noise(0.03, 0.035 * v, 'bandpass', 1500, 900, 0, 3); },
+      stepN: () => { const v = 0.55 + 0.45 * STEPV53; noise(0.09, 0.06 * v, 'bandpass', 950, 380, 0, 1.4); noise(0.03, 0.025 * v, 'highpass', 3800, 2400, 0.02); },
+      stepM: () => { const v = 0.55 + 0.45 * STEPV53; tone(900, 870, 0.08, 'triangle', 0.018 * v); tone(1350, 1330, 0.06, 'sine', 0.011 * v); noise(0.03, 0.03 * v, 'highpass', 4200, 3000); }
     };
     return {
       play(name) {
         const f = LIB[name]; if (!f) return false;
         if (!on()) return true;
         const now = performance.now(); if (last[name] && now - last[name] < (name === 'coin' ? 35 : 45)) return true; last[name] = now;
-        try { f(); } catch (e) {}
+        try { PANV = panFor53(name); f(); } catch (e) {} PANV = 0;
         if ((name === 'boom' || name === 'uboom') && typeof BGM !== 'undefined') BGM.duck(name === 'uboom' ? 0.3 : 0.5, name === 'uboom' ? 1.6 : 0.9);
         return true;
       },
@@ -7432,7 +7439,7 @@ const BlockAction = (() => {
     cam.shake = Math.max(cam.shake, ultra ? 30 : 15); vib(ultra ? [40, 30, 80] : 35);
     flashScreen(ultra ? 0.9 : 0.3);
     if (ultra) { G.slow = 32; floatText('ULTRA!', x, y + 1.5); }
-    snd(ultra ? 'uboom' : 'boom');
+    sndAt53(ultra ? 'uboom' : 'boom', x);
     EXLOG.push(log); if (EXLOG.length > 30) EXLOG.shift();
     return log;
   }
@@ -8589,6 +8596,7 @@ const BlockAction = (() => {
     hideOverlays(); setMenu(false);
     banner(def.id + '  ' + def.name, showIntro ? '목숨 × ' + G.lives : '', showIntro ? 1500 : 900);
     updateHUD(true); updBossBar();
+    if (showIntro) stageIn53(def); else iris53(true, 0.45);
   }
   function setPower(p, instant) {
     pl.power = p; pl.hB = p > 0 ? 1.28 : 0.9; if (!pl.truck) pl.h = pl.crouch ? pl.hB * 0.6 : pl.hB; if (p > (pl.power0 || 0) && !instant && typeof BGM !== 'undefined') BGM.jingle('power'); pl.power0 = p; pl.grow = instant ? 0 : 40;
@@ -8854,11 +8862,11 @@ const BlockAction = (() => {
     if (state === 'intro') { if (--G.introT <= 0) state = 'play'; tickWorld(false); return; }
     if (state === 'select' || state === 'over' || state === 'pause') { tickWorld(false); return; }
     if (state === 'dying') {
-      G.dieT++;
+      G.dieT++; if (G.dieT === 92) iris53(false, 0.45);
       if (G.dieT > 26) { pl.vy -= 0.014; pl.y += pl.vy; }
       if (G.dieT > 120) {
         G.lives--;
-        if (G.lives <= 0) { state = 'over'; showOver('over'); }
+        if (G.lives <= 0) { state = 'over'; showOver('over'); iris53(true, 0.5); }
         else startStage(true);
       }
       return;
@@ -8955,7 +8963,7 @@ const BlockAction = (() => {
       pops.push({ type: 'gate', m: L.arena.gateL, t: 0, dir: -1 });
       if (L.def.dragon && G.golemDown === stageIdx) { boss.alive = false; boss.gone = true; W3.group.remove(boss.mesh); L.dragonT = 60; }   // golem already beaten this run: straight to the dragon
       else if (boss.kind === 'wither') witherWake5(boss);
-      else { banner('골렘 왕', '머리를 5번 밟거나 불덩이로!', 1500); snd('check'); }
+      else { banner('골렘 왕', '머리를 5번 밟거나 불덩이로!', 1500); snd('check'); bossIntro53(boss); }
       updBossBar();
     }
     // goal
@@ -9013,7 +9021,7 @@ const BlockAction = (() => {
     const hgt = pl.y - L.goal.y;
     const bonus = hgt >= 7 ? 5000 : hgt >= 5 ? 2000 : hgt >= 3 ? 800 : hgt >= 1.5 ? 400 : 100;
     addScore(bonus, L.goal.x - 0.6, pl.y + 1.4);
-    G.clr = { phase: 'slide', t: 0, bonus }; G.clearTime = G.ticks / 60;
+    G.clr = { phase: 'slide', t: 0, bonus }; G.clearTime = G.ticks / 60; G.tl53 = G.timeLeft;
     pl.x = L.goal.x - 0.32; pl.vx = 0; pl.vy = 0; pl.face = 1;
     snd('win');
   }
@@ -9329,9 +9337,9 @@ const BlockAction = (() => {
     if (!G) return;
     setText('baWave', STAGES[stageIdx].id);
     setText('baTime', String(Math.max(0, G.timeLeft | 0)));
-    setText('baCoins', String(G.coins).padStart(2, '0'));
+    hudSet53('baCoins', G.coins, 2, force);
     setText('baHp', String(G.lives));
-    setText('baScore', String(G.score).padStart(6, '0'));
+    hudSet53('baScore', G.score, 6, force);
     setText('baTntN', String(G.tnt || 0)); setText('baUtntN', String(G.utnt || 0));
     setText('baTntB', String(G.tnt || 0)); setText('baUtntB', String(G.utnt || 0));
     const tb = $('baTnt'), ub = $('baUtnt'); if (tb) tb.classList.toggle('empty', !(G.tnt > 0)); if (ub) ub.classList.toggle('empty', !(G.utnt > 0));
@@ -9407,6 +9415,7 @@ const BlockAction = (() => {
       add('음악 볼륨: ' + (BGM.vol() < 0.3 ? '작게' : BGM.vol() < 0.5 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.3 ? 0.4 : v < 0.5 ? 0.6 : 0.2); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); showOver('pause'); }); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
     }
     el.dataset.kind = kind; el.classList.add('show'); setPad(false);
+    if (kind === 'clear') results53(el, info);
   }
   let pausedFrom = null;
   function pause() { if (state !== 'play' && state !== 'intro') return; pausedFrom = state; state = 'pause'; showOver('pause'); }
@@ -9416,6 +9425,7 @@ const BlockAction = (() => {
   // ---------- boot ----------
   function ensure() {
     if (started) return;
+    if (!LD53.done) { if (LD53.busy) return; LD53.busy = true; loader53(true); setTimeout(() => { LD53.done = true; LD53.busy = false; try { ensure(); } finally { setTimeout(() => loader53(false), 250); } }, 60); return; }
     started = true;
     mountEl = document.getElementById('baMount');
     fx = { flicker: [], lights: [], clouds: [] };
@@ -9451,7 +9461,7 @@ const BlockAction = (() => {
     bindInput();
     window.addEventListener('resize', onResize);
     dom5(); showSelect(); showMap5();
-    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); }
+    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); }
     last = performance.now(); requestAnimationFrame(animate);
   }
   function bindInput() {
@@ -9501,8 +9511,8 @@ const BlockAction = (() => {
     try {
     if (state === 'map' && mapFrame5(dt)) return;
     if (!L) return;
-    animHero(dt); animActors(dt); animStriders5(); fxTick3();
-    placeCamera(false); updLights(); updateHUD(); updBossBar();
+    animHero(dt); polish53(dt); animActors(dt); animStriders5(); fxTick3();
+    placeCamera(false); bossCam53(); updLights(); updateHUD(); hud53(); updBossBar();
     speedFx5(state === 'play' && RUN5.sprinting());
     postRender52(scene, camera);
     } catch (err) { tickErr5(err); }
@@ -11453,6 +11463,323 @@ const BlockAction = (() => {
   function installDebug52() {
     if (!window.__ba) return;
     window.__ba.post = () => ({ on: postOn52(), ok: PST.ok, lv: lv52(), w: PST.w, h: PST.h, hf: PST.hf, ca: +PST.ca.toFixed(3), fails: PST.fails });
+  }
+
+  // ================= v5.3 polish: faces / secondary motion / fidgets / footsteps / HUD counters /
+  // iris + title cards + loading screen / results tally / boss intro zoom =================
+  // ---- expression decals on the hero's face (blink, hurt, happy), drawn on canvas ----
+  const FACE53 = {};
+  function skinAt53(tex, u, v, dflt) {
+    try { const c = tex.image, g = c.getContext('2d'); const d = g.getImageData(Math.floor(u * c.width), Math.floor(v * c.height), 1, 1).data; return 'rgb(' + d[0] + ',' + d[1] + ',' + d[2] + ')'; } catch (e) { return dflt; }
+  }
+  function faceTex53(skin, ex, base) {
+    const key = skin + ':' + ex; if (FACE53[key]) return FACE53[key];
+    const S = 256, c = document.createElement('canvas'); c.width = c.height = S; const g = c.getContext('2d');
+    const steve = skin === 'steve';
+    const sk = steve ? skinAt53(base, 0.5, 0.56, '#c08a64') : skinAt53(base, 0.5, 0.54, '#f0c4a0');
+    const skM = steve ? sk : skinAt53(base, 0.3, 0.84, '#ecbc96');
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    const eyes = steve ? [[0.25, 0.5625], [0.75, 0.5625]] : [[0.3, 0.54], [0.7, 0.54]];
+    // cover the painted eyes
+    g.fillStyle = sk;
+    if (steve) { g.fillRect(S * 0.11, S * 0.47, S * 0.29, S * 0.17); g.fillRect(S * 0.6, S * 0.47, S * 0.29, S * 0.17); }
+    else eyes.forEach(([x, y]) => { g.beginPath(); g.ellipse(S * x, S * y, 26, 30, 0, 0, 7); g.fill(); });
+    g.strokeStyle = steve ? '#3a2214' : '#3a2010'; g.lineWidth = steve ? 9 : 8;
+    eyes.forEach(([x, y], i) => {
+      const X = S * x, Y = S * y, s = i ? -1 : 1;
+      g.beginPath();
+      if (ex === 'blink') { g.moveTo(X - 20, Y + 2); g.quadraticCurveTo(X, Y + 12, X + 20, Y + 2); }
+      else if (ex === 'hurt') { g.moveTo(X - 15 * s, Y - 14); g.lineTo(X + 13 * s, Y); g.lineTo(X - 15 * s, Y + 14); }
+      else if (ex === 'happy') { g.moveTo(X - 19, Y + 9); g.quadraticCurveTo(X, Y - 18, X + 19, Y + 9); }
+      g.stroke();
+      if (ex === 'blink' && !steve) { g.lineWidth = 3; g.beginPath(); g.moveTo(X + 18 * s, Y + 3); g.lineTo(X + 25 * s, Y - 2); g.stroke(); g.lineWidth = 8; }
+    });
+    // mouth
+    if (ex === 'hurt' || ex === 'happy') {
+      g.fillStyle = skM;
+      if (steve) g.fillRect(S * 0.22, S * 0.735, S * 0.56, S * 0.095); else g.fillRect(S * 0.33, S * 0.755, S * 0.34, S * 0.15);
+      if (ex === 'hurt') {
+        g.fillStyle = '#5a1a14'; g.beginPath(); g.ellipse(S * 0.5, S * (steve ? 0.79 : 0.83), steve ? 20 : 14, steve ? 11 : 15, 0, 0, 7); g.fill();
+        g.fillStyle = '#c0504a'; g.beginPath(); g.ellipse(S * 0.5, S * (steve ? 0.81 : 0.86), steve ? 11 : 8, 5, 0, 0, 7); g.fill();
+      } else {
+        const y0 = S * (steve ? 0.745 : 0.77); g.fillStyle = '#6a1a18'; g.beginPath(); g.moveTo(S * 0.36, y0); g.quadraticCurveTo(S * 0.5, y0 + 64, S * 0.64, y0); g.closePath(); g.fill();
+        g.fillStyle = '#ffffff'; g.fillRect(S * 0.385, y0, S * 0.23, 7);
+        g.fillStyle = '#e8706a'; g.beginPath(); g.ellipse(S * 0.5, y0 + 22, 15, 7, 0, 0, 7); g.fill();
+      }
+    }
+    const t = new THREE.CanvasTexture(c); if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding; t.anisotropy = 4;
+    return (FACE53[key] = t);
+  }
+  function addFace53(g) {
+    try {
+      const Lb = g.userData.limbs, P = g.userData.P || 0.046; if (!Lb) return;
+      const head = Lb.head.children.find(m => m.isMesh); if (!head) return;
+      const base = head.material[4] && head.material[4].map; const skin = HERO_SKIN;
+      const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, map: faceTex53(skin, 'blink', base), alphaTest: 0.5, roughness: 0.62, envMapIntensity: 0.4, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(8 * P * 0.985, 8 * P * 0.985), mat);
+      m.position.z = 4 * P + 0.0025; m.visible = false; m.renderOrder = 1; head.add(m);
+      const brim = head.children.find(c => c.isMesh && c !== m && c.position.z > 4 * P);
+      if (g.userData.tint) g.userData.tint.push(mat);
+      g.userData.face53 = { m, mat, skin, base, ex: 'open', blinkT: 90 + Math.random() * 120, blinkF: 0, hurtT: 0, joyT: 0, brim, brim0: brim ? brim.rotation.x : 0 };
+      g.userData.sm53 = { hz: 0, hv: 0, px: 0, pv: 0, bx: 0, bv: 0, vx0: 0, vy0: 0, idle: 0, fid: null, fidT: 0, fidN: 0, step: null, inv0: 0, pw0: 0 };
+    } catch (e) { slog5 && slog5('face53', String(e && e.message)); }
+  }
+  { const mh = makeHero; makeHero = function () { const g = mh.apply(this, arguments); addFace53(g); return g; }; }
+  function setFace53(F, ex) {
+    if (F.ex === ex) return; F.ex = ex;
+    if (ex === 'open') { F.m.visible = false; return; }
+    F.mat.map = faceTex53(F.skin, ex, F.base); F.m.visible = true;
+  }
+  const STEPSURF53 = { field: 'stepG', cave: 'stepS', wall: 'stepS', castle: 'stepS', fortress: 'stepS', bastion: 'stepS', nwaste: 'stepN', nforest: 'stepN', space: 'stepM', end: 'stepS' };
+  function surf53(p) {
+    const tx = Math.floor(p.x), ty = Math.floor(p.y - 0.12); let t = E;
+    try { t = tile(tx, ty); } catch (e) {}
+    if (t === BR || t === Q || t === U) return 'stepB';
+    if (t === SS || t === MG) return 'stepN';
+    if (t === E) return p.ride ? 'stepB' : null;
+    return STEPSURF53[L && L.def && L.def.theme] || 'stepS';
+  }
+  function polish53(dt) {
+    if (!player || !pl) return;
+    const u = player.userData, F = u.face53, s = u.sm53; if (!F || !s) return;
+    const k = Math.min(3, dt * 60), p = pl, Lb = u.limbs, dying = state === 'dying';
+    // ---- expressions ----
+    if ((p.inv || 0) > s.inv0 + 4) F.hurtT = 50;
+    s.inv0 = p.inv || 0;
+    if ((p.power || 0) > s.pw0) F.joyT = 60;
+    s.pw0 = p.power || 0;
+    F.hurtT = Math.max(0, F.hurtT - k); F.joyT = Math.max(0, F.joyT - k);
+    F.blinkT -= k;
+    if (F.blinkT <= 0) { F.blinkF = 7; F.blinkT = Math.random() < 0.2 ? 14 : 110 + Math.random() * 190; }
+    F.blinkF = Math.max(0, F.blinkF - k);
+    const win = state === 'clear' || (state === 'over' && G && G.clr && G.clr.phase === 'done');
+    if (!F.lock) setFace53(F, dying || F.hurtT > 0 ? 'hurt' : win || F.joyT > 0 ? 'happy' : F.blinkF > 0 ? 'blink' : 'open');
+    if (p.truck) return;
+    // ---- secondary motion: head tilt lags horizontal acceleration, head nods on landing/take-off, cap brim flaps ----
+    const ax = (p.vx - s.vx0) / Math.max(0.3, k), ay = (p.vy - s.vy0) / Math.max(0.3, k); s.vx0 = p.vx; s.vy0 = p.vy;
+    const fz = Math.max(-0.05, Math.min(0.05, ax)) * 2.2 * (p.face || 1);
+    s.hv += (-0.14 * s.hz - 0.2 * s.hv + fz) * k; s.hz += s.hv * k; s.hz = Math.max(-0.16, Math.min(0.16, s.hz));
+    const fy = Math.max(-0.12, Math.min(0.12, ay));
+    s.pv += (-0.16 * s.px - 0.22 * s.pv - fy * 1.6) * k; s.px += s.pv * k; s.px = Math.max(-0.22, Math.min(0.22, s.px));
+    s.bv += (-0.2 * s.bx - 0.16 * s.bv - fy * 2.4 + (p.ground ? 0 : -p.vy * 0.05)) * k; s.bx += s.bv * k; s.bx = Math.max(-0.3, Math.min(0.35, s.bx));
+    if (!dying) { Lb.head.rotation.z = s.hz; Lb.head.rotation.x += s.px; }
+    if (F.brim) F.brim.rotation.x = F.brim0 + s.bx;
+    // ---- idle fidgets (look around / stretch / fix the cap) ----
+    const idle = state === 'play' && p.ground && Math.abs(p.vx) < 0.004 && !p.crouch && !p.pound && !(AN.thr && AN.thr.f !== undefined && AN.thr.w > 0.05);
+    const nw = performance.now(), kw = Math.min(15, (nw - (s.lt || nw)) / 16.67); s.lt = nw;
+    s.idle = idle ? s.idle + kw : 0;
+    if (!idle) { s.fid = null; s.fidT = 0; s.fidAt = 0; }
+    else if (!s.fid && s.idle > 240 && s.idle - (s.fidAt || 0) > 260) { s.fidAt = s.idle; s.fid = ['look', 'stretch', 'cap'][s.fidN++ % 3]; s.fidT = 0; }
+    if (s.fid) {
+      s.fidT += k; const D = s.fid === 'look' ? 130 : 95, t = s.fidT / D;
+      if (t >= 1) s.fid = null;
+      else {
+        const w = Math.sin(Math.PI * Math.min(1, t)) ** 0.6;
+        if (s.fid === 'look') { Lb.head.rotation.y += Math.sin(t * Math.PI * 2) * 0.62 * w; Lb.head.rotation.x -= 0.08 * w; }
+        else if (s.fid === 'stretch') { Lb.armL.rotation.x = lerp(Lb.armL.rotation.x, -2.95, w); Lb.armR.rotation.x = lerp(Lb.armR.rotation.x, -2.95, w); Lb.armL.rotation.z = -0.06 - 0.35 * w; Lb.armR.rotation.z = 0.06 + 0.35 * w; Lb.body.rotation.x -= 0.12 * w; Lb.head.rotation.x -= 0.25 * w; if (t > 0.3 && t < 0.7 && F.ex === 'open') setFace53(F, 'blink'); }
+        else { Lb.armR.rotation.x = lerp(Lb.armR.rotation.x, -2.55, w); Lb.armR.rotation.z = 0.06 + 0.55 * w; Lb.head.rotation.z += Math.sin(t * Math.PI * 6) * 0.05 * w; if (F.brim) F.brim.rotation.x += Math.sin(t * Math.PI * 4) * 0.08 * w; }
+      }
+    }
+    // ---- footsteps by surface (planted foot = gait phase crossing pi/2 + n*pi) ----
+    if (state === 'play' && p.ground && Math.abs(p.vx) > 0.015) {
+      const idx = Math.floor((AN.phase - Math.PI / 2) / Math.PI);
+      if (s.step !== null && idx !== s.step) { const sf = surf53(p); if (sf) { STEPV53 = Math.min(1, Math.abs(p.vx) / C.run); snd(sf); } }
+      s.step = idx;
+    } else s.step = null;
+  }
+  let STEPV53 = 0.5;
+  // ---- stereo placement of SFX (screen-space x of the source; default = hero) ----
+  const SNDX53 = { x: 0, t: -1e9 };
+  const PAN0_53 = { select: 1, capture: 1, check: 1, wave: 1, win: 1, lose: 1, power: 1, pickup: 1, heal: 1, place: 1 };
+  function panFor53(name) {
+    try {
+      if (PAN0_53[name] || !cam || !cam.Wv) return 0;
+      const x = performance.now() - SNDX53.t < 80 ? SNDX53.x : pl ? pl.x : cam.x;
+      return Math.max(-0.7, Math.min(0.7, (x - cam.x) / (cam.Wv * 0.5) * 0.6));
+    } catch (e) { return 0; }
+  }
+  function sndAt53(name, x) { SNDX53.x = x; SNDX53.t = performance.now(); snd(name); }
+  // ---- HUD rolling counters + pop ----
+  const HUD53 = { v: {}, d: {}, pad: {} };
+  function hudSet53(id, v, pad, force) {
+    HUD53.pad[id] = pad;
+    if (force || HUD53.d[id] === undefined || v < HUD53.d[id]) { HUD53.d[id] = v; HUD53.v[id] = v; setText(id, String(v).padStart(pad, '0')); return; }
+    if (v > HUD53.v[id] && id === 'baCoins') pop53(id);
+    HUD53.v[id] = v;
+  }
+  function pop53(id) { const el = $(id); if (!el) return; el.classList.remove('pop53'); void el.offsetWidth; el.classList.add('pop53'); }
+  function hud53() {
+    const nw = performance.now(); HUD53.dt = Math.min(0.5, (nw - (HUD53.t || nw)) / 1000) || 0.016; HUD53.t = nw;
+    for (const id in HUD53.v) {
+      const t = HUD53.v[id], d = HUD53.d[id]; if (d === t) continue;
+      const n = d + Math.max(1, Math.ceil((t - d) * (1 - Math.exp(-HUD53.dt * (id === 'baScore' ? 10 : 40)))));
+      HUD53.d[id] = Math.min(t, n); setText(id, String(HUD53.d[id]).padStart(HUD53.pad[id], '0'));
+      if (id === 'baScore' && HUD53.d[id] === t) pop53(id);
+    }
+    if (G && HUD53.lives !== G.lives) { if (HUD53.lives !== undefined && G.lives > HUD53.lives) pop53('baHp'); HUD53.lives = G.lives; }
+    irisTick53();
+  }
+  // ---- CSS + DOM for overlays ----
+  function css53() {
+    if (document.getElementById('css53')) return;
+    const st = document.createElement('style'); st.id = 'css53';
+    st.textContent = `
+#baScore,#baCoins,#baHp{display:inline-block;transform-origin:50% 60%;}
+.pop53{animation:pop53 .34s cubic-bezier(.2,1.8,.4,1);}
+@keyframes pop53{0%{transform:scale(1)}35%{transform:scale(1.38);color:#fff6c0;text-shadow:0 0 10px rgba(255,220,120,.9)}100%{transform:scale(1)}}
+#ir53{position:absolute;inset:0;z-index:8;pointer-events:none;background:#05030c;display:none;}
+#tc53{position:absolute;left:0;right:0;top:30%;z-index:8;pointer-events:none;display:none;font-family:'Segoe UI',system-ui,sans-serif;color:#fff;}
+#tc53 .bar{position:relative;margin:0 auto;width:min(620px,92%);padding:14px 22px 16px;border-radius:18px;background:linear-gradient(100deg,rgba(255,120,60,.96),rgba(255,190,60,.96) 55%,rgba(255,226,120,.96));box-shadow:0 10px 0 rgba(120,40,10,.55),0 18px 40px rgba(0,0,0,.45);transform:translateX(-120vw) skewX(-8deg);}
+#tc53.show .bar{animation:tc53in .5s cubic-bezier(.2,1.3,.4,1) forwards,tc53out .38s ease-in 1.42s forwards;}
+#tc53 .w{font-size:13px;font-weight:900;letter-spacing:.3em;opacity:.9;text-shadow:0 2px 0 rgba(120,40,10,.6);}
+#tc53 .id{font-size:clamp(34px,8vw,58px);font-weight:900;line-height:1;margin:2px 0;text-shadow:0 4px 0 #a2380e,0 6px 14px rgba(0,0,0,.35);letter-spacing:.04em;}
+#tc53 .nm{font-size:clamp(16px,4vw,24px);font-weight:800;text-shadow:0 2px 0 rgba(120,40,10,.7);}
+#tc53 .lv{position:absolute;right:20px;top:14px;font-weight:900;font-size:15px;background:rgba(80,20,0,.35);border-radius:12px;padding:3px 10px;}
+body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
+#tc53 .sub{font-size:13px;font-weight:700;opacity:.92;margin-top:4px;}
+@keyframes tc53in{from{transform:translateX(-120vw) skewX(-8deg)}to{transform:translateX(0) skewX(-8deg)}}
+@keyframes tc53out{from{transform:translateX(0) skewX(-8deg)}to{transform:translateX(130vw) skewX(-8deg)}}
+#ld53{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(ellipse at 50% 40%,#2a2168,#0a0720 70%);color:#f4efe6;font-family:'Segoe UI',system-ui,sans-serif;transition:opacity .45s;}
+#ld53.out{opacity:0;pointer-events:none;}
+#ld53 .cube{width:56px;height:56px;position:relative;transform-style:preserve-3d;animation:ld53r 1.6s cubic-bezier(.5,0,.5,1) infinite;}
+#ld53 .cube i{position:absolute;inset:0;border-radius:6px;}
+#ld53 .cube i:nth-child(1){background:linear-gradient(#6fd25a,#3e9a34 40%,#8a5a34 41%,#6a4428);transform:translateZ(28px);}
+#ld53 .cube i:nth-child(2){background:#5cbc48;transform:rotateX(90deg) translateZ(28px);}
+#ld53 .cube i:nth-child(3){background:linear-gradient(#58b444,#327c2a 40%,#7a4e2c 41%,#5a3a20);transform:rotateY(90deg) translateZ(28px);}
+#ld53 .cube i:nth-child(4){background:linear-gradient(#58b444,#327c2a 40%,#7a4e2c 41%,#5a3a20);transform:rotateY(-90deg) translateZ(28px);}
+#ld53 .cube i:nth-child(5){background:#6a4428;transform:rotateY(180deg) translateZ(28px);}
+@keyframes ld53r{0%{transform:rotateX(-24deg) rotateY(0) translateY(0)}50%{transform:rotateX(-24deg) rotateY(180deg) translateY(-14px)}100%{transform:rotateX(-24deg) rotateY(360deg) translateY(0)}}
+#ld53 .t{font-weight:900;font-size:20px;letter-spacing:.06em;}
+#ld53 .bar{width:min(260px,70%);height:10px;border-radius:6px;background:rgba(255,255,255,.14);overflow:hidden;}
+#ld53 .bar b{display:block;height:100%;width:30%;border-radius:6px;background:linear-gradient(90deg,#ffd76a,#ff9a3c);animation:ld53b 1.1s ease-in-out infinite;}
+@keyframes ld53b{0%{transform:translateX(-110%)}100%{transform:translateX(340%)}}
+#ld53 .tip{font-size:13px;opacity:.75;max-width:80%;text-align:center;}
+#baOver[data-kind="pause"]{background:rgba(8,6,22,.38);backdrop-filter:blur(9px) saturate(.7) brightness(.85);-webkit-backdrop-filter:blur(9px) saturate(.7) brightness(.85);}
+#baOver[data-kind="pause"] .ba-panel{background:rgba(20,16,46,.55);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px 16px 20px;box-shadow:0 20px 50px rgba(0,0,0,.4);}
+.r53{margin:4px auto 12px;max-width:420px;}
+.r53 .st{display:flex;justify-content:center;gap:14px;margin:4px 0 12px;}
+.r53 .st i{font-style:normal;font-size:44px;line-height:1;color:rgba(255,255,255,.16);text-shadow:none;transform:scale(.4);opacity:.5;transition:transform .35s cubic-bezier(.2,1.9,.4,1),opacity .2s;}
+.r53 .st i.on{color:#ffd54a;opacity:1;transform:scale(1);text-shadow:0 0 16px rgba(255,210,80,.85),0 3px 0 #b07a10;}
+.r53 .st i.off{opacity:1;transform:scale(.86);}
+.r53 .row{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;margin:5px 0;border-radius:12px;background:rgba(255,255,255,.08);font-weight:700;font-variant-numeric:tabular-nums;opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
+.r53 .row.on{opacity:1;transform:none;}
+.r53 .row b{font-size:20px;color:#fde68a;}
+.r53 .row small{opacity:.7;font-weight:600;margin-left:6px;}
+.r53 .nb{color:#ffd54a;font-weight:900;margin-top:6px;opacity:0;transition:opacity .3s;}
+.r53 .nb.on{opacity:1;}
+`;
+    document.head.appendChild(st);
+  }
+  function host53() { const m = mountEl || document.getElementById('baMount'); return m ? m.parentElement : document.body; }
+  // ---- loading screen (first boot builds every texture synchronously: show something first) ----
+  const LD53 = { done: false, busy: false };
+  const TIPS53 = ['점프를 길게 누르면 더 높이 뛰어요', '공중에서 ↓ = 내려찍기로 벽돌을 깨요', '대시를 두 번 톡톡 누르면 달리기가 고정돼요', '⭐ 3개: 클리어 + 코인 60% + 빠른 클리어', '울트라 TNT는 화면 전체를 흔들어요'];
+  function loader53(on) {
+    css53(); let el = document.getElementById('ld53');
+    if (on) {
+      if (!el) { el = document.createElement('div'); el.id = 'ld53'; el.innerHTML = '<div class="cube"><i></i><i></i><i></i><i></i><i></i></div><div class="t">블록 월드 만드는 중…</div><div class="bar"><b></b></div><div class="tip"></div>'; host53().appendChild(el); }
+      el.querySelector('.tip').textContent = '💡 ' + TIPS53[Math.floor(Math.random() * TIPS53.length)];
+      el.classList.remove('out');
+    } else if (el) { if (window.__BA_DEBUG && window.__BA_HOLD53) return; el.classList.add('out'); setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, 520); }
+  }
+  // ---- iris wipe ----
+  const IR53 = { r: 1, want: 1, t0: 0, from: 1, dur: 0.5, x: 0.5, y: 0.5, closed: false, mask: null };
+  function irisEl53() {
+    css53(); let el = document.getElementById('ir53');
+    if (!el) { el = document.createElement('div'); el.id = 'ir53'; host53().appendChild(el);
+      IR53.mask = (window.CSS && CSS.supports) ? (CSS.supports('mask-image', 'radial-gradient(circle, #000, #fff)') ? 'maskImage' : CSS.supports('-webkit-mask-image', 'radial-gradient(circle, #000, #fff)') ? 'webkitMaskImage' : null) : null; }
+    return el;
+  }
+  function heroScreen53() {
+    try { const v = new THREE.Vector3(pl.x, pl.y + 0.6, ZP).project(camera); return [Math.max(0.05, Math.min(0.95, v.x * 0.5 + 0.5)), Math.max(0.05, Math.min(0.95, 0.5 - v.y * 0.5))]; } catch (e) { return [0.5, 0.5]; }
+  }
+  function iris53(open, dur) {
+    const el = irisEl53(); const [x, y] = heroScreen53(); IR53.x = x; IR53.y = y;
+    IR53.from = IR53.r; IR53.want = open ? 1 : 0; IR53.t0 = performance.now(); IR53.dur = dur || (open ? 0.65 : 0.45);
+    if (!open && IR53.from >= 1) IR53.from = 1; IR53.closed = !open; el.style.display = 'block';
+  }
+  function irisTick53() {
+    const el = document.getElementById('ir53'); if (!el) return;
+    if (IR53.closed && state !== 'dying' && state !== 'over' && state !== 'clear') iris53(true);
+    const k = Math.min(1, (performance.now() - IR53.t0) / 1000 / IR53.dur), e = k * k * (3 - 2 * k);
+    IR53.r = IR53.from + (IR53.want - IR53.from) * e;
+    if (IR53.r >= 0.999 && IR53.want === 1) { el.style.display = 'none'; return; }
+    el.style.display = 'block';
+    const W = el.clientWidth || 1, H = el.clientHeight || 1, X = IR53.x * W, Y = IR53.y * H;
+    const far = Math.hypot(Math.max(X, W - X), Math.max(Y, H - Y)) + 4, R = Math.max(0, IR53.r * far);
+    if (IR53.mask) { const g = 'radial-gradient(circle at ' + X.toFixed(0) + 'px ' + Y.toFixed(0) + 'px, transparent ' + R.toFixed(1) + 'px, #000 ' + (R + 1.5).toFixed(1) + 'px)'; el.style[IR53.mask] = g; el.style.opacity = 1; }
+    else el.style.opacity = (1 - IR53.r).toFixed(3);
+  }
+  // ---- stage title card ----
+  function stageIn53(def) {
+    css53(); iris53(true, 0.7);
+    try { clearTimeout(bannerT); const bm = $('baMsg'); if (bm) bm.classList.remove('show'); } catch (e) {}
+    let el = document.getElementById('tc53');
+    if (!el) { el = document.createElement('div'); el.id = 'tc53'; el.innerHTML = '<div class="bar"><div class="w"></div><div class="id"></div><div class="nm"></div><div class="sub"></div><div class="lv"></div></div>'; host53().appendChild(el); }
+    const wn = String(def.id).split('-')[0];
+    const WN = { 1: '오버월드', 2: '네더', 3: '우주' };
+    el.querySelector('.w').textContent = 'WORLD ' + wn + (WN[wn] ? ' · ' + WN[wn] : '');
+    el.querySelector('.id').textContent = def.id; el.querySelector('.nm').textContent = def.name; el.querySelector('.sub').textContent = def.sub || '';
+    el.querySelector('.lv').textContent = '♥ × ' + (G ? G.lives : 3);
+    el.classList.remove('show'); el.style.display = 'block'; void el.offsetWidth; el.classList.add('show');
+    clearTimeout(stageIn53.t); stageIn53.t = setTimeout(() => { if (window.__BA_DEBUG && window.__BA_HOLD53) return; el.classList.remove('show'); el.style.display = 'none'; }, 1900);
+  }
+  // ---- results tally: stars (clear / coins / time) + counted-up rows ----
+  function results53(el, info) {
+    try {
+      css53();
+      const def = STAGES[stageIdx], p = el.querySelector('p'); if (!p) return;
+      const coins = (L && L.coins) ? L.coins : [], got = coins.filter(c => c.taken).length, tot = coins.length;
+      const tl = G.tl53 !== undefined ? G.tl53 : 0, tf = def.time ? tl / def.time : 0;
+      const stars = [true, tot === 0 || got / tot >= 0.6, tf >= 0.5];
+      const b = save.best[def.id] || {}; const ns = stars.filter(Boolean).length; if (!(b.stars >= ns)) { b.stars = ns; save.best[def.id] = b; saveSave(); }
+      [...p.children].slice(0, 3).forEach(d => { d.style.display = 'none'; });
+      const box = document.createElement('div'); box.className = 'r53';
+      box.innerHTML = '<div class="st"><i>★</i><i>★</i><i>★</i></div>' +
+        '<div class="row"><span>⏱ 클리어 시간</span><b data-k="t">0.0</b></div>' +
+        '<div class="row"><span>🪙 코인</span><b data-k="c">0<small>/ ' + tot + '</small></b></div>' +
+        '<div class="row"><span>🏁 스테이지 점수</span><b data-k="s">0</b></div><div class="nb">' + (info && info.newBest ? '🏆 최고 기록!' : '') + '</div>';
+      p.insertBefore(box, p.firstChild);
+      const rows = box.querySelectorAll('.row'), st = box.querySelectorAll('.st i'), T = { t: G.clearTime || 0, c: got, s: info ? info.gained : 0 };
+      const val = { t: box.querySelector('[data-k=t]'), c: box.querySelector('[data-k=c]'), s: box.querySelector('[data-k=s]') };
+      const t0 = performance.now(); let lastTick = 0;
+      const step = now => {
+        if (!box.isConnected) return;
+        const e = (now - t0) / 1000;
+        rows.forEach((r, i) => r.classList.toggle('on', e > 0.15 + i * 0.35));
+        const f = (i, d) => Math.max(0, Math.min(1, (e - 0.25 - i * 0.35) / d));
+        val.t.textContent = (T.t * f(0, 0.6)).toFixed(1) + '초';
+        val.c.firstChild.nodeValue = String(Math.round(T.c * f(1, 0.6)));
+        val.s.textContent = Math.round(T.s * f(2, 0.9)).toLocaleString();
+        if (e < 2.0 && now - lastTick > 70) { lastTick = now; snd('coin'); }
+        st.forEach((s, i) => { if (e > 1.6 + i * 0.32 && !s.dataset.done) { s.dataset.done = 1; s.classList.add(stars[i] ? 'on' : 'off'); if (stars[i]) snd('pickup'); } });
+        if (e > 2.8) box.querySelector('.nb').classList.add('on');
+        if (e < 3.2) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+      box.dataset.stars = ns;
+    } catch (e) { slog5 && slog5('results53', String(e && e.message)); }
+  }
+  // ---- boss intro: brief freeze while the camera pushes in on the boss, then eases back ----
+  const BI53 = { on: false, t: 0, T: 100, e: null };
+  function bossIntro53(e) { if (!e || !e.mesh) return; BI53.on = true; BI53.t = 0; BI53.e = e; BI53.t0 = performance.now(); state = 'intro'; G.introT = BI53.T; cam.shake = 0; }
+  function bossCam53() {
+    if (!BI53.on) return;
+    if (state !== 'intro' || !BI53.e || !camera) { BI53.on = false; return; }
+    const t = (BI53.T - G.introT) / BI53.T, e = BI53.e;
+    const w = t < 0.3 ? ease(t / 0.3) : t > 0.75 ? ease(1 - (t - 0.75) / 0.25) : 1;
+    const tx = e.x, ty = e.y + (e.h || 2) * 0.55, d = 6.2;
+    const cx = lerp(camera.position.x, tx, w), cy = lerp(camera.position.y, ty + d * 0.06, w), cz = lerp(camera.position.z, d, w);
+    camera.position.set(cx, cy, cz);
+    camera.lookAt(lerp(cam.x, tx, w), lerp(cam.y, ty, w), 0);
+    if (G.introT <= 1) BI53.on = false;
+  }
+  function installDebug53() {
+    window.__ba.p53 = () => ({ face: player && player.userData.face53 ? player.userData.face53.ex : null, fid: player && player.userData.sm53 ? player.userData.sm53.fid : null, idle: player && player.userData.sm53 ? player.userData.sm53.idle : 0, iris: { r: IR53.r, closed: IR53.closed }, bi: BI53.on, hud: Object.assign({}, HUD53.d) });
+    window.__ba.face53 = ex => { const F = player.userData.face53; F.lock = !!ex; if (ex) setFace53(F, ex); };
+    window.__ba.iris = (o, d) => iris53(o, d);
+    window.__ba.addG = (sc, co) => { G.score += sc; G.coins += co; };
+    window.__ba.results = () => results53($('baOver'), { gained: 12345, newBest: true });
   }
 
   return { ensure, setActive(v) { active = v; if (!v) { releaseKeys(); BGM.update(state, false); } else if (started && state === 'play') { /* resume input cleanly */ releaseKeys(); } } };
