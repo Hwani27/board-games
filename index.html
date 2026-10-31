@@ -16720,7 +16720,7 @@ const ROSTER=[
   {id:'moosh',name:'무시룸',tag:'돌진',make:()=>K.makeMooshroom(),H:1.45,W:0.95,fit:'max',fitL:2.0,hp:108,spd:0.95,wt:1.2,pow:1.05,sp:'charge',spN:'버섯 박치기',su:'버섯 폭주',col:0xd03030,chip:[0xd03030,0xe8e8e8,0x8a5a3a]},
   {id:'dragon',name:'엔더드래곤',tag:'비행',make:()=>{const g=K.makeDragon(),m=g.children[0],u=m.userData;m.rotation.y=-Math.PI/2;u.body.rotation.z=0.75;u.neckSeg.forEach((n,i)=>{if(i>0)n.position.x=0.3;n.rotation.z=i===0?-0.5:-0.12;});u.tail.forEach((t,i)=>{if(i>0)t.position.x=-0.3;t.rotation.z=i<3?0.12:0;if(i===5)t.visible=false;});u.wings.forEach(w=>{w.root.rotation.x=-w.side*0.4;w.root.scale.setScalar(0.5);});if(u.aura)u.aura.visible=false;return g;},H:1.75,W:1.0,fit:'max',fitL:2.7,hp:108,spd:1.0,wt:1.1,pow:1.08,hover:0.5,sp:'breath',spN:'드래곤 브레스',su:'엔더 폭풍',col:0xb050ff,chip:[0x1a1a22,0xb050ff,0x3a3a44]},
   {id:'ghast',name:'가스트',tag:'부유',make:()=>K.makeGhast(),H:1.7,W:1.0,fit:'max',fitL:1.8,hp:96,spd:0.85,wt:0.9,pow:1.05,hover:0.4,sp:'gfire',spN:'대형 화염구',su:'울음 폭격',col:0xf0f0f0,chip:[0xf0f0f0,0xc8c8c8,0xff7a30]},
-  {id:'byeol',name:'별별이',tag:'물약',make:()=>K.makeVillager5('v'),H:1.55,W:0.56,hp:92,spd:1.05,wt:0.85,pow:0.95,sp:'potion',spN:'물약 투척',su:'쉴 대포',cine:'shwee',col:0x86efac,chip:[0x86efac,0xf2c8a0,0x6a4a2a]},
+  {id:'byeol',name:'별별이',tag:'물약',make:()=>K.makeVillager5('v'),H:1.55,W:0.56,hp:92,spd:1.05,wt:0.85,pow:0.95,sp:'potion',spN:'물약 투척',su:'쉬대포',cine:'shwee',col:0x86efac,chip:[0x86efac,0xf2c8a0,0x6a4a2a]},
   {id:'axo',name:'아홀로틀',tag:'물살',make:()=>K.makeAxolotl(),H:0.95,W:0.85,fit:'max',fitL:2.1,hp:86,spd:1.2,wt:0.75,pow:0.95,sp:'water',spN:'물살 대시',su:'물보라 러시',col:0xff8ab0,chip:[0xff8ab0,0xffc0d8,0x5ac8ff]},
   {id:'armad',name:'아르마딜로',tag:'구르기',make:()=>{const a=makeArmadillo();a.children[0].userData={head:a.userData.head,legs:a.userData.legs};return a;},H:0.95,W:0.8,fit:'max',fitL:1.7,hp:102,spd:1.05,wt:1.15,pow:1.0,sp:'ball',spN:'몸말이 구르기',su:'회전 볼 러시',superBall:1,shell:1,curl:1,col:0xc08070,chip:[0xc08070,0xe8b0a0,0xa06050]},
   {id:'villager',name:'주민',tag:'잡동사니',make:()=>K.makeVillager56(),H:1.8,W:0.6,hp:95,spd:0.98,wt:1.0,pow:0.98,sp:'item',spN:'잡동사니 던지기',su:'거래 대폭주',col:0x9a6a3a,chip:[0x9a6a3a,0x5a8a3a,0xe8c8a0]},
@@ -17121,13 +17121,13 @@ class Fighter{
   hitbox(m){const b=m.box,k=this.H/1.85;return{x:this.x+this.face*b[0]*Math.max(1,this.W/0.62),y:this.y+b[1]*k,w:b[2]*Math.max(1,this.W/0.62*0.9),h:b[3]*k};}
 }
 
-// ---------------------------------------------------------------- cinematic supers: '스티브 100명!' (steve) and '쉴 대포!' (byeol) ----------------------------------------------------------------
+// ---------------------------------------------------------------- cinematic supers: '스티브 100명!' (steve) and '쉬대포!' (byeol) ----------------------------------------------------------------
 // Both deal ≈24 base damage in total (same budget as the other supers). The sim is paused (CINE.step runs instead of the fighters) while the script plays.
 const C_low=()=>typeof GQ!=='undefined'&&GQ.level==='low';
 const CINE={on:null,
   start(G,A,V){const k=A.def.cine;if(!k||V.koed)return false;
     this.on={k,A,V,f:0,hit:0,dmg:0,ko:false,x0:V.x};V.mv=null;V.held=null;V.setSt('tumble');V.spin=0;V.inv=0;A.inv=999;
-    G.hs=0;G.camFocus=null;this.title(k==='steve100'?'스티브 100명!':'쉴 대포!',k);
+    G.hs=0;G.camFocus=null;this.title(k==='steve100'?'스티브 100명!':'쉬대포!',k);
     if(k==='steve100')this.crowdStart(G,A,V);else this.jetStart(G,A,V);return true;},
   // ---- DOM title card / counter / space sky (inline styles; no global CSS needed)
   dom(){if(this._d&&this._d.isConnected)return this._d;const host=(UI.el.bfBanner&&UI.el.bfBanner.parentNode)||D.body;const d=D.createElement('div');d.id='bfCine';
@@ -17194,7 +17194,7 @@ const CINE={on:null,
     // camera: low wide shot, slow orbit-feel dolly, then punch-in at the finish
     const cx=c.x0+Math.sin(f*0.012)*2.0;G.camOverride=f<150?{x:cx,y:2.2+f*0.002,z:16-f*0.008,ly:1.4+V.y*0.18}:{x:V.x*0.7+c.x0*0.3,y:2.4,z:11.5,ly:Math.min(V.y+0.9,3.2)};
     if(f>=196)return this.end(G,c);},
-  // ================= 쉴 대포! =================
+  // ================= 쉬대포! =================
   jetBuild(G){if(this.jet&&this.jet.scene===G.scene)return this.jet;const root=new THREE.Group();
     const geo=new THREE.CylinderGeometry(0.34,0.2,1,14,1,true);geo.rotateZ(-Math.PI/2);geo.translate(0.5,0,0);
     const outer=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color:LINc(0xbfe8ff),transparent:true,opacity:0.7,depthWrite:false,toneMapped:false,side:THREE.DoubleSide}));
