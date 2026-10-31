@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.7-diff">
+<meta name="ba-version" content="v5.7.1">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>보드게임 모음 — 체스·오목·장기</title>
 <style>
   :root{--gold:#c39a3e;--ink:#221d16;--line:#4a3f30;--paper:#efe7d6;}
@@ -678,7 +678,7 @@
       <h2>블록 액션 · 스테이지 선택</h2>
       <p class="ba-hint">PC: ←→/A·D 이동 · Space 점프(길게=높이, 공중에서 한 번 더 = 2단 점프) · ↓/S 웅크리기·슬라이딩, 공중에서 ↓ = 내려찍기 · Shift 달리기/불덩이 · E TNT · R 울트라 TNT · T 사이버트럭 소환 · Esc 일시정지 · 1~4 선택</p>
       <p class="ba-hint ba-touch">폰: ←/→ 이동 · ↓ 웅크리기(공중 = 내려찍기: 벽돌 깨기·? 블록) · 점프(길게=높이, 공중에서 다시 탭/밀어 올리기 = 2단 점프) · 대시 = 달리기/불덩이 · 🧨 TNT · ✴ 울트라 · 트럭 = 사이버트럭 소환</p>
-      <div class="ba-skin">캐릭터 <button type="button" data-skin="cap">🧢 블루캡</button><button type="button" data-skin="steve">⛏️ 스티브풍</button></div><div class="ba-skin ba-diff">난이도 <button type="button" data-diff="easy">🌱 쉬움</button><button type="button" data-diff="normal">⚔️ 보통</button><button type="button" data-diff="hard">🔥 어려움</button><button type="button" class="sv" onclick="SaveCode57.open()">💾 기록 옮기기</button></div>
+      <div class="ba-skin ba-diff">난이도 <button type="button" data-diff="easy">🌱 쉬움</button><button type="button" data-diff="normal">⚔️ 보통</button><button type="button" data-diff="hard">🔥 어려움</button><button type="button" class="sv" onclick="SaveCode57.open()">💾 기록 옮기기</button></div>
       <p class="ba-hint ba-rot">📱 가로로 돌리면 캐릭터가 더 크게 보여요</p>
       <div class="ba-cards"></div>
     </div>
@@ -6139,7 +6139,7 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
     gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') return { unlocked: Math.max(1, Math.min(11, s.unlocked)), best: s.best || {}, skin: s.skin === 'steve' ? 'steve' : 'cap', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; } catch (e) {} return { unlocked: 1, best: {} }; }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') return { unlocked: Math.max(1, Math.min(11, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; } catch (e) {} return { unlocked: 1, best: {} }; }
   function saveSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
@@ -6391,7 +6391,7 @@ const BlockAction = (() => {
   // =====================================================================
   //  Minecraft-inspired cast — all procedural (own canvas textures, no game assets)
   // =====================================================================
-  let HERO_SKIN = (save && save.skin) || 'cap';
+  let HERO_SKIN = 'steve'; if (save) save.skin = 'steve';   // v5.7.1: Steve is the only playable hero (old 'cap' saves migrate)
   const SC = { skin: '#c99670', skinD: '#a8764f', hair: '#3a2414', hairL: '#55361f', shirt: '#22a3a6', shirtL: '#3fc3c2', shirtD: '#14797c',
     pants: '#3b3a9c', pantsD: '#272672', shoe: '#5b5b60', shoeD: '#3a3a40', iris: '#5a46c8', mouth: '#5a3220' };
   function steveTex(kind) {
@@ -6444,12 +6444,11 @@ const BlockAction = (() => {
     return heroTex(kind);
   }
   function setHeroSkin(s) {
-    if (s !== 'steve') s = 'cap';
+    s = 'steve';
     HERO_SKIN = s; save.skin = s; saveSave();
     if (player) { player.parent && player.parent.remove(player); player = null; }
     player = makeHero(); scene.add(player);
     if (pl) setPower(pl.power || 0, true);
-    document.querySelectorAll('#baSelect .ba-skin button').forEach(b => b.classList.toggle('sel', b.dataset.skin === s));
   }
 
   // ---------- shared small helpers ----------
@@ -7017,7 +7016,9 @@ const BlockAction = (() => {
     const LIB = {
       jump: () => { tone(330, 720, 0.13, 'square', 0.07); tone(660, 1300, 0.09, 'triangle', 0.04); },
       djump: () => { tone(280, 900, 0.16, 'square', 0.08); tone(560, 1600, 0.12, 'triangle', 0.05); },
-      airjump: () => { tone(470, 1250, 0.13, 'triangle', 0.075); tone(940, 2100, 0.1, 'square', 0.03, 0.035); noise(0.16, 0.06, 'bandpass', 900, 3200, 0.02, 1.6); },
+      wslide: () => { noise(0.22, 0.035, 'bandpass', 500, 1400, 0.01, 1.2); },
+      walljump: () => { tone(330, 990, 0.1, 'triangle', 0.08); tone(660, 1320, 0.08, 'square', 0.025, 0.03); noise(0.1, 0.06, 'highpass', 1800, 3000, 0.005, 1.4); },
+      airjump: () => { tone(520, 1400, 0.12, 'triangle', 0.09); tone(1047, 1047, 0.07, 'sine', 0.06, 0.05); tone(1568, 1568, 0.12, 'sine', 0.05, 0.1); tone(940, 2100, 0.1, 'square', 0.025, 0.035); noise(0.16, 0.07, 'bandpass', 900, 3600, 0.02, 1.6); },
       summon: () => { noise(0.35, 0.12, 'highpass', 2400, 6000, 0, 0.8); tone(110, 880, 0.32, 'sawtooth', 0.05); tone(1760, 220, 0.18, 'square', 0.03, 0.22); noise(0.18, 0.16, 'lowpass', 1400, 200, 0.3); },
       land: () => { noise(0.07, 0.12, 'lowpass', 900, 200); tone(140, 70, 0.06, 'sine', 0.12); },
       stomp: () => { tone(520, 140, 0.11, 'square', 0.11); noise(0.08, 0.14, 'bandpass', 1800, 400, 0, 1.2); tone(90, 50, 0.1, 'sine', 0.18); },
@@ -7355,8 +7356,17 @@ const BlockAction = (() => {
 
   // ---------- v5.5 double jump ----------
   function dj55pre(p) { if (p.djUsed && p._vyE !== undefined && !p.ground && p.vy > p._vyE + 0.06) p.djUsed = 0; }   // stomp / spring / bounce refills it
+  function djK571() { const lg = !!(L.def && L.def.lowG); return C.jump * (lg ? 0.87 : 0.965) * LG54(2); }   // v5.7.1: ~92% of a ground jump (~75% in low gravity)
+  function dj571(p, dir, max) {
+    if (p.vy > djK571() * 0.62) { p.djQ = 1; p.djDir = dir; p.djMax = max; p.djUsed = 1; return; }   // pressed right after takeoff: reserve it
+    dj55(p, dir, max);
+  }
   function dj55post(p) {
-    if (p.ground || p.ride || p.wet || p.truck) p.djUsed = 0;
+    if (p.djQ) { if (p.ground || p.ride || p.wet || p.truck || p.pound || state !== 'play') { p.djQ = 0; } else if (p.vy <= djK571() * 0.62 || ++p.djQ > 9) { p.djQ = 0; dj55(p, p.djDir || 0, p.djMax || C.run); } }
+    if (p.djH571 > 0) p.djH571--;
+    if (p.wjLock571 > 0) p.wjLock571--;
+    if (p.djF > 14 && clock % 2 === 0) { const th = THEMES[L.def.theme] || {}; spawnParts(p.x, p.y + 0.25, ZP, th.space || (L.def && L.def.lowG) ? 0x9ff2ff : th.nether ? 0xffb04a : 0xfff4c2, 1, 0.012, 0.04); }
+    if (p.ground || p.ride || p.wet || p.truck) { p.djUsed = 0; p.djQ = 0; p.djH571 = 0; }
     if (p.djF > 0) { p.djF--; if (p.ground || p.pound || p.wet || p.truck) p.djF = 0; }
     p._vyE = p.vy;
     if (!save.djTip && stageIdx === 0 && state === 'play' && !p.ground && p.vy < -0.02 && (G.ticks || 0) > 90) { save.djTip = 1; try { saveSave(); } catch (e) {} banner('2단 점프!', '공중에서 점프를 한 번 더 누르세요', 1500); }
@@ -7368,20 +7378,53 @@ const BlockAction = (() => {
   }
   function dj55(p, dir, max) {
     const lg = !!(L.def && L.def.lowG), th = THEMES[L.def.theme] || {};
-    p.vy = C.jump * (lg ? 0.8 : 0.9) * LG54(2);            // ~80% of a ground jump (≈64% in low gravity, so space stays a challenge)
-    p.djUsed = 1; p.djF = 24; p.buf = 0; p.coy = 0; p.jumping = true; p.ground = false; p.crouch = false; p.slide = 0; p.h = p.hB || p.h;
+    p.vy = Math.max(p.vy, djK571());            // v5.7.1: ~92% of a ground jump (~75% in low gravity); never slows an upward bounce
+    p.djUsed = 1; p.djQ = 0; p.djH571 = 11; p.djF = 24; p.buf = 0; p.coy = 0; p.jumping = true; p.ground = false; p.crouch = false; p.slide = 0; p.h = p.hB || p.h;
     if (dir) { if (p.vx * dir < 0) p.vx *= 0.45; p.vx = Math.max(-max, Math.min(max, p.vx + dir * 0.025)); }   // small air control
     const col = lg || th.space ? 0xbfe8ff : th.nether ? 0xff8a3a : 0xf4eee2;
-    fxRing55(p.x, p.y + 0.02, col); fxRing55(p.x, p.y - 0.04, col, 0.08);
+    fxRing55(p.x, p.y + 0.02, col); fxRing55(p.x, p.y - 0.04, col, 0.08); fxRing55(p.x, p.y + 0.06, 0xffffff, 0.26); spawnParts(p.x, p.y + 0.1, ZP, 0xffffff, NP(6), 0.12, 0.01);
     if (lg || th.space) { spawnParts(p.x, p.y, ZP, 0xffffff, NP(8), 0.09, 0.02); spawnParts(p.x, p.y, ZP, 0x9ff2ff, NP(6), 0.06, 0.03); }
     else if (th.nether) { spawnParts(p.x, p.y, ZP, 0xff6a1a, NP(9), 0.07, 0.05); spawnParts(p.x, p.y, ZP, 0xffd27a, NP(4), 0.04, 0.07); }
     else spawnParts(p.x, p.y, ZP, 0xe8dccb, NP(8), 0.07, 0.02);
-    snd('airjump'); vib(10); G.djumps = (G.djumps || 0) + 1;
+    snd('airjump'); vib([8, 20, 8]); G.djumps = (G.djumps || 0) + 1;
+  }
+  // ---------- v5.7.1 wall slide + wall jump ----------
+  function wallAt571(p, d) {
+    const tx = Math.floor(d > 0 ? p.x + p.hw + 0.05 : p.x - p.hw - 0.05); if (tx < 0 || tx >= L.W) return false;   // never the level edges
+    const a = Math.floor(p.y + 0.25), b = Math.max(a + 1, Math.floor(p.y + p.h - 0.2));
+    return tile(tx, a) !== E && tile(tx, b) !== E;   // a real wall (feet + head rows), not a ledge lip or a lone block
+  }
+  function wslide571(p, dir, wet) {
+    const ok = !p.ground && !p.truck && !wet && !p.pound && !p.ride && !p.crouch && state === 'play' && !!dir && wallAt571(p, dir);
+    if (ok) { p.wc571 = dir; p.wcG571 = 6; p.wcD571 = dir; } else { p.wc571 = 0; if (p.wcG571 > 0) p.wcG571--; }
+    if (p.ground || p.truck) p.wcG571 = 0;
+    const sl = ok && p.vy < 0;
+    p.wsl571 = sl ? dir : 0;
+    if (sl) {
+      const cap = -0.075 * (L.def && L.def.lowG ? 0.7 : 1);
+      if (p.vy < cap) p.vy = Math.max(p.vy, Math.min(cap, p.vy * 0.7));
+      p.wslT571 = (p.wslT571 || 0) + 1; G.wslides = (G.wslides || 0) + (p.wslT571 === 1 ? 1 : 0);
+      if (p.wslT571 % 4 === 1) spawnParts(p.x + dir * p.hw, p.y + p.h * 0.55, ZP, (THEMES[L.def.theme] || {}).nether ? 0xff9a50 : 0xd8c8b0, 1, 0.02, 0.03);
+      if (p.wslT571 % 18 === 1) snd('wslide');
+    } else p.wslT571 = 0;
+  }
+  function wjOk571(p, wet0) { return !p.truck && !wet0 && !p.pound && !(p.poundRec > 0) && !p.ride && state === 'play' && (p.wc571 || p.wcG571 > 0); }
+  function wj571(p) {
+    const d = p.wc571 || p.wcD571 || p.face;
+    p.vy = C.jump * 0.925 * LG54(2); p.vx = -d * C.run * 0.85; p.face = -d;    // ~85% of a ground jump, kicked away from the wall
+    p.wjLock571 = 9; p.wjD571 = d; p.wc571 = 0; p.wcG571 = 0; p.wsl571 = 0; p.wslT571 = 0;
+    p.djUsed = 0; p.djQ = 0; p.djH571 = 9; p.djF = 0; p.buf = 0; p.coy = 0; p.jumping = true; p.airRun = true; p.ground = false;
+    const th = THEMES[L.def.theme] || {}, col = (L.def && L.def.lowG) || th.space ? 0xbfe8ff : th.nether ? 0xff8a3a : 0xf4eee2;
+    spawnParts(p.x + d * p.hw, p.y + p.h * 0.45, ZP, col, NP(9), 0.07, 0.05); spawnParts(p.x + d * p.hw, p.y + 0.2, ZP, 0xffffff, NP(4), 0.05, 0.04);
+    fxRing55(p.x + d * p.hw, p.y + p.h * 0.4, col, 0.12);
+    snd('walljump'); vib(12); G.wjumps = (G.wjumps || 0) + 1;
   }
   // ---------- v5.5 Cybertruck as a stockable item ----------
   const TRUCK_MAX55 = 3;
   let trkLatch55 = false;   // a quick tap/press shorter than one frame still counts
   addEventListener('keydown', e => { if (e.code === 'KeyT' && !e.repeat && state === 'play') trkLatch55 = true; });
+  let jk571 = 0, jq571 = 0;   // v5.7.1 jump presses since last tick (keyboard) / one press carried to the next tick
+  addEventListener('keydown', e => { if ((e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW' || e.code === 'KeyZ') && !e.repeat && state === 'play') jk571 = Math.min(3, jk571 + 1); });
   function truckTouch55(it) {
     if ((G.truckN || 0) >= TRUCK_MAX55) { if (!pl.truck) mountTruck(it); return; }   // pocket full: ride it right away
     it.gone = true; G.truckN = (G.truckN || 0) + 1; G.truckPicks = (G.truckPicks || 0) + 1; updateHUD();
@@ -8690,7 +8733,7 @@ const BlockAction = (() => {
     const i = { left: K('ArrowLeft') || K('KeyA'), right: K('ArrowRight') || K('KeyD'),
       jump: K('Space') || K('ArrowUp') || K('KeyW') || K('KeyZ'),
       raw: K('ShiftLeft') || K('ShiftRight') || K('KeyK') || K('KeyX') || K('KeyJ') || K('KeyF'), tnt: K('KeyE') || K('KeyC'), utnt: K('KeyR') || K('KeyV'), trk: K('KeyT'), down: K('ArrowDown') || K('KeyS') };
-    i.run = i.raw || RUN5.run(); i.jumpP = (i.jump && !prevIn.jump) || RUN5.jpulse(); i.trkP = (i.trk && !prevIn.trk) || trkLatch55; trkLatch55 = false; i.runP = (i.raw && !prevIn.raw) || RUN5.pulse(); i.tntP = i.tnt && !prevIn.tnt; i.utntP = i.utnt && !prevIn.utnt; i.downP = i.down && !prevIn.down; prevIn = i; return i;
+    i.run = i.raw || RUN5.run(); { const n571 = Math.max(i.jump && !prevIn.jump ? 1 : 0, (RUN5.jpulse() | 0) + jk571) + jq571; jk571 = 0; jq571 = n571 > 1 ? 1 : 0; i.jumpP = n571 > 0; } i.trkP = (i.trk && !prevIn.trk) || trkLatch55; trkLatch55 = false; i.runP = (i.raw && !prevIn.raw) || RUN5.pulse(); i.tntP = i.tnt && !prevIn.tnt; i.utntP = i.utnt && !prevIn.utnt; i.downP = i.down && !prevIn.down; prevIn = i; return i;
   }
 
   // ---------- blocks & items ----------
@@ -8844,7 +8887,7 @@ const BlockAction = (() => {
     if (p.poundRec > 0) p.poundRec--;
     if (p.slide) { p.slide++; if (clock % 3 === 0) spawnParts(p.x + p.face * 0.2, p.y + 0.03, ZP, 0xcab59a, 1, 0.03, 0.03); if (Math.abs(p.vx) < 0.02) p.slide = 0; }
     const lockMove = p.pound || p.poundRec > 0 || (p.crouch && p.ground);
-    const dir = lockMove ? 0 : (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
+    let dir = lockMove ? 0 : (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (p.wjLock571 > 0 && dir === p.wjD571) dir = 0;   // ~150ms lock away from the wall after a wall jump
     if (p.crouch && p.ground && !p.slide) { const d2 = (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (d2) p.face = d2; }
     if (p.ground) p.airRun = inp.run && Math.abs(p.vx) > C.walk * 1.02; else if (!p.airRun && inp.run) p.airRun = true;
     const max = p.truck ? C.run * 1.5 : ((inp.run || (!p.ground && p.airRun)) ? C.run : C.walk);
@@ -8861,7 +8904,8 @@ const BlockAction = (() => {
     if (inp.jumpP) p.buf = C.buffer; else if (p.buf > 0) p.buf--;
     if (p.ground) p.coy = C.coyote; else if (p.coy > 0) p.coy--;
     if (p.buf > 0 && p.coy > 0 && !p.pound && !(p.crouch && !p.slide)) { p.vy = (C.jump + Math.abs(p.vx) / C.run * C.jumpRun) * LG54(2); p.buf = 0; p.coy = 0; p.ground = false; p.ride = null; p.jumping = true; snd(p.power ? 'djump' : 'jump'); }
-    else if (inp.jumpP && !p.ground && !p.djUsed && !p.pound && !(p.poundRec > 0) && !p.truck && !wet0 && state === 'play') dj55(p, dir, max);
+    else if (inp.jumpP && !p.ground && wjOk571(p, wet0)) wj571(p);
+    else if (inp.jumpP && !p.ground && !p.djUsed && !p.pound && !(p.poundRec > 0) && !p.truck && !wet0 && state === 'play') dj571(p, dir, max);
     if (p.vy <= 0) p.jumping = false;
     const wet = inWater(p);
     if (wet) {
@@ -8874,10 +8918,11 @@ const BlockAction = (() => {
       if (p.poundT < 13) p.vy = p.poundT < 4 ? 0.02 : 0;                // brief hang + spin
       else { p.vy = -0.5; if (clock % 2 === 0) spawnParts(p.x, p.y + p.h * 0.5, ZP, 0xffffff, 1, 0.01, 0.06); }
     } else {
-      const gr = (inp.jump && p.jumping) ? C.gUp : (p.vy < 0 ? C.gFall : C.gDown);
+      const gr = ((inp.jump || p.djH571 > 0) && p.jumping) ? C.gUp : (p.vy < 0 ? C.gFall : C.gDown);
       const hang = (inp.jump && !p.ground && !p.truck && Math.abs(p.vy) < C.hangV) ? C.hang : 1;   // apex hang while the button is held
       p.vy = Math.max(C.gMax * LG54(1) * (p.truck ? 1.15 : 1), p.vy - gr * LG54(0) * hang * (p.truck ? 1.18 : 1));
     }
+    wslide571(p, dir, wet);
     p.wet = wet;
     const preVy = p.vy;
     const r = moveBody(p, p.vx, p.vy);
@@ -9279,6 +9324,7 @@ const BlockAction = (() => {
     if (crouch && p.slide) { gL = -1.25; gR = -0.8; aL = 0.5; aR = -0.5; }
     else if (crouch) { gL = -0.8; gR = 0.8; aL = -0.55; aR = -0.4; }
     if (p.djF > 0 && !p.pound && !dying) { const tk = Math.sin(Math.min(1, (24 - p.djF) / 21) * Math.PI); gL = lerp(gL, -1.55, tk); gR = lerp(gR, -1.35, tk); aL = lerp(aL, -1.15, tk); aR = lerp(aR, -1.0, tk); }
+    if (p.wsl571 && !p.pound && !dying) { gL = -0.95; gR = 0.35; aL = -2.55; aR = -0.7; }
     if (p.pound && !dying) { if (p.poundT < 13) { gL = gR = -1.5; aL = aR = -2.2; } else { gL = 0.12; gR = -0.12; aL = aR = -2.9; } }
     if (dying) { aL = aR = -2.9; gL = 0.2; gR = -0.2; }
     if (state === 'clear' && G.clr && G.clr.phase === 'slide') { aL = aR = -2.8; gL = -0.4; gR = -0.4; }
@@ -9302,7 +9348,7 @@ const BlockAction = (() => {
     // ground-pound spin: flip forward around the body centre
     if (p.pound && p.poundT < 13 && !dying) { const b = -p.face * (p.poundT / 12) * Math.PI * 2, hc = 0.45 * AN.scale * 1.6; player.rotation.z = b; player.position.x += hc * Math.sin(-b) * -1; player.position.y += hc * (1 - Math.cos(b)); }
     else if (p.djF > 0 && !dying) { const t = Math.min(1, (24 - p.djF + 1) / 22), e = 1 - Math.pow(1 - t, 2.2), b = -p.face * e * Math.PI * 2, hc = 0.45 * AN.scale * 1.25; player.rotation.z = b; player.position.x += hc * Math.sin(-b) * -1; player.position.y += hc * (1 - Math.cos(b)); }
-    else player.rotation.z = 0;
+    else player.rotation.z = (p.wsl571 && !dying) ? p.wsl571 * 0.13 : 0;
     // head tracking: glance at the nearest active enemy, otherwise look ahead / up while jumping
     let lookY = 0, lookX = p.vy > 0.05 ? -0.22 : p.vy < -0.15 ? 0.2 : 0;
     let best = null, bd = 6;
@@ -9736,7 +9782,6 @@ const BlockAction = (() => {
       c.onclick = () => { if (!locked) { SFX && snd('select'); newRun(i); } };
       grid.appendChild(c);
     });
-    el.querySelectorAll('.ba-skin button').forEach(b => { b.classList.toggle('sel', b.dataset.skin === HERO_SKIN); b.onclick = () => { if (b.dataset.skin !== HERO_SKIN) { setHeroSkin(b.dataset.skin); snd('select'); } }; });
     el.classList.add('show'); setPad(false);
     { const mp = $('baMap'); if (mp) mp.classList.remove('show'); modeClass5(null); sayHide5(); selectExtras5(); }
     const ob = $('baOver'); if (ob) ob.classList.remove('show');
@@ -11585,7 +11630,7 @@ const BlockAction = (() => {
   const RUN5 = (() => {
     const KEY = 'ba_runmode', MODES = ['hold', 'toggle', 'always'], LBL = { hold: '길게 누르기', toggle: '토글', always: '항상 달리기' };
     let mode = 'hold'; try { const v = localStorage.getItem(KEY); if (MODES.includes(v)) mode = v; } catch (e) {}
-    let latch = false, pulse = false, jp = false, sprint = null; const lastUp = {}, lastDown = {};
+    let latch = false, pulse = false, jp = 0, sprint = null; const lastUp = {}, lastDown = {};
     const ptr = new Map();   // pointerId → Set of codes this touch has visited
     let dashHeld = false;
     function ui() {
@@ -11598,7 +11643,7 @@ const BlockAction = (() => {
       let j = false, d = false; ptr.forEach(s => { if (s.has('Space')) j = true; if (s.has('ShiftLeft')) d = true; });
       keys.Space = j;
       if (added === 'ShiftLeft') { if (mode === 'toggle') latch = !latch; if (mode !== 'hold') pulse = true; vib(8); }
-      if (added === 'Space') { vib(8); jp = true; }
+      if (added === 'Space') { vib(8); jp = Math.min(3, jp + 1); }
       dashHeld = d; keys.ShiftLeft = mode === 'hold' ? d : false; ui();
     }
     function hit(x, y) {
@@ -11609,8 +11654,8 @@ const BlockAction = (() => {
     }
     function bindAct(el, code) {
       if (!el) return;
-      el.addEventListener('pointerdown', ev => { ev.preventDefault(); try { el.setPointerCapture(ev.pointerId); } catch (e) {} let s = ptr.get(ev.pointerId); if (!s) { s = new Set(); ptr.set(ev.pointerId, s); } s.cur = code; if (!s.has(code)) { s.add(code); apply(code); } else if (code === 'Space') { jp = true; vib(8); } });
-      el.addEventListener('pointermove', ev => { const s = ptr.get(ev.pointerId); if (!s) return; const c = hit(ev.clientX, ev.clientY); if (c && !s.has(c)) { s.add(c); apply(c); } else if (c === 'Space' && s.cur !== 'Space') { jp = true; vib(8); } s.cur = c; });
+      el.addEventListener('pointerdown', ev => { ev.preventDefault(); try { el.setPointerCapture(ev.pointerId); } catch (e) {} let s = ptr.get(ev.pointerId); if (!s) { s = new Set(); ptr.set(ev.pointerId, s); } s.cur = code; if (!s.has(code)) { s.add(code); apply(code); } else if (code === 'Space') { jp = Math.min(3, jp + 1); vib(8); } });
+      el.addEventListener('pointermove', ev => { const s = ptr.get(ev.pointerId); if (!s) return; const c = hit(ev.clientX, ev.clientY); if (c && !s.has(c)) { s.add(c); apply(c); } else if (c === 'Space' && s.cur !== 'Space') { jp = Math.min(3, jp + 1); vib(8); } s.cur = c; });
       const up = ev => { if (ptr.delete(ev.pointerId)) apply(null); };
       el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
       el.addEventListener('contextmenu', e => e.preventDefault());
@@ -11621,8 +11666,8 @@ const BlockAction = (() => {
       dirUp(code) { lastUp[code] = performance.now(); if (sprint === code) sprint = null; ui(); },
       run() { return mode === 'always' || (mode === 'toggle' && latch) || (!!sprint && !!keys[sprint]); },
       pulse() { const p = pulse; pulse = false; return p; },
-      jpulse() { const p = jp; jp = false; return p; },
-      reset() { ptr.clear(); dashHeld = false; pulse = false; jp = false; sprint = null; ui(); },
+      jpulse() { const p = jp; jp = 0; return p; },
+      reset() { ptr.clear(); dashHeld = false; pulse = false; jp = 0; sprint = null; ui(); },
       sprinting: () => !!sprint && !!keys[sprint],
       mode: () => mode, label: () => LBL[mode],
       cycle() { mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length]; latch = false; try { localStorage.setItem(KEY, mode); } catch (e) {} ui(); return mode; },
@@ -12747,6 +12792,9 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
       boss: boss ? { kind: boss.kind, ai: boss.ai, hp: boss.hp, alive: boss.alive, active: boss.active, x: boss.x, y: boss.y, mv: !!(boss.mesh && boss.mesh.visible), ms: boss.mesh ? boss.mesh.scale.x : 0, mp: !!(boss.mesh && boss.mesh.parent), mz: boss.mesh ? boss.mesh.position.z : 0, cx: camera ? camera.position.x : 0, cy: camera ? camera.position.y : 0, cz: camera ? camera.position.z : 0 } : null, ufoDown: !!G.ufoDown, w3: w3Open54() });
     window.__ba.ufoAi = (ai) => { if (boss && boss.kind === 'ufo') { boss.ai = ai; boss.aiT = 0; if (ai === 'low') boss.y = 2.02; } };
     window.__ba.inv = n => { pl.inv = n || 600; return pl.inv; };
+    window.__ba.wj571 = () => ({ wc: pl.wc571 || 0, wsl: pl.wsl571 || 0, g: pl.wcG571 || 0, lock: pl.wjLock571 || 0, wjumps: G.wjumps || 0, wslides: G.wslides || 0, vx: pl.vx, vy: pl.vy, x: pl.x, y: pl.y, h: pl.h, hw: pl.hw, ground: !!pl.ground, djUsed: !!pl.djUsed, truck: !!pl.truck, rz: player.rotation.z, skin: HERO_SKIN });
+    window.__ba.tiles571 = (x, y, w, h, v) => { const T = { E, S, Q, BR }[v || 'S']; for (let i = 0; i < w; i++) for (let j = 0; j < h; j++) setTile(x + i, y + j, T); };
+    window.__ba.tile571 = (x, y) => tile(x, y);
     window.__ba.dj55 = () => ({ djUsed: !!pl.djUsed, djF: pl.djF || 0, truckN: G.truckN || 0, sum: !!(G.sum55 && items.includes(G.sum55)), truck: !!pl.truck, vy: pl.vy, y: pl.y, x: pl.x, ground: !!pl.ground, pound: pl.pound || 0, rz: player.rotation.z, djumps: G.djumps || 0 });
     window.__ba.giveTrucks = n => { G.truckN = n; updateHUD(); return G.truckN; };
     window.__ba.content = () => Object.assign({}, L.content);
@@ -13688,6 +13736,39 @@ const SaveCode57 = (() => {
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else setTimeout(boot, 0);
   return { open, close, exportCode, decodeCode, summary, collect, QR, _lz: { lzEnc, lzDec } };
+})();
+</script>
+
+<style id="nosel571">
+/* v5.7.1: iOS long-press never selects text or shows the callout on game screens */
+.screen,.screen *,#baPad,#baPad *,#baHud,#baHud *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;}
+.screen{touch-action:manipulation;}
+#blockaction,#blockaction canvas,#baPad,#baPad *,#baHud,#baHud *,.mount3d,.mount3d canvas{touch-action:none;}
+.screen canvas{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+input,textarea,select,[contenteditable="true"],#sv57 textarea,#sv57 input{-webkit-user-select:text!important;user-select:text!important;-webkit-touch-callout:default!important;touch-action:manipulation!important;}
+</style>
+<script>
+(function () {
+  const TXT = 'input,textarea,select,[contenteditable="true"]';
+  const isTxt = t => !!(t && t.closest && t.closest(TXT));
+  const CTL = '#baLeft,#baRight,#baDown,#baJump,#baDash,#baTnt,#baUtnt,#baTruck,#baPad';
+  const inGame = t => !!(t && t.closest && t.closest('.screen,#baPad,#baHud'));
+  const clr = () => { try { const s = window.getSelection && window.getSelection(); if (s && s.rangeCount && !isTxt(document.activeElement)) s.removeAllRanges(); } catch (e) {} };
+  let n = 0;
+  document.addEventListener('touchstart', e => {
+    if (isTxt(e.target)) return;
+    if (inGame(e.target)) clr();
+    // pointer events already fired, so the hold/jump/dash controls keep working; this only kills iOS selection/callout/zoom
+    if (e.target.closest && e.target.closest(CTL) && e.cancelable) { e.preventDefault(); n++; }
+  }, { passive: false, capture: true });
+  const block = e => { if (!isTxt(e.target) && inGame(e.target)) { e.preventDefault(); clr(); } };
+  ['contextmenu', 'selectstart', 'dblclick'].forEach(t => document.addEventListener(t, block, { passive: false, capture: true }));
+  ['gesturestart', 'gesturechange', 'gestureend'].forEach(t => document.addEventListener(t, e => e.preventDefault(), { passive: false }));
+  // double-tap zoom guard outside text inputs (iOS ignores user-scalable)
+  let lastEnd = 0;
+  document.addEventListener('touchend', e => { const now = Date.now(); if (now - lastEnd < 300 && e.cancelable && !isTxt(e.target) && e.target.closest && e.target.closest(CTL)) e.preventDefault(); lastEnd = now; }, { passive: false });
+  document.addEventListener('selectionchange', () => { const a = document.activeElement; if (isTxt(a)) return; try { const s = window.getSelection(); if (s && s.rangeCount && !s.isCollapsed && inGame(s.anchorNode && (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement))) s.removeAllRanges(); } catch (e) {} });
+  if (window.__BA_DEBUG) window.__nosel571 = () => n;
 })();
 </script>
 
