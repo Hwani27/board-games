@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.8.1-crayon">
+<meta name="ba-version" content="v5.8.2-shop">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 체스·오목·장기·블록 액션</title>
@@ -6139,7 +6139,7 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
     gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(15, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(15, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(15, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(15, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
   function saveSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
@@ -8903,7 +8903,7 @@ const BlockAction = (() => {
     player.visible = true; player.rotation.set(0, 0, 0);
     pl = { x: sp[0], y: sp[1], vx: 0, vy: 0, hw: 0.28, h: 0.9, face: 1, ground: false, coy: 0, buf: 0, jumping: false, power: 0, inv: 0, ride: null, grow: 0, phase: 0, fireCd: 0, prevY: sp[1] };
     setPower(0, true); stage57();
-    G.ticks = 0; G.timeLeft = def.time; G.stageScore0 = G.score; G.over = false;
+    G.ticks = 0; G.timeLeft = def.time; G.stageScore0 = G.score; G.over = false; G.w582 = null;
     cam.lockX = null; cam.fy = pl.y; cam.x = pl.x; cam.shake = 0;
     placeCamera(true);
     state = showIntro ? 'intro' : 'play'; G.introT = showIntro ? 100 : 0;
@@ -8938,7 +8938,7 @@ const BlockAction = (() => {
     if (v === Q) {
       setTile(tx, ty, U); if (mesh) { mesh.material = M.used; pops.push({ type: 'bump', m: mesh, t: 0, y0: ty + 0.5 }); }
       const c = L.content[key] || 'coin';
-      if (c === 'coin') { G.coins++; addScore(200, tx + 0.5, ty + 1.5); snd('coin'); const m = makeCoin(); m.position.set(tx + 0.5, ty + 1.2, ZP); W3.group.add(m); pops.push({ type: 'coin', m, t: 0, y0: ty + 1.2 }); coinCheck(); }
+      if (c === 'coin') { G.coins++; G.cw582 = (G.cw582 || 0) + 1; addScore(200, tx + 0.5, ty + 1.5); snd('coin'); const m = makeCoin(); m.position.set(tx + 0.5, ty + 1.2, ZP); W3.group.add(m); pops.push({ type: 'coin', m, t: 0, y0: ty + 1.2 }); coinCheck(); }
       else spawnItem(c === '1up' ? '1up' : (c === 'grow' || c === 'fire') ? (pl.power === 0 ? 'grow' : 'fire') : c, tx, ty);
     } else if (v === BR) {
       if (pl.power > 0) { setTile(tx, ty, E); if (mesh) { W3.group.remove(mesh); delete W3.tiles[key]; } spawnParts(tx + 0.5, ty + 0.4, 0.3, 0xa0583a, NP(14), 0.08, 0.14); addScore(50); snd('brick'); cam.shake = 4; vib(10); }
@@ -8957,7 +8957,7 @@ const BlockAction = (() => {
     snd('select');
   }
   function coinCheck() { if (G.coins >= 100) { G.coins -= 100; G.lives++; banner('1UP!', '', 700); snd('wave'); } }
-  function takeCoin(c) { c.taken = true; W3.group.remove(c.mesh); G.coins++; addScore(200); snd('coin'); coinCheck(); spawnParts(c.x, c.y, ZP, 0xffd24a, NP(5), 0.04, 0.05); }
+  function takeCoin(c) { c.taken = true; W3.group.remove(c.mesh); G.coins++; G.cw582 = (G.cw582 || 0) + 1; addScore(200); snd('coin'); coinCheck(); spawnParts(c.x, c.y, ZP, 0xffd24a, NP(5), 0.04, 0.05); }
   function addScore(n, x, y) { G.score += n; if (x !== undefined) floatText('+' + n, x, y); }
   let floats = [];
   function floatText(txt, x, y) {
@@ -9380,6 +9380,7 @@ const BlockAction = (() => {
     const unlockedNow = stageIdx + 2 > save.unlocked && stageIdx + 1 < STAGES.length;
     save.unlocked = Math.min(STAGES.length, Math.max(save.unlocked, stageIdx + 2));
     saveSave();
+    try { G.w582 = shopBank582(def, !b.clear); } catch (e) {}
     if (afterClear5(def, { gained, newBest, unlockedNow })) return;
     state = 'over'; pl.res581 = true; pl.x = Math.max(pl.x - 1.2, L.goal.x + 0.6); { const gy581 = groundBelow(pl.x, pl.y + 0.5); if (gy581 > -6) pl.y = gy581; } pl.vx = 0; pl.vy = 0;
     showOver('clear', { gained, newBest, unlockedNow });
@@ -9470,6 +9471,7 @@ const BlockAction = (() => {
   // ---------- per-frame animation (visual only) ----------
   function animHero(dt) {
     if (!player || !pl) return;
+    if (SHOP582.pend) shopPend582();
     const u = player.userData, Lb = u.limbs, model = u.model;
     const p = pl, k = Math.min(1, dt * 60);
     // size (grow / shrink with a flicker like the classics)
@@ -9979,7 +9981,7 @@ const BlockAction = (() => {
       c.querySelector('.ba-sub').textContent = locked ? '이전 스테이지를 클리어하면 열려요' : s.sub;
       c.querySelector('.ba-best').textContent = b && b.clear ? `최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}` : locked ? '' : '아직 기록 없음';
       c.disabled = locked;
-      c.onclick = () => { if (!locked) { SFX && snd('select'); newRun(i); } };
+      c.onclick = () => { if (!locked) { SFX && snd('select'); shopGo582(i, () => newRun(i)); } };
       grid.appendChild(c);
     });
     el.classList.add('show'); setPad(false);
@@ -10005,12 +10007,13 @@ const BlockAction = (() => {
       if (info.unlockedNow) lines.push(`🔓 ${STAGES[stageIdx + 1].id} ${STAGES[stageIdx + 1].name} 해금!`);
       if (stageIdx + 1 >= STAGES.length) lines.push('🎉 네더를 정복했습니다! 모든 스테이지 클리어');
       lines.forEach(t => { const d = document.createElement('div'); d.textContent = t; p.appendChild(d); });
-      if (stageIdx + 1 < STAGES.length) add('다음 스테이지 ▶', () => { stageIdx++; cpReached = false; startStage(true); }, 'pri');
-      add('다시 하기', () => { cpReached = false; G.score = G.stageScore0; startStage(true); });
-      add('🗺 월드맵', () => showMap5());
+      if (G.w582) { const W = G.w582, d = document.createElement('div'); d.className = 'w582'; d.dataset.earn = W.earn; d.dataset.w = W.w; p.appendChild(d); const t0 = performance.now(); const f = now => { if (!d.isConnected) return; const k = Math.min(1, Math.max(0, (now - t0 - 900) / 900)); d.textContent = `🪙 +${Math.round(W.earn * k)} 코인 → 지갑 ${(W.w - W.earn + Math.round(W.earn * k)).toLocaleString()}${W.first ? ' (첫 클리어 +20)' : ''}`; if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
+      if (stageIdx + 1 < STAGES.length) add('다음 스테이지 ▶', () => shopGo582(stageIdx + 1, () => { stageIdx++; cpReached = false; startStage(true); }), 'pri');
+      add('다시 하기', () => shopGo582(stageIdx, () => { cpReached = false; G.score = G.stageScore0; startStage(true); }));
+      add('🗺 월드맵', () => showMap5()); add('🛒 상점', () => shopOpen582());
     } else if (kind === 'over') {
       h.textContent = '게임 오버'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
-      add('다시 도전', () => newRun(stageIdx), 'pri'); add('🗺 월드맵', () => showMap5());
+      add('다시 도전', () => shopGo582(stageIdx, () => newRun(stageIdx)), 'pri'); add('🗺 월드맵', () => showMap5());
     } else if (kind === 'pause') {
       h.textContent = '일시정지'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 목숨 ${G.lives} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
       add('계속하기', resume, 'pri'); add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) { mb.textContent = BGM.isOn() ? '🎵' : '🎵'; mb.classList.toggle('off', !BGM.isOn()); } showOver('pause'); });
@@ -11618,19 +11621,200 @@ const BlockAction = (() => {
     const D = dom5(), n = MAPN5[MAP.at], i = MAP.at, S = story5(), P = D.map;
     const mid = P.querySelector('.mid'), h = P.querySelector('h3'), p = P.querySelector('p'), btns = P.querySelector('.ba-btns'); btns.innerHTML = '';
     const add = (txt, fn, cls, dis) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.className = cls || ''; b.disabled = !!dis; b.onclick = (ev) => { ev.stopPropagation(); snd('select'); fn(); }; btns.appendChild(b); return b; };
-    if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = (n.s >= 12 ? '월드 4 · 우주' : n.s >= 8 ? '월드 3 · 크레용 나라' : n.s >= 4 ? '월드 2 · 네더' : '월드 1 · 성') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}${bestLine57(st.id)} — ${st.sub}` : st.sub; add('▶ 시작', () => playFromMap5(n.s), 'pri'); }
+    if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = (n.s >= 12 ? '월드 4 · 우주' : n.s >= 8 ? '월드 3 · 크레용 나라' : n.s >= 4 ? '월드 2 · 네더' : '월드 1 · 성') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}${bestLine57(st.id)} — ${st.sub}` : st.sub; add('▶ 시작', () => shopGo582(n.s, () => playFromMap5(n.s)), 'pri'); }
     else if (n.k === 'village') { mid.textContent = '월드 1 · 시작'; h.textContent = '꾸꾸의 마을'; p.textContent = S.ending ? '모두가 돌아온 평화로운 마을. 축제가 한창이에요!' : '골렘 왕에게 습격당한 마을. 뚜뚜와 마을 주민들을 구하러 가자!'; add('📜 프롤로그 보기', () => playCut5('intro'), 'pri'); }
     else if (n.k === 'rocket') { mid.textContent = '월드 4 · 우주'; h.textContent = '크레용 로켓 발사대'; p.textContent = '크레용 로봇이 그려 준 로켓! 우주 해적 UFO가 달과 정거장을 노리고 있어요.'; add('🚀 발사 장면 보기', () => rocketCut54(), 'pri'); add('📜 크레용 로켓 장면 보기', () => playCut5('rocket58'), '', !S.rocket58); }
     else if (n.k === 'crayon') { mid.textContent = '월드 3 · 크레용 나라'; h.textContent = '이상한 포털'; p.textContent = '위더를 물리친 뒤 포털이 오작동! 모든 것이 크레용으로 그려진 나라로 이어져요.'; add('📜 크레용 나라 장면 보기', () => playCut5('crayon'), 'pri', !S.crayon58); }
     else { mid.textContent = '차원문'; h.textContent = '네더 포탈'; p.textContent = '성 깊은 곳에 열린 보랏빛 차원문. 위더가 기다리는 네더로 이어져요.'; add('📜 포탈 장면 보기', () => playCut5('portal'), 'pri', !S.portal); }
+    add('🛒 상점 · 🪙 ' + shopSt582().w.toLocaleString(), () => shopOpen582(() => mapPanel5()), 'shop582');
     if (S.ending) add('🎬 엔딩 다시보기', () => playCut5('ending'));
     add('📋 스테이지 목록', () => { modeClass5(null); D.map.classList.remove('show'); showSelect(); selectExtras5(); });
     add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); mapPanel5(); if (VOICE.mode() !== 'off') { sayPreview5(); } });
     add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); mapPanel5(); }); add('⌨️ 대시 키: ' + (DK581.cap ? '새 키를 누르세요 (Esc 취소)' : DK581.lbl(DK581.get())), () => { DK581.cap = DK581.cap ? 0 : 1; mapPanel5(); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); mapPanel5(); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open());
     add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) mb.classList.toggle('off', !BGM.isOn()); mapPanel5(); });
     const clr = MAPN5.filter((m, k) => m.s !== undefined && nodeClear5(k)).length;
-    D.mapT.textContent = `🗺 월드맵 · ${clr}/${MAPN5.filter(m => m.s !== undefined).length} 클리어`;
+    D.mapT.textContent = `🗺 월드맵 · ${clr}/${MAPN5.filter(m => m.s !== undefined).length} 클리어 · 🪙 ${shopSt582().w.toLocaleString()}`;
   }
+  // ===== v5.8.2 SHOP: persistent coin wallet, item shop, pre-stage loadout ('준비물') =====
+  // wallet rule: every coin picked up in a stage is banked when that stage is CLEARED (respawns keep them, a game over loses them);
+  // hard difficulty banks x1.5, a stage's first clear adds +20. Old saves start with a 100-coin welcome bonus.
+  const SHOP582 = { items: [
+    { id: 'grow', ic: '🍄', nm: '버섯', ds: '처음부터 커진 상태로 시작', pr: 30, mx: 5 },
+    { id: 'fire', ic: '🔥', nm: '불꽃 꽃', ds: '처음부터 불덩이 던지기 (대시 키)', pr: 60, mx: 5 },
+    { id: 'tnt', ic: '🧨', nm: 'TNT ×2', ds: 'E 키 / TNT 버튼으로 던지기', pr: 40, mx: 5 },
+    { id: 'utnt', ic: '💥', nm: '울트라 TNT', ds: 'R 키 / 울트라 버튼 · 보스 2배 피해', pr: 90, mx: 3 },
+    { id: 'fireres', ic: '🧪', nm: '화염 저항 포션', ds: '시작 후 30초 용암·불 면역', pr: 50, mx: 3 },
+    { id: 'life', ic: '❤️', nm: '목숨 +1', ds: '이번 도전의 목숨 하나 추가', pr: 80, mx: 3 },
+    { id: 'truck', ic: '🚙', nm: '사이버트럭', ds: '트럭 보관함에 1대 · T 키 / 트럭 버튼', pr: 250, mx: 3, prem: 1 }
+  ], pend: null, el: null, open: false, sel: [] };
+  function shopSt582() {
+    if (!save.shop || typeof save.shop !== 'object') save.shop = { v: 1, w: 100, inv: {}, welcome: 1 };
+    const s = save.shop; if (!s.inv || typeof s.inv !== 'object') s.inv = {};
+    s.w = Math.max(0, Math.min(999999, Math.floor(+s.w || 0)));
+    SHOP582.items.forEach(it => { s.inv[it.id] = Math.max(0, Math.min(it.mx, Math.floor(+s.inv[it.id] || 0))); });
+    return s;
+  }
+  function shopSlots582(d) { return (d || DIFF) === 'hard' ? 1 : 2; }
+  function shopBank582(def, firstClear) {
+    const s = shopSt582(), got = Math.max(0, G.cw582 || 0);
+    const earn = Math.round(got * ((G.d57 || DIFF) === 'hard' ? 1.5 : 1)) + (firstClear ? 20 : 0);
+    s.w += earn; G.cw582 = 0; saveSave(); return { earn, got, w: s.w, first: !!firstClear };
+  }
+  function shopCss582() {
+    if (document.getElementById('st582')) return;
+    const st = document.createElement('style'); st.id = 'st582';
+    st.textContent = `
+#ba582{position:absolute;inset:0;z-index:12;display:none;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 30%,rgba(60,30,90,.55),rgba(5,3,14,.88));font-family:'Segoe UI',system-ui,sans-serif;color:#fff;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation;box-sizing:border-box;padding:64px 0 12px;}
+#ba582.show{display:flex;}
+#ba582 *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+#ba582 .pn{position:relative;width:min(96%,820px);max-height:100%;overflow:auto;-webkit-overflow-scrolling:touch;background:linear-gradient(180deg,#2a1d4a,#1a1230);border:3px solid #f8e7b0;border-radius:22px;padding:14px 16px 16px;box-shadow:0 16px 50px rgba(0,0,0,.6),inset 0 0 0 2px rgba(255,255,255,.06);}
+#ba582 .hd{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+#ba582 h3{margin:0;font-size:clamp(19px,4vw,26px);letter-spacing:.02em;flex:1;}
+#ba582 .wl{display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:linear-gradient(180deg,#ffe58a,#e9a91a);color:#3a2300;font-weight:900;font-size:clamp(15px,3.2vw,19px);box-shadow:0 3px 0 #9a6a08;}
+#ba582 .wl.bump{animation:w582 .35s ease;}@keyframes w582{40%{transform:scale(1.18)}}
+#ba582 .x{border:0;background:rgba(255,255,255,.14);color:#fff;width:38px;height:38px;border-radius:12px;font-size:18px;font-weight:900;cursor:pointer;}
+#ba582 .sub{font-size:13px;opacity:.85;margin:-4px 0 10px;}
+#ba582 .gr{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:10px;}
+#ba582 .cd{position:relative;display:flex;flex-direction:column;gap:4px;padding:10px 10px 10px;border-radius:16px;background:linear-gradient(180deg,#fff8e6,#f3e2b8);color:#2b1a08;border:2px solid #c99a3c;box-shadow:0 4px 0 #8a6420;}
+#ba582 .cd.prem{background:linear-gradient(180deg,#e9f3ff,#bcd3f2);border-color:#5a86c8;box-shadow:0 4px 0 #2f5590,0 0 18px rgba(120,180,255,.45);}
+#ba582 .cd .ic{font-size:40px;line-height:1.1;text-align:center;filter:drop-shadow(0 3px 2px rgba(0,0,0,.25));}
+#ba582 .cd .nm{font-weight:900;font-size:16px;text-align:center;}
+#ba582 .cd .ds{font-size:12px;line-height:1.35;min-height:32px;text-align:center;opacity:.8;word-break:keep-all;}
+#ba582 .cd .ow{font-size:12px;font-weight:800;text-align:center;color:#6a4a10;}
+#ba582 .cd.prem .ow{color:#23477a;}
+#ba582 .cd .tag{position:absolute;top:-8px;right:-6px;background:#ff5a7a;color:#fff;font-size:11px;font-weight:900;padding:2px 8px;border-radius:999px;box-shadow:0 2px 0 #a02040;}
+#ba582 .cd button,#ba582 .ft button{border:0;border-radius:12px;padding:9px 8px;font-weight:900;font-size:15px;cursor:pointer;background:linear-gradient(180deg,#5ad06a,#2f9a40);color:#fff;box-shadow:0 3px 0 #1d6a2a;}
+#ba582 .cd button:disabled{background:#9a917c;box-shadow:0 3px 0 #6a6250;cursor:not-allowed;opacity:.85;}
+#ba582 .cd button:active,#ba582 .ft button:active{transform:translateY(2px);box-shadow:none;}
+#ba582 .cd.pick{cursor:pointer;}#ba582 .cd.on{outline:4px solid #5ad06a;outline-offset:2px;transform:translateY(-2px);}
+#ba582 .cd.pick .ck{position:absolute;top:6px;left:8px;width:24px;height:24px;border-radius:8px;border:2px solid #8a6420;background:#fff;font-weight:900;text-align:center;line-height:20px;color:#2f9a40;}
+#ba582 .ft{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:flex-end;}
+#ba582 .ft button.sec{background:rgba(255,255,255,.16);box-shadow:0 3px 0 rgba(0,0,0,.35);}
+#ba582 .ft button.go{min-width:150px;font-size:17px;background:linear-gradient(180deg,#f8d36a,#e0a020);color:#2a1a04;box-shadow:0 3px 0 #8a6408;}
+#ba582 .fly{position:fixed;z-index:99;font-size:22px;pointer-events:none;transition:transform .55s cubic-bezier(.3,.0,.6,1),opacity .55s;}
+#ba582 .toast{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#2f9a40;color:#fff;font-weight:900;padding:6px 14px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:2;}
+#ba582 .toast.on{opacity:1;}
+#ba582 .em{padding:20px;text-align:center;opacity:.8;}
+.w582{margin-top:6px;font-weight:900;color:#fde68a;font-size:15px;}
+@media (max-width:560px){#ba582 .gr{grid-template-columns:repeat(2,1fr);gap:8px;}#ba582 .cd .ic{font-size:32px;}#ba582 .cd .ds{font-size:11px;min-height:28px;}#ba582 .pn{padding:12px 10px 12px;}}
+`;
+    document.head.appendChild(st);
+  }
+  function shopEl582() {
+    if (SHOP582.el && SHOP582.el.isConnected) return SHOP582.el;
+    shopCss582(); const root = document.getElementById('blockaction'); if (!root) return null;
+    const el = document.createElement('div'); el.id = 'ba582'; root.appendChild(el); SHOP582.el = el;
+    el.addEventListener('contextmenu', e => e.preventDefault());
+    el.addEventListener('click', e => { if (e.target === el && SHOP582.mode === 'shop') shopClose582(); });
+    return el;
+  }
+  function shopToast582(t) { const el = SHOP582.el, q = el && el.querySelector('.toast'); if (!q) return; q.textContent = t; q.classList.add('on'); clearTimeout(shopToast582.t); shopToast582.t = setTimeout(() => q.classList.remove('on'), 1100); }
+  function shopFly582(from, to, n) {
+    try {
+      const a = from.getBoundingClientRect(), b = to.getBoundingClientRect();
+      for (let i = 0; i < n; i++) {
+        const c = document.createElement('div'); c.className = 'fly'; c.textContent = '🪙'; SHOP582.el.appendChild(c);
+        c.style.left = (b.left + b.width / 2 - 11) + 'px'; c.style.top = (b.top + b.height / 2 - 11) + 'px';
+        const dx = a.left + a.width / 2 - (b.left + b.width / 2) + (Math.random() - 0.5) * 40, dy = a.top + a.height / 2 - (b.top + b.height / 2) + (Math.random() - 0.5) * 20;
+        setTimeout(() => { c.style.transform = `translate(${dx}px,${dy}px) scale(.6)`; c.style.opacity = '0.2'; }, 20 + i * 60);
+        setTimeout(() => { c.remove(); try { snd('coin'); } catch (e) {} }, 600 + i * 60);
+      }
+    } catch (e) {}
+  }
+  function shopOpen582(back) {
+    const el = shopEl582(); if (!el) return; const s = shopSt582();
+    SHOP582.mode = 'shop'; SHOP582.open = true; SHOP582.back = back || null;
+    el.innerHTML = `<div class="toast"></div><div class="pn"><div class="hd"><h3>🛒 상점</h3><div class="wl" data-w>🪙 ${s.w.toLocaleString()}</div><button type="button" class="x" data-x aria-label="닫기">✕</button></div>
+<div class="sub">스테이지에서 모은 코인은 <b>클리어할 때</b> 지갑에 들어와요${DIFF === 'hard' ? ' (어려움 ×1.5)' : ''}. 산 아이템은 스테이지 시작 전 <b>준비물</b>로 골라 가져가요 (최대 ${shopSlots582()}개).</div><div class="gr"></div>
+<div class="ft"><button type="button" class="sec" data-x>${back ? '← 돌아가기' : '닫기'}</button></div></div>`;
+    const gr = el.querySelector('.gr');
+    SHOP582.items.forEach(it => {
+      const c = document.createElement('div'); c.className = 'cd' + (it.prem ? ' prem' : ''); c.dataset.id = it.id;
+      c.innerHTML = `${it.prem ? '<div class="tag">프리미엄</div>' : ''}<div class="ic">${it.ic}</div><div class="nm">${it.nm}</div><div class="ds">${it.ds}</div><div class="ow"></div><button type="button"></button>`;
+      gr.appendChild(c); c.querySelector('button').onclick = ev => { ev.stopPropagation(); shopBuy582(it.id, c); };
+    });
+    el.querySelectorAll('[data-x]').forEach(b => b.onclick = ev => { ev.stopPropagation(); snd('select'); shopClose582(); });
+    shopRefresh582(); el.classList.add('show');
+  }
+  function shopRefresh582() {
+    const el = SHOP582.el, s = shopSt582(); if (!el) return;
+    const w = el.querySelector('[data-w]'); if (w) w.textContent = '🪙 ' + s.w.toLocaleString();
+    el.querySelectorAll('.cd[data-id]').forEach(c => {
+      const it = SHOP582.items.find(i => i.id === c.dataset.id), n = s.inv[it.id], b = c.querySelector('button'), ow = c.querySelector('.ow');
+      if (ow) ow.textContent = `보유 ${n} / ${it.mx}`;
+      if (b && SHOP582.mode === 'shop') { b.disabled = n >= it.mx || s.w < it.pr; b.textContent = n >= it.mx ? '가득 참' : `🪙 ${it.pr} 구매`; }
+    });
+  }
+  function shopBuy582(id, card) {
+    const s = shopSt582(), it = SHOP582.items.find(i => i.id === id); if (!it) return false;
+    if (s.inv[id] >= it.mx) { shopToast582('더 이상 보관할 수 없어요'); snd('land'); return false; }
+    if (s.w < it.pr) { shopToast582('코인이 부족해요'); snd('land'); return false; }
+    s.w -= it.pr; s.inv[id]++; saveSave();
+    const w = SHOP582.el && SHOP582.el.querySelector('[data-w]');
+    if (card && w) { shopFly582(card, w, Math.min(8, 3 + Math.round(it.pr / 50))); w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); }
+    try { snd('power'); vib(12); } catch (e) {}
+    shopToast582(`${it.ic} ${it.nm} 구매! (보유 ${s.inv[id]})`); shopRefresh582(); return true;
+  }
+  function shopClose582() {
+    const el = SHOP582.el; SHOP582.open = false; SHOP582.mode = null; if (el) { el.classList.remove('show'); el.innerHTML = ''; }
+    const b = SHOP582.back; SHOP582.back = null; if (b) b();
+  }
+  // pre-stage loadout: go() starts the stage; chosen items are taken out of the inventory and applied once play begins
+  function shopGo582(idx, go) {
+    const s = shopSt582(), owned = SHOP582.items.filter(it => s.inv[it.id] > 0);
+    if (!owned.length || (window.__BA_DEBUG && window.__BA_NOLOAD582)) { go(); return; }
+    const el = shopEl582(); if (!el) { go(); return; }
+    const def = STAGES[idx] || STAGES[stageIdx], slots = shopSlots582(), boss = !!(def && def.bossKind);
+    SHOP582.mode = 'load'; SHOP582.open = true; SHOP582.sel = (SHOP582.last || []).filter(id => s.inv[id] > 0).slice(0, slots);
+    el.innerHTML = `<div class="toast"></div><div class="pn"><div class="hd"><h3>🎒 준비물 · ${def ? def.id + ' ' + def.name : ''}</h3><div class="wl" data-w>🪙 ${s.w.toLocaleString()}</div></div>
+<div class="sub">가져갈 아이템을 최대 <b>${slots}개</b> 골라요${DIFF === 'hard' ? ' (어려움)' : ''}. 고른 아이템만 사용돼요${boss ? ' · 보스전도 가져갈 수 있어요' : ''}.</div><div class="gr"></div>
+<div class="ft"><button type="button" class="sec" data-shop>🛒 상점</button><button type="button" class="sec" data-none>그냥 출발</button><button type="button" class="go" data-go>출발 ▶</button></div></div>`;
+    const gr = el.querySelector('.gr');
+    owned.forEach(it => {
+      const c = document.createElement('div'); c.className = 'cd pick' + (it.prem ? ' prem' : ''); c.dataset.id = it.id;
+      c.innerHTML = `<div class="ck"></div><div class="ic">${it.ic}</div><div class="nm">${it.nm}</div><div class="ds">${it.ds}</div><div class="ow"></div>`;
+      c.onclick = ev => { ev.stopPropagation(); const i = SHOP582.sel.indexOf(it.id);
+        if (i >= 0) SHOP582.sel.splice(i, 1); else if (SHOP582.sel.length < slots) SHOP582.sel.push(it.id); else { shopToast582(`최대 ${slots}개까지 가져갈 수 있어요`); snd('land'); return; }
+        snd('select'); shopLoadRefresh582(); };
+      gr.appendChild(c);
+    });
+    const start = sel => { SHOP582.last = sel.slice(); const s2 = shopSt582(); const take = sel.filter(id => s2.inv[id] > 0); take.forEach(id => s2.inv[id]--); saveSave();
+      SHOP582.open = false; SHOP582.mode = null; el.classList.remove('show'); el.innerHTML = ''; go(); SHOP582.pend = take.length ? take : null; };
+    el.querySelector('[data-go]').onclick = ev => { ev.stopPropagation(); snd('select'); start(SHOP582.sel); };
+    el.querySelector('[data-none]').onclick = ev => { ev.stopPropagation(); snd('select'); start([]); };
+    el.querySelector('[data-shop]').onclick = ev => { ev.stopPropagation(); snd('select'); shopOpen582(() => shopGo582(idx, go)); };
+    shopRefresh582(); shopLoadRefresh582(); el.classList.add('show');
+  }
+  function shopLoadRefresh582() {
+    const el = SHOP582.el; if (!el) return;
+    el.querySelectorAll('.cd.pick').forEach(c => { const on = SHOP582.sel.includes(c.dataset.id); c.classList.toggle('on', on); const k = c.querySelector('.ck'); if (k) k.textContent = on ? '✓' : ''; });
+    const g = el.querySelector('[data-go]'); if (g) g.textContent = SHOP582.sel.length ? `출발 ▶ (${SHOP582.sel.length}개)` : '출발 ▶';
+  }
+  // called every frame from animHero: apply the brought items on the first 'play' frame
+  function shopPend582() {
+    const P = SHOP582.pend; if (!P || state !== 'play' || !pl || !G) return; SHOP582.pend = null;
+    const names = [];
+    P.forEach(id => { const it = SHOP582.items.find(i => i.id === id); if (!it) return; names.push(it.ic + ' ' + it.nm);
+      if (id === 'grow') { if (!(pl.power > 0)) setPower(1, true); }
+      else if (id === 'fire') setPower(2, true);
+      else if (id === 'tnt') giveTNT('tnt', 2);
+      else if (id === 'utnt') giveTNT('utnt', 1);
+      else if (id === 'fireres') pl.fireRes = Math.max(pl.fireRes || 0, 1800);
+      else if (id === 'life') G.lives++;
+      else if (id === 'truck') G.truckN = Math.min(TRUCK_MAX55, (G.truckN || 0) + 1);
+    });
+    G.used582 = P.slice(); updateHUD(true);
+    if (names.length) { try { snd('power'); spawnParts(pl.x, pl.y + 0.6, ZP, 0xffd24a, NP(14), 0.06, 0.05); } catch (e) {} banner('🎒 준비물', names.join(' · '), 1500); }
+  }
+  document.addEventListener('keydown', e => {
+    if (!SHOP582.open) return;
+    e.stopImmediatePropagation();
+    if (e.code === 'Escape') { e.preventDefault(); if (SHOP582.mode === 'shop') shopClose582(); }
+    else if (e.code === 'Enter' && SHOP582.mode === 'load') { e.preventDefault(); const b = SHOP582.el.querySelector('[data-go]'); if (b) b.click(); }
+  }, true);
+  if (window.__BA_DEBUG) window.__shop582 = { st: () => JSON.parse(JSON.stringify(shopSt582())), set: (w, inv) => { const s = shopSt582(); if (w !== undefined) s.w = w; if (inv) Object.assign(s.inv, inv); saveSave(); return shopSt582(); },
+    open: () => shopOpen582(), go: i => shopGo582(i, () => newRun(i)), buy: id => shopBuy582(id), isOpen: () => SHOP582.open, mode: () => SHOP582.mode, used: () => G && G.used582, cw: () => G && G.cw582,
+    w582: () => G && G.w582, pick: ids => { SHOP582.sel = ids.slice(); shopLoadRefresh582(); }, items: () => SHOP582.items.map(i => ({ id: i.id, pr: i.pr, mx: i.mx })) };
   function sayPreview5() { if (VOICE.mode() === 'tts' && VOICE.ttsOK()) VOICE.speak('안녕! 나는 꾸꾸야.', 'haru'); else if (VOICE.usesBlips()) Array.from('안녕나는꾸꾸야').forEach((ch, i) => setTimeout(() => VOICE.blip(ch, 'haru'), i * 55)); }
   function selectExtras5() {
     const el = $('baSelect'); if (!el) return; const panel = el.querySelector('.ba-panel');
@@ -11664,7 +11848,7 @@ const BlockAction = (() => {
     const lP = inp.left && !MAPIN5.pl, rP = inp.right && !MAPIN5.pr; MAPIN5.pl = inp.left; MAPIN5.pr = inp.right;
     if (!MAP.walk) {
       if (rP && nodeOpen5(MAP.at + 1)) walkTo5(MAP.at + 1); else if (lP && MAP.at > 0) walkTo5(MAP.at - 1);
-      else if (inp.jumpP || MAPIN5.act) { MAPIN5.act = false; const n = MAPN5[MAP.at]; snd('select'); if (n.s !== undefined) playFromMap5(n.s); else if (n.k === 'village') playCut5('intro'); else if (n.k === 'rocket') rocketCut54(); else if (n.k === 'crayon') { if (story5().crayon58) playCut5('crayon'); } else if (story5().portal) playCut5('portal'); return; }
+      else if ((inp.jumpP || MAPIN5.act) && !SHOP582.open) { MAPIN5.act = false; const n = MAPN5[MAP.at]; snd('select'); if (n.s !== undefined) shopGo582(n.s, () => playFromMap5(n.s)); else if (n.k === 'village') playCut5('intro'); else if (n.k === 'rocket') rocketCut54(); else if (n.k === 'crayon') { if (story5().crayon58) playCut5('crayon'); } else if (story5().portal) playCut5('portal'); return; }
     } else MAPIN5.act = false;
     if (MAP.walk) { const n = MAPN5[MAP.walk.to], dx = n.x - MAP.hx, dz = n.z - MAP.hz, d = Math.hypot(dx, dz), sp = 0.11;
       MAP.face = Math.atan2(dx, dz);
@@ -13332,7 +13516,7 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
   function eggGet56(p) {
     sfx5('eggPop'); spawnParts(p.x, p.y, ZP, 0xfff2c0, NP(8), 0.05, 0.06); G.eggs = (G.eggs || 0) + 1;
     if (pl.power === 0) { setPower(1); floatText('달걀 회복!', p.x, p.y + 1); hearts(p.x, p.y + 0.4, NP(5)); }
-    else { G.coins += 3; coinCheck(); addScore(300, p.x, p.y + 0.6); floatText('+3 코인', p.x, p.y + 1.1); }
+    else { G.coins += 3; G.cw582 = (G.cw582 || 0) + 3; coinCheck(); addScore(300, p.x, p.y + 0.6); floatText('+3 코인', p.x, p.y + 1.1); }
   }
 
   // ---------- helpers ----------
@@ -14333,12 +14517,12 @@ const SaveCode57 = (() => {
   function summary(keys) {
     const r = { stages: 0, stars: 0, unlocked: 1, diff: '보통', board: 0, ending: false, keys: Object.keys(keys).length, best: [] };
     try { const s = JSON.parse(keys.ba_stages_v1 || 'null'); if (s) { r.unlocked = s.unlocked || 1; const B = s.best || {};
-      Object.keys(B).forEach(id => { if (B[id] && B[id].clear) { r.stages++; r.best.push(id); } r.stars += (B[id] && B[id].stars) || 0; }); r.ending = !!(s.story && s.story.ending); } } catch (e) {}
+      Object.keys(B).forEach(id => { if (B[id] && B[id].clear) { r.stages++; r.best.push(id); } r.stars += (B[id] && B[id].stars) || 0; }); r.ending = !!(s.story && s.story.ending); r.wallet = s.shop && +s.shop.w || 0; } } catch (e) {}
     r.diff = { easy: '쉬움', normal: '보통', hard: '어려움' }[keys.ba_diff] || '보통';
     r.board = Object.keys(keys).filter(k => k.indexOf('minigames_v1_') === 0).length;
     r.best.sort(); return r;
   }
-  const sumText = (r, t) => `${t ? '📅 ' + new Date(t).toLocaleString('ko-KR') + '\n' : ''}🧱 블록 액션: 클리어 ${r.stages}개 스테이지${r.best.length ? ' (' + r.best.join(', ') + ')' : ''} · ⭐ ${r.stars}개 · 해금 ${r.unlocked}${r.ending ? ' · 엔딩 봄' : ''}\n⚙️ 난이도 ${r.diff} · 저장 항목 ${r.keys}개${r.board ? ' · 보드게임 기록 ' + r.board + '개' : ''}`;
+  const sumText = (r, t) => `${t ? '📅 ' + new Date(t).toLocaleString('ko-KR') + '\n' : ''}🧱 블록 액션: 클리어 ${r.stages}개 스테이지${r.best.length ? ' (' + r.best.join(', ') + ')' : ''} · ⭐ ${r.stars}개 · 해금 ${r.unlocked}${r.ending ? ' · 엔딩 봄' : ''}${r.wallet ? ' · 🪙 ' + r.wallet : ''}\n⚙️ 난이도 ${r.diff} · 저장 항목 ${r.keys}개${r.board ? ' · 보드게임 기록 ' + r.board + '개' : ''}`;
   function apply(p) {
     const rm = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && ok(k)) rm.push(k); }
     rm.forEach(k => localStorage.removeItem(k)); Object.keys(p.keys).forEach(k => localStorage.setItem(k, p.keys[k]));
