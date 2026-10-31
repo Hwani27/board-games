@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.8-crayon">
+<meta name="ba-version" content="v5.8.1-crayon">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>보드게임 모음 — 체스·오목·장기</title>
+<title>미니 게임 모음 — 체스·오목·장기·블록 액션</title>
 <style>
   :root{--gold:#c39a3e;--ink:#221d16;--line:#4a3f30;--paper:#efe7d6;}
   *{box-sizing:border-box;}
@@ -233,7 +233,7 @@
 <!-- ============ LAUNCHER ============ -->
 <div id="launcher" class="screen active">
   <div>
-    <h1>보드게임 모음</h1>
+    <h1>미니 게임 모음</h1>
     <p class="tag">체스 · 오목 · 장기 · 바둑 · UNO · 블록 액션 — 원하는 게임을 골라보세요</p>
   </div>
   <div class="game-cards">
@@ -9346,7 +9346,7 @@ const BlockAction = (() => {
     const hgt = pl.y - L.goal.y;
     const bonus = hgt >= 7 ? 5000 : hgt >= 5 ? 2000 : hgt >= 3 ? 800 : hgt >= 1.5 ? 400 : 100;
     addScore(bonus, L.goal.x - 0.6, pl.y + 1.4);
-    G.clr = { phase: 'slide', t: 0, bonus }; G.clearTime = G.ticks / 60; G.tl53 = G.timeLeft;
+    pl.inv = 0; G.clr = { phase: 'slide', t: 0, bonus }; G.clearTime = G.ticks / 60; G.tl53 = G.timeLeft;
     pl.x = L.goal.x - 0.32; pl.vx = 0; pl.vy = 0; pl.face = 1;
     snd('win');
   }
@@ -9378,7 +9378,7 @@ const BlockAction = (() => {
     save.unlocked = Math.min(STAGES.length, Math.max(save.unlocked, stageIdx + 2));
     saveSave();
     if (afterClear5(def, { gained, newBest, unlockedNow })) return;
-    state = 'over';
+    state = 'over'; pl.res581 = true; pl.x = Math.max(pl.x - 1.2, L.goal.x + 0.6); { const gy581 = groundBelow(pl.x, pl.y + 0.5); if (gy581 > -6) pl.y = gy581; } pl.vx = 0; pl.vy = 0;
     showOver('clear', { gained, newBest, unlockedNow });
   }
 
@@ -9410,6 +9410,7 @@ const BlockAction = (() => {
     const ahead = adir * Math.min(2.4, 0.8 + Math.abs(pl.vx) * 10) * (a < 1 ? 0.75 : 1);
     cam.ahead = snap ? ahead : lerp(cam.ahead || 0, ahead, fk(0.045));
     let tx = pl.x + cam.ahead;
+    if (state === 'over' && pl.res581 && a >= 1) tx -= cam.Wv * 0.3;
     const half = cam.Wv / 2;
     let x0 = half - 0.5, x1 = L.W - half + 0.5;
     if (cam.lockX && L.arena) { x0 = Math.max(x0, L.arena.x0 - 0.5 + half); x1 = Math.min(x1, L.arena.x1 + 1.5 - half); if (x1 < x0) x0 = x1 = (L.arena.x0 + L.arena.x1 + 1) / 2; }
@@ -9558,9 +9559,10 @@ const BlockAction = (() => {
     const st = p.ground ? (1 - Math.sin(AN.squash * Math.PI) * 0.2) * (1 - (AN.rsq || 0)) : 1 + Math.min(0.2, Math.abs(p.vy) * 0.7);
     model.scale.set(1 / Math.sqrt(st), st, 1 / Math.sqrt(st));
     // hurt blink + fade into the exit
-    const blink = p.inv > 0 && (clock >> 2) % 2 === 0;
+    const blink = state === 'play' && p.inv > 0 && (clock >> 2) % 2 === 0;
     player.visible = state !== 'clear' || !G.clr || G.clr.phase !== 'tally' ? !blink : false;
     if (state === 'clear' && G.clr && G.clr.phase === 'enter') player.scale.multiplyScalar(Math.max(0.05, 1 - G.clr.t / 24));
+    if (state === 'over' && p.res581) { player.visible = true; AN.turn = lerp(AN.turn, 0.25, 0.12 * k); model.rotation.y = AN.turn; Lb.armR.rotation.x = -2.7 + Math.sin(clock * 0.16) * 0.25; Lb.armR.rotation.z = 0.25; }
     // v4 ride: hero seated in the cab, head showing through the side window
     if (p.truck && !dying) {
       animTruck(dt); const tr = p.truck;
