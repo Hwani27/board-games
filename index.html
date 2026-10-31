@@ -676,7 +676,7 @@
   <div id="baSelect" class="ba-ov">
     <div class="ba-panel">
       <h2>블록 액션 · 스테이지 선택</h2>
-      <p class="ba-hint">PC: ←→/A·D 이동 · Space 점프(길게=높이, 공중에서 한 번 더 = 2단 점프) · ↓/S 웅크리기·슬라이딩, 공중에서 ↓ = 내려찍기 · Shift 달리기/불덩이 · E TNT · R 울트라 TNT · T 사이버트럭 소환 · Esc 일시정지 · 1~4 선택</p>
+      <p class="ba-hint">PC: ←→/A·D 이동 · Space 점프(길게=높이, 공중에서 한 번 더 = 2단 점프) · ↓/S 웅크리기·슬라이딩, 공중에서 ↓ = 내려찍기 · <b class="dk581">X</b> 달리기/불덩이(K·J·F도 가능) · E TNT · R 울트라 TNT · T 사이버트럭 소환 · Esc 일시정지 · 1~4 선택</p>
       <p class="ba-hint ba-touch">폰: ←/→ 이동 · ↓ 웅크리기(공중 = 내려찍기: 벽돌 깨기·? 블록) · 점프(길게=높이, 공중에서 다시 탭/밀어 올리기 = 2단 점프) · 대시 = 달리기/불덩이 · 🧨 TNT · ✴ 울트라 · 트럭 = 사이버트럭 소환</p>
       <div class="ba-skin ba-diff">난이도 <button type="button" data-diff="easy">🌱 쉬움</button><button type="button" data-diff="normal">⚔️ 보통</button><button type="button" data-diff="hard">🔥 어려움</button><button type="button" class="sv" onclick="SaveCode57.open()">💾 기록 옮기기</button></div>
       <p class="ba-hint ba-rot">📱 가로로 돌리면 캐릭터가 더 크게 보여요</p>
@@ -8921,11 +8921,14 @@ const BlockAction = (() => {
 
   // ---------- input ----------
   const K = c => !!keys[c];
+  const DK581 = { cap: 0, get() { try { return localStorage.getItem('ba_dashkey') || 'KeyX'; } catch (e) { return 'KeyX'; } }, lbl(c) { return String(c).replace(/^Key/, '').replace(/^Semicolon$/, ';').replace(/^Quote$/, "'").replace(/^Comma$/, ',').replace(/^Period$/, '.').replace(/^Slash$/, '/').replace(/^Numpad/, 'Num'); },
+    ok(c) { return /^(Key[A-Z]|Semicolon|Quote|Comma|Period|Slash|BracketLeft|BracketRight|Backslash|Minus|Equal|Numpad\d)$/.test(c) && !['KeyA', 'KeyD', 'KeyW', 'KeyS', 'KeyZ', 'KeyE', 'KeyC', 'KeyR', 'KeyV', 'KeyT', 'KeyP'].includes(c); } };
+  function dk581Hint() { const t = DK581.lbl(DK581.get()); document.querySelectorAll('.dk581').forEach(el => { el.textContent = t; }); }
   let prevIn = {};
   function readInput() {
     const i = { left: K('ArrowLeft') || K('KeyA'), right: K('ArrowRight') || K('KeyD'),
       jump: K('Space') || K('ArrowUp') || K('KeyW') || K('KeyZ'),
-      raw: K('ShiftLeft') || K('ShiftRight') || K('KeyK') || K('KeyX') || K('KeyJ') || K('KeyF'), tnt: K('KeyE') || K('KeyC'), utnt: K('KeyR') || K('KeyV'), trk: K('KeyT'), down: K('ArrowDown') || K('KeyS') };
+      raw: K('ShiftLeft') || K(DK581.get()) || K('KeyK') || K('KeyX') || K('KeyJ') || K('KeyF'), tnt: K('KeyE') || K('KeyC'), utnt: K('KeyR') || K('KeyV'), trk: K('KeyT'), down: K('ArrowDown') || K('KeyS') };
     i.run = i.raw || RUN5.run(); { const n571 = Math.max(i.jump && !prevIn.jump ? 1 : 0, (RUN5.jpulse() | 0) + jk571) + jq571; jk571 = 0; jq571 = n571 > 1 ? 1 : 0; i.jumpP = n571 > 0; } i.trkP = (i.trk && !prevIn.trk) || trkLatch55; trkLatch55 = false; i.runP = (i.raw && !prevIn.raw) || RUN5.pulse(); i.tntP = i.tnt && !prevIn.tnt; i.utntP = i.utnt && !prevIn.utnt; i.downP = i.down && !prevIn.down; prevIn = i; return i;
   }
 
@@ -9218,7 +9221,7 @@ const BlockAction = (() => {
         else if (it.kind === 'grow') { if (pl.power === 0) setPower(1); addScore(1000, it.x, it.y + 1); snd('power'); vib(15); }
         else if (it.kind === 'tnt' || it.kind === 'utnt') pickTNT(it);
         else if (it.kind === 'fireres') takeFireRes5(it);
-        else if (it.kind === 'fire') { setPower(2); addScore(1000, it.x, it.y + 1); snd('power'); vib(15); banner('불꽃 능력!', '대시(Shift)로 불덩이 던지기', 1300); }
+        else if (it.kind === 'fire') { setPower(2); addScore(1000, it.x, it.y + 1); snd('power'); vib(15); banner('불꽃 능력!', '대시(' + DK581.lbl(DK581.get()) + ' 키)로 불덩이 던지기', 1300); }
       }
       if (it.gone) W3.group.remove(it.mesh); else { it.mesh.position.x = it.x; if (!(it.kind === 'tnt' || it.kind === 'utnt' || it.kind === 'fireres') || it.emerge) it.mesh.position.y = it.y; it.mesh.position.z = ZP; }
     });
@@ -10065,8 +10068,13 @@ const BlockAction = (() => {
   }
   function bindInput() {
     const isTyping = e => e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+    window.addEventListener('keydown', e => { if (!DK581.cap) return; e.preventDefault(); e.stopImmediatePropagation(); if (e.repeat) return;
+      if (e.code === 'Escape') { DK581.cap = 0; mapPanel5(); return; }
+      if (DK581.ok(e.code)) { try { localStorage.setItem('ba_dashkey', e.code); } catch (er) {} DK581.cap = 0; dk581Hint(); mapPanel5(); } }, true);
+    dk581Hint();
     window.addEventListener('keydown', e => {
       if (!active || isTyping(e)) return;
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') return;
       keys[e.code] = true;
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
       if (e.repeat) return;
@@ -10074,7 +10082,7 @@ const BlockAction = (() => {
       if (state === 'select' && /^Digit[1-9]$/.test(e.code)) { const i = +e.code.slice(5) - 1; if (i < save.unlocked) newRun(i); }
       if ((state === 'over') && (e.code === 'Enter')) { const b = document.querySelector('#baOver .ba-btns button'); if (b) b.click(); }
     });
-    window.addEventListener('keyup', e => { keys[e.code] = false; });
+    window.addEventListener('keyup', e => { if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') return; keys[e.code] = false; });
     window.addEventListener('blur', releaseKeys);
     const hold = (el, code) => {
       if (!el) return;
@@ -11618,7 +11626,7 @@ const BlockAction = (() => {
     if (S.ending) add('🎬 엔딩 다시보기', () => playCut5('ending'));
     add('📋 스테이지 목록', () => { modeClass5(null); D.map.classList.remove('show'); showSelect(); selectExtras5(); });
     add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); mapPanel5(); if (VOICE.mode() !== 'off') { sayPreview5(); } });
-    add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); mapPanel5(); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); mapPanel5(); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open());
+    add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); mapPanel5(); }); add('⌨️ 대시 키: ' + (DK581.cap ? '새 키를 누르세요 (Esc 취소)' : DK581.lbl(DK581.get())), () => { DK581.cap = DK581.cap ? 0 : 1; mapPanel5(); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); mapPanel5(); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open());
     add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) mb.classList.toggle('off', !BGM.isOn()); mapPanel5(); });
     const clr = MAPN5.filter((m, k) => m.s !== undefined && nodeClear5(k)).length;
     D.mapT.textContent = `🗺 월드맵 · ${clr}/${MAPN5.filter(m => m.s !== undefined).length} 클리어`;
