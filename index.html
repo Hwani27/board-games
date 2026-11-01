@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.8.3-stock">
+<meta name="ba-version" content="v5.8.4">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>미니 게임 모음 — 체스·오목·장기·블록 액션</title>
+<title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
 <style>
   :root{--gold:#c39a3e;--ink:#221d16;--line:#4a3f30;--paper:#efe7d6;}
   *{box-sizing:border-box;}
@@ -234,9 +234,14 @@
 <div id="launcher" class="screen active">
   <div>
     <h1>미니 게임 모음</h1>
-    <p class="tag">체스 · 오목 · 장기 · 바둑 · UNO · 블록 액션 — 원하는 게임을 골라보세요</p>
+    <p class="tag">마인크래프트 마리오 · 마인크래프트 파이터 · 체스 · 오목 · 장기 · 바둑 · UNO — 원하는 게임을 골라보세요</p>
   </div>
   <div class="game-cards">
+    <div class="gcard" onclick="openGame('blockaction')">
+      <div class="ic">⛏️</div>
+      <h2>마인크래프트 마리오</h2>
+      <small>블록 세상 횡스크롤 점프 액션 · 스토리 모드<br>월드 1~4 · 15 스테이지 · 보스전</small>
+    </div>
     <div class="gcard" onclick="openGame('chess')">
       <div class="ic">♛</div>
       <h2>체스</h2>
@@ -261,11 +266,6 @@
       <div class="ic">🃏</div>
       <h2>UNO</h2>
       <small>2~4인 · 사람/CPU<br>색·숫자 맞춰 내기</small>
-    </div>
-    <div class="gcard" onclick="openGame('blockaction')">
-      <div class="ic">🧱</div>
-      <h2>블록 액션</h2>
-      <small>마리오풍 횡스크롤 · 스토리 모드<br>월드 1 성 · 월드 2 네더</small>
     </div>
   </div>
   <div class="lbbar">
@@ -675,9 +675,9 @@
   <div id="baMsg"></div>
   <div id="baSelect" class="ba-ov">
     <div class="ba-panel">
-      <h2>블록 액션 · 스테이지 선택</h2>
+      <h2>마인크래프트 마리오 · 스테이지 선택</h2>
       <p class="ba-hint">PC: ←→/A·D 이동 · Space 점프(길게=높이, 공중에서 한 번 더 = 2단 점프) · ↓/S 웅크리기·슬라이딩, 공중에서 ↓ = 내려찍기 · <b class="dk581">X</b> 달리기/불덩이(K·J·F도 가능) · E TNT · R 울트라 TNT · T 사이버트럭 소환 · <b>1~5 보관 아이템</b>(🍄🔥🔱🧪❤️) · Esc 일시정지 · 1~4 선택</p>
-      <p class="ba-hint ba-touch">폰: 왼쪽 조이스틱 이동(두 번 튕기면 질주 · 아래 = 웅크리기, 공중 = 내려찍기) · 큰 버튼 점프(길게=높이, 공중에서 다시 = 2단) · 대시 = 달리기/불덩이/🔱 삼지창 · 🧨 TNT · ✴ 울트라 · 트럭 소환 · 위쪽 아이템 칸 탭 = 보관 아이템 사용</p>
+      <p class="ba-hint ba-touch">폰: 왼쪽 ←→ 버튼 이동(두 번 누르면 질주 · ↓ = 웅크리기, 공중 = 내려찍기 · ⏸ 메뉴/지도 설정에서 조이스틱으로 바꿀 수 있어요) · 큰 버튼 점프(길게=높이, 공중에서 다시 = 2단) · 대시 = 달리기/불덩이/🔱 삼지창 · 🧨 TNT · ✴ 울트라 · 트럭 소환 · 위쪽 아이템 칸 탭 = 보관 아이템 사용</p>
       <div class="ba-skin ba-diff">난이도 <button type="button" data-diff="easy">🌱 쉬움</button><button type="button" data-diff="normal">⚔️ 보통</button><button type="button" data-diff="hard">🔥 어려움</button><button type="button" class="sv" onclick="SaveCode57.open()">💾 기록 옮기기</button></div>
       <p class="ba-hint ba-rot">📱 가로로 돌리면 캐릭터가 더 크게 보여요</p>
       <div class="ba-cards"></div>
@@ -9067,7 +9067,7 @@ const BlockAction = (() => {
     m.rotation.x = -1.25; m.position.set(x, y + 0.06, ZP + 0.2); m.scale.setScalar(0.2); m.renderOrder = 7; W3.group.add(m);
     m2fx.push({ type: 'ring', m, t: 0, T: 22, s1: 6 });
   }
-  function stepPlayer(inp) { const p = pl; p.stp583 = clock; if (state === 'play') st583().t++; if (bubTick57(p)) { p.djF = 0; if (p.pound) { p.pound = 0; p.poundT = 0; } return; } dj55pre(p); stepPlayer0(inp); dj55post(p); safe57(p); }
+  function stepPlayer(inp) { const p = pl; p.stp583 = clock; if (state === 'play') st583().t++; if (bubTick57(p)) { p.djF = 0; if (p.pound) { p.pound = 0; p.poundT = 0; } return; } const x584 = p.x, y584 = p.y, g584 = p.ground; dj55pre(p); stepPlayer0(pre584(p, inp)); fjump584(p, inp, g584); dj55post(p); post584(p, inp, x584, y584); safe57(p); }
   function stepPlayer0(inp) {
     const p = pl;
     p.prevY = p.y;
@@ -9087,7 +9087,7 @@ const BlockAction = (() => {
     }
     if (p.poundRec > 0) p.poundRec--;
     if (p.slide) { p.slide++; if (clock % 3 === 0) spawnParts(p.x + p.face * 0.2, p.y + 0.03, ZP, 0xcab59a, 1, 0.03, 0.03); if (Math.abs(p.vx) < 0.02) p.slide = 0; }
-    const lockMove = p.pound || p.poundRec > 0 || (p.crouch && p.ground);
+    const lockMove = p.pound || p.poundRec > 0 || (p.crouch && p.ground && !p.crawl584);
     let dir = lockMove ? 0 : (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (p.wjLock571 > 0 && dir === p.wjD571) dir = 0;   // ~150ms lock away from the wall after a wall jump
     if (p.crouch && p.ground && !p.slide) { const d2 = (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (d2) p.face = d2; }
     if (p.ground) p.airRun = inp.run && Math.abs(p.vx) > C.walk * 1.02; else if (!p.airRun && inp.run) p.airRun = true;
@@ -9186,7 +9186,7 @@ const BlockAction = (() => {
 
   function tick() {
     clock++;
-    if (G && G.hitstop > 0 && state === 'play') { G.hitstop--; return; }   // stomp hit-stop freeze (input edges survive)
+    if (G && G.hitstop > 0 && state === 'play') { G.hitstop = Math.min(G.hitstop, 12) - 1; return; }   // stomp hit-stop freeze (input edges survive)
     const inp = readInput();
     if (state === 'map' || state === 'cut' || state === 'talk') { story5Tick(inp); prevIn = inp; return; }
     if (state === 'intro') { if (--G.introT <= 0) state = 'play'; tickWorld(false); return; }
@@ -9479,7 +9479,7 @@ const BlockAction = (() => {
   function animHero(dt) {
     if (!player || !pl) return;
     if (SHOP582.pend) shopPend582();
-    if (!STK583.ui) { STK583.ui = 1; stkUI583(); } stkTick583(); stkPad583();
+    if (!STK583.ui) { STK583.ui = 1; stkUI583(); } stkTick583(); stkPad583(); lrTick584();
     const u = player.userData, Lb = u.limbs, model = u.model;
     const p = pl, k = Math.min(1, dt * 60);
     // size (grow / shrink with a flicker like the classics)
@@ -10027,7 +10027,7 @@ const BlockAction = (() => {
     } else if (kind === 'pause') {
       h.textContent = '일시정지'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 목숨 ${G.lives} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
       add('계속하기', resume, 'pri'); add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) { mb.textContent = BGM.isOn() ? '🎵' : '🎵'; mb.classList.toggle('off', !BGM.isOn()); } showOver('pause'); });
-      add('음악 볼륨: ' + (BGM.vol() < 0.3 ? '작게' : BGM.vol() < 0.5 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.3 ? 0.4 : v < 0.5 ? 0.6 : 0.2); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); showOver('pause'); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); showOver('pause'); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open()); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
+      add('음악 볼륨: ' + (BGM.vol() < 0.3 ? '작게' : BGM.vol() < 0.5 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.3 ? 0.4 : v < 0.5 ? 0.6 : 0.2); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); if (CTL584.touch()) add('📱 이동 조작: ' + CTL584.label(), () => { CTL584.cycle(); showOver('pause'); }); add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); showOver('pause'); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); showOver('pause'); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open()); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
     }
     el.dataset.kind = kind; el.classList.add('show'); setPad(false);
     if (kind === 'clear') results53(el, info);
@@ -10035,7 +10035,7 @@ const BlockAction = (() => {
   let pausedFrom = null;
   function pause() { if (state !== 'play' && state !== 'intro') return; pausedFrom = state; state = 'pause'; showOver('pause'); }
   function resume() { if (state !== 'pause') return; state = pausedFrom || 'play'; hideOverlays(); releaseKeys(); }
-  function releaseKeys() { for (const k in keys) keys[k] = false; prevIn = {}; RUN5.reset(); }
+  function releaseKeys() { for (const k in keys) keys[k] = false; prevIn = {}; RUN5.reset(); try { lrEnd584(); } catch (e) {} }
 
   // ---------- boot ----------
   function ensure() {
@@ -10164,7 +10164,7 @@ const BlockAction = (() => {
       hold: (code, on) => { keys[code] = !!on; }, stepFeet: n => { const out = []; for (let i = 0; i < n; i++) { tick(); animHero(1 / 60); rigTick58(1 / 60, true); feetFix55(true); out.push(window.__ba.feet()); } return out; },
       step55: n => { const out = []; for (let i = 0; i < n; i++) { tick(); animHero(1 / 60); polish53(1 / 60); animActors(1 / 60); animStriders5(); rigTick58(1 / 60); feetFix55(); out.push(window.__ba.foot55()); } return out; },
       foot55: () => { const r = { hero: heroFootPen55(), lift: FIX55.hero, g: pl.ground, x: pl.x, vx: pl.vx, rb: AN.rb, mobs: [] }; for (const e of enemies) { const L = mobLegs55(e); if (!L || !e.alive) continue; e.mesh.updateMatrixWorld(true); r.mobs.push([e.kind, e.id, Math.abs(groundBelow(e.x, e.y + 0.05) - e.y) < 0.02, e.y - legLow55(L), e.vx, e.x]); } r.cx = cam.x; r.wv = cam.Wv; return r; },
-      fix55: on => { FIX55.on = !!on; }, draw55: () => { placeCamera(false); postRender52(scene, camera); return renderer.domElement.toDataURL('image/png'); }, dbg: () => ({ crouch: pl.crouch, pound: pl.pound, h: pl.h, slide: pl.slide }), shot: (x, y, d) => { cam.ov = x === undefined ? null : { x, y, d: d || 5 }; }, select: () => showSelect()
+      as584: () => ({ n: AS584.n, log: AS584.log.slice() }), ctl584: m => { if (m) CTL584.set(m); return { mode: CTL584.mode(), dir: LR584.dir, keys: { L: !!keys.ArrowLeft, R: !!keys.ArrowRight, D: !!keys.ArrowDown, J: !!keys.Space } }; }, tick584: n => { for (let i = 0; i < n; i++) tick(); }, fix55: on => { FIX55.on = !!on; }, draw55: () => { placeCamera(false); postRender52(scene, camera); return renderer.domElement.toDataURL('image/png'); }, dbg: () => ({ crouch: pl.crouch, pound: pl.pound, h: pl.h, slide: pl.slide }), shot: (x, y, d) => { cam.ov = x === undefined ? null : { x, y, d: d || 5 }; }, select: () => showSelect()
     };
   }
 
@@ -11363,7 +11363,7 @@ const BlockAction = (() => {
     if (CUT.on && CUT.i >= CUT.steps.length) endCut5();
   }
   function fw5(x, y) { const c = [0xff5a7a, 0xffd04a, 0x6ad8ff, 0xa0ff6a, 0xd07aff][Math.floor(Math.random() * 5)]; spawnParts(x, y, ZP - 1.5, c, NP(26), 0.16, 0.02); const g = glowSprite(LIN(c), 3); g.material.opacity = 0.8; g.position.set(x, y, ZP - 1.5); W3.group.add(g); pops.push({ type: 'fade5', m: g, t: 0 }); sfx5('firework'); }
-  const CREDITS5 = `<h1>블록 액션 · 꾸꾸의 모험</h1>
+  const CREDITS5 = `<h1>마인크래프트 마리오 · 꾸꾸의 모험</h1>
 <h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>
 <h3>CAST</h3><div class="l">꾸꾸 — 용감한 주인공</div><div class="l">뚜뚜 — 호박 농사꾼 친구</div><div class="l">촌장 — 마을의 어르신</div><div class="l">무시룸 · 철골렘 · 눈골렘 — 든든한 동료들</div><div class="l">골렘 왕 — 되찾은 수호자</div><div class="l">그락 — 피글린 대장</div><div class="l">위더 — 네더의 지배자</div><div class="l">별별이 — 크레용 나라의 길잡이</div><div class="l">크레용 로봇 — 낙서에서 태어난 친구</div>
 <h3>WORLD 1</h3><div class="l">성 밖 들판 · 지하 동굴 · 성벽 위 공중 발판 · 성 안 보스전</div>
@@ -11644,6 +11644,7 @@ const BlockAction = (() => {
     if (allClear583()) add('👑 최종 엔딩 다시 보기', () => playFinale583(), 'pri');
     add('📋 스테이지 목록', () => { modeClass5(null); D.map.classList.remove('show'); showSelect(); selectExtras5(); });
     add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); mapPanel5(); if (VOICE.mode() !== 'off') { sayPreview5(); } });
+    if (CTL584.touch()) add('📱 이동 조작: ' + CTL584.label(), () => { CTL584.cycle(); mapPanel5(); });
     add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); mapPanel5(); }); add('⌨️ 대시 키: ' + (DK581.cap ? '새 키를 누르세요 (Esc 취소)' : DK581.lbl(DK581.get())), () => { DK581.cap = DK581.cap ? 0 : 1; mapPanel5(); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); mapPanel5(); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open());
     add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) mb.classList.toggle('off', !BGM.isOn()); mapPanel5(); });
     const clr = MAPN5.filter((m, k) => m.s !== undefined && nodeClear5(k)).length;
@@ -12033,6 +12034,7 @@ const BlockAction = (() => {
     }
     const PAD = document.getElementById('baPad');
     if (PAD && !document.getElementById('baJoy')) joy583(PAD);
+    if (PAD && !document.getElementById('baLR584')) lr584(PAD);
     const root = document.getElementById('blockaction');
     if (root && !root.dataset.idle583) { root.dataset.idle583 = 1; const wake = () => { root.classList.remove('idle583'); clearTimeout(STK583.idleT); STK583.idleT = setTimeout(() => root.classList.add('idle583'), 4000); };
       root.addEventListener('pointerdown', wake, true); window.addEventListener('keydown', wake, true); wake(); }
@@ -12048,11 +12050,11 @@ const BlockAction = (() => {
       if (code !== 'ArrowDown') { if (v) { RUN5.dirDown(code); vib(6); } else RUN5.dirUp(code); } };
     const move = (x, y) => { let dx = x - cx, dy = y - cy; const d = Math.hypot(dx, dy); if (d > R) { dx *= R / d; dy *= R / d; }
       knob.style.transform = `translate(${dx}px,${dy}px)`; const nx = dx / R, ny = dy / R;
-      set('ArrowLeft', nx < -0.32); set('ArrowRight', nx > 0.32); set('ArrowDown', ny > 0.55 && Math.abs(nx) < 0.85); };
+      set('ArrowLeft', nx < -0.32); set('ArrowRight', nx > 0.32); set('ArrowDown', ny > 0.6 && Math.abs(nx) <= 0.32); };
     const end = () => { id = null; z.classList.remove('act'); knob.style.transform = ''; set('ArrowLeft', false); set('ArrowRight', false); set('ArrowDown', false); home(); };
     z.addEventListener('pointerdown', e => { if (id !== null) return; e.preventDefault(); id = e.pointerId; try { z.setPointerCapture(id); } catch (err) {}
       const r = z.getBoundingClientRect(); const x = Math.max(r.left + 60, Math.min(r.right - 60, e.clientX)), y = Math.max(r.top + 60, Math.min(r.bottom - 60, e.clientY));
-      cx = x; cy = y; base.style.left = (x - r.left) + 'px'; base.style.top = (y - r.top) + 'px'; z.classList.add('act'); move(e.clientX, e.clientY); });
+      cx = e.clientX; cy = e.clientY; base.style.left = (x - r.left) + 'px'; base.style.top = (y - r.top) + 'px'; z.classList.add('act'); move(e.clientX, e.clientY); });
     z.addEventListener('pointermove', e => { if (e.pointerId === id) { e.preventDefault(); move(e.clientX, e.clientY); } });
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => z.addEventListener(t, e => { if (e.pointerId === id) end(); }));
     z.addEventListener('contextmenu', e => e.preventDefault());
@@ -12291,6 +12293,154 @@ const BlockAction = (() => {
     const j = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.1, 0.03), jm); j.position.set(0, 0.02, 0.26); g.add(j);
     let top = 1.0; try { H.updateMatrixWorld(true); const bb = new THREE.Box3().setFromObject(H); if (isFinite(bb.max.y)) top = (bb.max.y - H.getWorldPosition(new THREE.Vector3()).y) / 0.7; } catch (e) {}
     g.position.y = top + 0.04; H.add(g); H.userData.crown583 = g;
+  }
+  // ===== v5.8.4 ANTI-STUCK: crouch never freezes the hero, embedded bodies are pushed out, locked control flags self-heal =====
+  const AS584 = { n: 0, log: [] };
+  function as584log(k, p) { AS584.n++; AS584.log.push({ k, x: +p.x.toFixed(2), y: +p.y.toFixed(2), st: stageIdx }); if (AS584.log.length > 30) AS584.log.shift(); try { slog5('stuck584', k + ' @' + p.x.toFixed(1) + ',' + p.y.toFixed(1)); } catch (e) {} }
+  function boxHit584(p, x, y, h) {   // does the body box (x,y,h) overlap a solid tile?
+    const x0 = Math.floor(x - p.hw + 0.03), x1 = Math.floor(x + p.hw - 0.03), y0 = Math.floor(y + 0.03), y1 = Math.floor(y + h - 0.03);
+    for (let ty = y0; ty <= y1; ty++) for (let tx = x0; tx <= x1; tx++) if (solidAt(tx, ty)) return true;
+    return false;
+  }
+  function room584(p) { return !boxHit584(p, p.x, p.y, p.hB || p.h); }   // enough head-room to stand up
+  function stand584(p) { p.crouch = false; p.slide = 0; p.crawl584 = 0; p.h = p.hB || p.h; }
+  // before stepPlayer0: crouch-jump + "down held with left/right" walks instead of freezing (phones press ↓ by accident)
+  function pre584(p, inp) {
+    if (state !== 'play' || p.truck || p.bub57) { p.cH584 = 0; p.dSup584 = 0; p.crawl584 = 0; return inp; }
+    const h = (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
+    if (p.dSup584 && !(inp.down && h)) p.dSup584 = 0;
+    if (p.crouch && p.ground && !p.slide && h) p.cH584 = (p.cH584 | 0) + 1; else p.cH584 = 0;
+    p.crawl584 = 0;
+    if (p.crouch && p.ground && !p.slide) {
+      if (inp.jumpP && room584(p)) { stand584(p); return Object.assign({}, inp, { down: false }); }
+      if (h && p.cH584 >= 14) { if (room584(p)) { stand584(p); p.dSup584 = 1; as584log('crouch-walk', p); } else p.crawl584 = 1; }   // no room -> crawl out crouched
+    }
+    if (p.dSup584 && inp.down) return Object.assign({}, inp, { down: false });
+    return inp;
+  }
+  // after stepPlayer0: never stay inside a block; locked flags heal after ~1.5 s
+  function post584(p, inp, x0, y0) {
+    if (state !== 'play' || p.truck || p.bub57) { p.lk584 = 0; p.nm584 = 0; p.emb584 = 0; return; }
+    if (p.crawl584) { const m = C.walk * 0.45; if (Math.abs(p.vx) > m) p.vx = Math.sign(p.vx) * m; }
+    if (boxHit584(p, p.x, p.y, p.h)) {
+      p.emb584 = (p.emb584 | 0) + 1;
+      const hc = (p.hB || p.h) * 0.6;
+      if (p.ground && !p.crouch && !boxHit584(p, p.x, p.y, hc)) { p.crouch = true; p.h = hc; p.emb584 = 0; }   // grown under a low ceiling -> duck instead
+      else if (p.emb584 >= 2) {   // moveBody could not resolve it: nearest free spot (up first)
+        let best = null, bd = 1e9;
+        for (let dy = -2; dy <= 5; dy += 0.25) for (let dx = -3; dx <= 3; dx += 0.25) {
+          const nx = p.x + dx, ny = p.y + dy; let d = Math.abs(dx) + (dy < 0 ? -dy * 1.6 : dy * 0.8); if (d >= bd) continue;
+          if (boxHit584(p, nx, ny, p.h)) continue;
+          if (!boxHit584(p, nx, ny - 0.3, 0.3)) d += 2;   // prefer a spot with floor under it
+          if (d < bd) { best = [nx, ny]; bd = d; }
+        }
+        if (!best) for (let r = 1; r <= 6 && !best; r++) for (const [dx, dy] of [[0, r], [-r, 0], [r, 0], [0, -r]]) if (!best && !boxHit584(p, p.x + dx, p.y + dy, p.h)) best = [p.x + dx, p.y + dy];
+        if (best) { p.x = best[0]; p.y = best[1]; p.vx = 0; p.vy = 0; p.ride = null; as584log('push-out', p); }
+        p.emb584 = 0;
+      }
+    } else p.emb584 = 0;
+    // lock watchdog: control flags that block movement, held for > 90 ticks (1.5 s) during normal play
+    const h = (inp.right ? 1 : 0) - (inp.left ? 1 : 0);
+    const locked = (p.pound && p.ground) || p.poundRec > 0 || p.wjLock571 > 0 || p.djF > 0 && p.ground || (p.crouch && p.ground && !inp.down && !p.slide) || (G && G.hitstop > 0);
+    p.lk584 = locked ? (p.lk584 | 0) + 1 : 0;
+    const wall = h && (solidAt(Math.floor(p.x + h * (p.hw + 0.06)), Math.floor(p.y + 0.1)) || solidAt(Math.floor(p.x + h * (p.hw + 0.06)), Math.floor(p.y + p.h - 0.1)));
+    const still = h && !wall && !p.crouch && Math.abs(p.x - x0) < 0.0005 && Math.abs(p.y - y0) < 0.0005;
+    p.nm584 = still ? (p.nm584 | 0) + 1 : 0;
+    if (p.lk584 > 90 || p.nm584 > 90) {
+      as584log(p.lk584 > 90 ? 'flags' : 'no-move', p);
+      p.pound = 0; p.poundT = 0; p.poundRec = 0; p.wjLock571 = 0; p.djF = 0; p.slide = 0; if (G) G.hitstop = 0;
+      if (p.crouch) { if (room584(p)) stand584(p); }
+      if (player) player.rotation.set(0, 0, 0);
+      p.lk584 = 0; p.nm584 = 0;
+    }
+  }
+  // ===== v5.8.4 MOBILE CONTROL STYLE: '좌우 버튼' (default) or '조이스틱' (the v5.8.3 analog stick) =====
+  const CTL584 = (() => {
+    const KEY = 'ba_ctl584', LBL = { btn: '좌우 버튼', joy: '조이스틱' };
+    let mode = 'btn'; try { const v = localStorage.getItem(KEY); if (v === 'joy' || v === 'btn') mode = v; } catch (e) {}
+    const touch = () => { try { return matchMedia('(pointer:coarse)').matches || (navigator.maxTouchPoints | 0) > 0; } catch (e) { return false; } };
+    function apply() {
+      const root = document.getElementById('blockaction'); if (root) { root.classList.toggle('ctlb584', mode === 'btn'); root.classList.toggle('ctlj584', mode === 'joy'); }
+      if (mode === 'btn') { try { STK583.joy && STK583.joy.end(); } catch (e) {} } else lrEnd584();
+    }
+    return { mode: () => mode, label: () => LBL[mode], touch, apply,
+      set(m) { if (m !== 'btn' && m !== 'joy') return; mode = m; try { localStorage.setItem(KEY, m); } catch (e) {} apply(); },
+      cycle() { this.set(mode === 'btn' ? 'joy' : 'btn'); return mode; } };
+  })();
+  const LR584 = { id: null, dir: null, el: null, dn: null };
+  function lrSet584(code) {   // code: 'ArrowLeft' | 'ArrowRight' | null
+    if (LR584.dir === code) return;
+    const old = LR584.dir; if (old) { keys[old] = false; RUN5.dirUp(old); }
+    LR584.dir = code;
+    if (code) { keys[code] = true; RUN5.dirDown(code); vib(6); }
+    if (LR584.el) { LR584.el.querySelector('.l584').classList.toggle('on', code === 'ArrowLeft'); LR584.el.querySelector('.r584').classList.toggle('on', code === 'ArrowRight'); }
+  }
+  function lrEnd584() { LR584.id = null; lrSet584(null); }
+  function lr584(PAD) {
+    if (document.getElementById('baLR584')) return;
+    const st = document.createElement('style'); st.id = 'ctl584-css'; st.textContent = `
+#blockaction #baPad > #baLR584,#blockaction #baPad > #baDn584{display:none !important;}
+#blockaction.ctlb584 #baPad > #baJoy{display:none !important;}
+#blockaction.ctlb584 #baPad > #baLR584{display:block !important;position:absolute !important;left:0;bottom:0;width:calc(250px + var(--sl583)) !important;height:calc(150px + var(--sb583)) !important;pointer-events:auto !important;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;}
+#blockaction.ctlb584 #baPad > #baDn584{display:flex !important;}
+#blockaction #baPad > #baLR584 > .k584,#blockaction #baPad > #baDn584{position:absolute !important;border-radius:30px;pointer-events:none;align-items:center;justify-content:center;box-sizing:border-box;
+  background:radial-gradient(130% 120% at 32% 18%,rgba(255,255,255,.30),rgba(255,255,255,.07) 46%,rgba(30,36,70,.42) 100%);border:1.5px solid rgba(255,255,255,.42);
+  box-shadow:inset 0 2px 1px rgba(255,255,255,.38),inset 0 -7px 16px rgba(0,0,0,.26),0 6px 18px rgba(0,0,0,.32);backdrop-filter:blur(10px) saturate(150%);-webkit-backdrop-filter:blur(10px) saturate(150%);
+  display:flex;transition:transform .07s ease-out,box-shadow .12s,filter .12s;}
+#blockaction #baPad > #baLR584 > .k584{width:96px;height:86px;bottom:calc(22px + var(--sb583));}
+#blockaction #baPad > #baLR584 > .l584{left:calc(14px + var(--sl583));} #blockaction #baPad > #baLR584 > .r584{left:calc(124px + var(--sl583));}
+#blockaction #baPad > #baLR584 svg,#blockaction #baPad > #baDn584 svg{width:46%;height:46%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45));pointer-events:none;}
+#blockaction #baPad > #baLR584 > .k584.on,#blockaction #baPad > #baDn584.on{transform:scale(.93);filter:brightness(1.2);box-shadow:inset 0 2px 1px rgba(255,255,255,.45),inset 0 -4px 12px rgba(0,0,0,.2),0 0 22px rgba(140,190,255,.85),0 0 0 2px rgba(140,190,255,.55);}
+#blockaction #baPad > #baLR584.sp584 > .k584.on{box-shadow:inset 0 2px 1px rgba(255,255,255,.45),0 0 22px rgba(255,190,90,.9),0 0 0 2px rgba(255,190,90,.6);}
+#blockaction #baPad > #baDn584{width:62px !important;height:46px !important;border-radius:23px;left:calc(86px + var(--sl583));bottom:calc(152px + var(--sb583));pointer-events:auto !important;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;-webkit-tap-highlight-color:transparent;}
+#blockaction #baPad > #baDn584::before{content:'';position:absolute;inset:-12px -16px -6px -16px;}
+@media (max-width:420px){#blockaction.ctlb584 #baPad > #baLR584{width:calc(196px + var(--sl583)) !important;}
+  #blockaction #baPad > #baLR584 > .k584{width:84px;height:80px;} #blockaction #baPad > #baLR584 > .l584{left:calc(10px + var(--sl583));} #blockaction #baPad > #baLR584 > .r584{left:calc(102px + var(--sl583));}
+  #blockaction #baPad > #baDn584{left:calc(67px + var(--sl583));bottom:calc(146px + var(--sb583));}}
+@media (max-width:374px){#blockaction.ctlb584 #baPad > #baLR584{width:calc(166px + var(--sl583)) !important;}
+  #blockaction #baPad > #baLR584 > .k584{width:76px;height:74px;} #blockaction #baPad > #baLR584 > .l584{left:calc(6px + var(--sl583));} #blockaction #baPad > #baLR584 > .r584{left:calc(88px + var(--sl583));}
+  #blockaction #baPad > #baDn584{left:calc(56px + var(--sl583));}}
+/* v5.8.4 portrait text fit (BF worker note 10:20 KST): banner, story text, dialog vs pad, stage title card */
+:is(#blockaction,body) #baMsg{max-width:calc(100vw - 20px);width:max-content;box-sizing:border-box;}
+:is(#blockaction,body) #baMsg b{white-space:normal !important;word-break:keep-all;overflow-wrap:break-word;text-wrap:balance;font-size:clamp(22px,6vw,46px);line-height:1.15;}
+:is(#blockaction,body) #baMsg span{word-break:keep-all;overflow-wrap:break-word;text-wrap:balance;}
+:is(#blockaction,body) #tc53 .bar{box-sizing:border-box;max-width:calc(100vw - 20px);}
+:is(#blockaction,body) #tc53 .nm,:is(#blockaction,body) #tc53 .sub{word-break:keep-all;overflow-wrap:break-word;text-wrap:balance;}
+:is(#blockaction,body) #tc53 .id{font-size:clamp(28px,8vw,58px);white-space:nowrap;}
+@media (orientation:portrait) and (pointer:coarse){
+  :is(#blockaction,body) #baDlg{bottom:calc(300px + var(--sb583,0px));width:94%;}
+  :is(#blockaction,body) #baDlg .pt{width:64px;height:64px;}
+  :is(#blockaction,body) #baDlg .bx{min-height:64px;padding:8px 12px 10px;}
+  :is(#blockaction,body) #baDlg p{font-size:clamp(14px,4vw,18px);}
+  :is(#blockaction,body) #tc53 .lv{position:static;display:inline-block;margin-top:6px;}
+  :is(#blockaction,body) #baMsg{top:30%;}
+}
+`;
+    document.head.appendChild(st);
+    const arrow = d => `<svg viewBox="0 0 24 24"><path d="${d}" fill="#fff" stroke="rgba(0,0,0,.25)" stroke-width=".8" stroke-linejoin="round"/></svg>`;
+    const z = document.createElement('div'); z.id = 'baLR584';
+    z.innerHTML = `<div class="k584 l584">${arrow('M15.5 4.5 L6.5 12 L15.5 19.5 Z')}</div><div class="k584 r584">${arrow('M8.5 4.5 L17.5 12 L8.5 19.5 Z')}</div>`;
+    PAD.insertBefore(z, PAD.firstChild); LR584.el = z;
+    const pick = x => { const r = z.getBoundingClientRect(), L = z.querySelector('.l584').getBoundingClientRect(), R = z.querySelector('.r584').getBoundingClientRect();
+      const mid = (L.right + R.left) / 2, hy = 10;   // hysteresis around the gap between the two buttons
+      if (LR584.dir === 'ArrowLeft' && x < mid + hy) return 'ArrowLeft'; if (LR584.dir === 'ArrowRight' && x > mid - hy) return 'ArrowRight';
+      return x < mid ? 'ArrowLeft' : 'ArrowRight'; };
+    z.addEventListener('pointerdown', e => { if (LR584.id !== null) return; e.preventDefault(); LR584.id = e.pointerId; try { z.setPointerCapture(e.pointerId); } catch (err) {} lrSet584(pick(e.clientX)); });
+    z.addEventListener('pointermove', e => { if (e.pointerId !== LR584.id) return; e.preventDefault(); lrSet584(pick(e.clientX)); });   // slide between ← and → without lifting
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => z.addEventListener(t, e => { if (e.pointerId === LR584.id) lrEnd584(); }));
+    z.addEventListener('contextmenu', e => e.preventDefault());
+    const dn = document.createElement('div'); dn.id = 'baDn584'; dn.innerHTML = arrow('M4.5 8.5 L12 17.5 L19.5 8.5 Z'); PAD.insertBefore(dn, PAD.firstChild); LR584.dn = dn;
+    let did = null; const dup = e => { if (e.pointerId !== did) return; did = null; keys.ArrowDown = false; dn.classList.remove('on'); };
+    dn.addEventListener('pointerdown', e => { if (did !== null) return; e.preventDefault(); did = e.pointerId; try { dn.setPointerCapture(did); } catch (err) {} keys.ArrowDown = true; dn.classList.add('on'); vib(6); });
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => dn.addEventListener(t, dup)); dn.addEventListener('contextmenu', e => e.preventDefault());
+    CTL584.apply();
+  }
+  function lrTick584() { if (LR584.el) LR584.el.classList.toggle('sp584', RUN5.sprinting()); if (LR584.dir && !keys[LR584.dir] && LR584.id !== null) keys[LR584.dir] = true; }
+  // forward-jump assist (touch): a jump started while ←/→ is held leaves with at least ~75% walk speed in that direction
+  function fjump584(p, inp, g0) {
+    if (!g0 || p.ground || p.vy < 0.1 || p.truck || !CTL584.touch()) return;
+    const h = (inp.right ? 1 : 0) - (inp.left ? 1 : 0); if (!h) return;
+    const m = C.walk * 0.75; if (p.vx * h < m) p.vx = h * m;
   }
   function sayPreview5() { if (VOICE.mode() === 'tts' && VOICE.ttsOK()) VOICE.speak('안녕! 나는 꾸꾸야.', 'haru'); else if (VOICE.usesBlips()) Array.from('안녕나는꾸꾸야').forEach((ch, i) => setTimeout(() => VOICE.blip(ch, 'haru'), i * 55)); }
   function selectExtras5() {
@@ -15452,7 +15602,7 @@ const SaveCode57 = (() => {
     r.board = Object.keys(keys).filter(k => k.indexOf('minigames_v1_') === 0).length;
     r.best.sort(); return r;
   }
-  const sumText = (r, t) => `${t ? '📅 ' + new Date(t).toLocaleString('ko-KR') + '\n' : ''}🧱 블록 액션: 클리어 ${r.stages}개 스테이지${r.best.length ? ' (' + r.best.join(', ') + ')' : ''} · ⭐ ${r.stars}개 · 해금 ${r.unlocked}${r.ending ? ' · 엔딩 봄' : ''}${r.wallet ? ' · 🪙 ' + r.wallet : ''}\n⚙️ 난이도 ${r.diff} · 저장 항목 ${r.keys}개${r.board ? ' · 보드게임 기록 ' + r.board + '개' : ''}`;
+  const sumText = (r, t) => `${t ? '📅 ' + new Date(t).toLocaleString('ko-KR') + '\n' : ''}⛏️ 마인크래프트 마리오: 클리어 ${r.stages}개 스테이지${r.best.length ? ' (' + r.best.join(', ') + ')' : ''} · ⭐ ${r.stars}개 · 해금 ${r.unlocked}${r.ending ? ' · 엔딩 봄' : ''}${r.wallet ? ' · 🪙 ' + r.wallet : ''}\n⚙️ 난이도 ${r.diff} · 저장 항목 ${r.keys}개${r.board ? ' · 보드게임 기록 ' + r.board + '개' : ''}`;
   function apply(p) {
     const rm = []; for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && ok(k)) rm.push(k); }
     rm.forEach(k => localStorage.removeItem(k)); Object.keys(p.keys).forEach(k => localStorage.setItem(k, p.keys[k]));
@@ -15534,7 +15684,7 @@ const SaveCode57 = (() => {
     if (el) return el; const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     el = document.createElement('div'); el.id = 'sv57';
     el.innerHTML = `<div class="pn"><h3>💾 기록 옮기기</h3><div class="tb"><button type="button" data-t="ex">기록 내보내기</button><button type="button" data-t="im">기록 불러오기</button><span style="flex:1"></span><button type="button" data-a="close">닫기 ✕</button></div>
-<div data-p="ex"><small>이 기기의 블록 액션 진행·스토리·해금·난이도별 최고 기록·설정(화질/난이도/달리기/음성/음악)과 보드게임 기록을 하나의 코드로 만들어요.</small>
+<div data-p="ex"><small>이 기기의 마인크래프트 마리오 진행·스토리·해금·난이도별 최고 기록·설정(화질/난이도/달리기/음성/음악)과 보드게임 기록을 하나의 코드로 만들어요.</small>
 <textarea readonly data-f="code" aria-label="기록 코드"></textarea><div class="row"><button type="button" class="pri" data-a="copy">📋 복사</button><button type="button" data-a="file">💾 파일로 저장</button></div>
 <div class="msg" data-f="exmsg"></div><div class="qr"><canvas data-f="qr" width="10" height="10"></canvas><small data-f="qrinfo"></small></div></div>
 <div data-p="im"><small>다른 기기에서 내보낸 코드를 붙여 넣거나 .txt 파일을 열어 주세요. (QR을 폰 카메라로 찍으면 자동으로 열려요)</small>
@@ -15653,7 +15803,7 @@ input,textarea,select,[contenteditable="true"],#sv57 textarea,#sv57 input{-webki
 if(window.UIX&&window.UIX.__v)return;
 var UIX=window.UIX={__v:1};
 var BOARD=['chess','omok','janggi','baduk','uno'];
-var NAME={chess:'3D 체스',omok:'오목',janggi:'장기',baduk:'바둑',uno:'UNO',blockaction:'블록 액션'};
+var NAME={chess:'3D 체스',omok:'오목',janggi:'장기',baduk:'바둑',uno:'UNO',blockaction:'마인크래프트 마리오',blockfighter:'마인크래프트 파이터'};
 var LVK={1:'쉬움',2:'보통',3:'어려움'};
 function $(s,r){return (r||document).querySelector(s);}
 function $$(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
@@ -15723,9 +15873,9 @@ var THUMB={
  janggi:'<svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice"><rect x="20" y="8" width="200" height="116" rx="6" fill="#e3c08a" opacity=".85"/><g stroke="#7a5428" stroke-width="1" opacity=".6">'+(function(){var s='';for(var i=0;i<9;i++)s+='<path d="M'+(30+i*22.5)+' 14v104"/>';for(var j=0;j<6;j++)s+='<path d="M30 '+(14+j*20.8)+'h180"/>';s+='<path d="M97.5 14l45 41.6M142.5 14l-45 41.6"/>';return s;})()+'</g><g class="fl"><polygon points="62,46 82,46 96,60 96,80 82,94 62,94 48,80 48,60" fill="#fff6e4" stroke="#d9473a" stroke-width="4"/><text x="72" y="79" text-anchor="middle" font-size="30" fill="#c8322a" font-family="serif" font-weight="700">楚</text></g><g class="fl2"><polygon points="158,40 178,40 192,54 192,74 178,88 158,88 144,74 144,54" fill="#fff6e4" stroke="#1f8590" stroke-width="4"/><text x="168" y="73" text-anchor="middle" font-size="30" fill="#16707a" font-family="serif" font-weight="700">漢</text></g></svg>',
  baduk:'<svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice"><rect x="56" y="4" width="128" height="124" rx="6" fill="#dcb46a"/><g stroke="#5a3f18" stroke-width="1" opacity=".75">'+(function(){var s='';for(var i=0;i<9;i++){s+='<path d="M'+(66+i*13.5)+' 14v108"/>';s+='<path d="M66 '+(14+i*13.5)+'h108"/>';}return s;})()+'</g>'+(function(){var s='',B=[[2,2],[3,3],[2,4],[4,2],[5,5],[6,3]],W=[[3,2],[4,3],[3,4],[5,4],[6,5]];B.forEach(function(p,i){s+='<circle class="'+(i===5?'pulse':'')+'" cx="'+(66+p[0]*13.5)+'" cy="'+(14+p[1]*13.5)+'" r="6.2" fill="#141416"/>';});W.forEach(function(p){s+='<circle cx="'+(66+p[0]*13.5)+'" cy="'+(14+p[1]*13.5)+'" r="6.2" fill="#f4f1ea" stroke="#999" stroke-width=".6"/>';});return s;})()+'</svg>',
  uno:'<svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice"><g class="fan">'+[['#d23a2f','7'],['#e3b300','+2'],['#1d8a40','⟲'],['#2357c2','★']].map(function(c,i){var rot=[-18,-6,6,18][i];return '<g transform="rotate('+rot+' 120 190)"><g transform="translate(96 30)"><rect width="48" height="72" rx="7" fill="'+c[0]+'" stroke="#fff" stroke-width="3"/><ellipse cx="24" cy="36" rx="17" ry="25" transform="rotate(-24 24 36)" fill="#fff"/><text x="24" y="45" text-anchor="middle" font-size="24" font-weight="900" fill="'+c[0]+'">'+c[1]+'</text></g></g>';}).join('')+'</g></svg>',
- blockaction:'<svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice"><g class="fl"><rect x="60" y="64" width="34" height="34" rx="5" fill="#4ec9f0"/><rect x="94" y="64" width="34" height="34" rx="5" fill="#4ec9f0"/><rect x="94" y="30" width="34" height="34" rx="5" fill="#4ec9f0"/></g><g class="fl2"><rect x="140" y="50" width="30" height="30" rx="5" fill="#ff8a3d"/><rect x="170" y="50" width="30" height="30" rx="5" fill="#ff8a3d"/><rect x="170" y="80" width="30" height="30" rx="5" fill="#ff8a3d"/></g><g class="drop"><rect x="104" y="0" width="22" height="22" rx="4" fill="#ffd34a"/></g></svg>'
+ blockaction:'<svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges"><defs><linearGradient id="mm584s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4fb4ff"/><stop offset="1" stop-color="#c5ecff"/></linearGradient></defs><rect x="0" y="0" width="240" height="132" fill="url(#mm584s)"/><g fill="#fff" opacity=".92"><rect x="30" y="22" width="36" height="10" fill="#fff"/><rect x="38" y="16" width="20" height="8" fill="#fff"/></g><g fill="#fff" opacity=".92"><rect x="150" y="16" width="36" height="10" fill="#fff"/><rect x="158" y="10" width="20" height="8" fill="#fff"/></g><g fill="#fff" opacity=".92"><rect x="196" y="32" width="36" height="10" fill="#fff"/><rect x="204" y="26" width="20" height="8" fill="#fff"/></g><g opacity=".55"><rect x="0" y="78" width="30" height="22" fill="#7fc37a"/><rect x="18" y="70" width="22" height="30" fill="#6fb36a"/><rect x="222" y="74" width="18" height="26" fill="#7fc37a"/></g><rect x="0" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="0" y="100" width="16" height="6" fill="#5fc23c"/><rect x="0" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="3" y="111" width="3" height="3" fill="#a06a35"/><rect x="10" y="116" width="3" height="3" fill="#6d4320"/><rect x="5" y="122" width="3" height="3" fill="#a06a35"/><rect x="12" y="126" width="3" height="3" fill="#6d4320"/><rect x="2" y="128" width="3" height="3" fill="#a06a35"/><rect x="15" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="16" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="16" y="100" width="16" height="6" fill="#5fc23c"/><rect x="16" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="19" y="111" width="3" height="3" fill="#a06a35"/><rect x="26" y="116" width="3" height="3" fill="#6d4320"/><rect x="21" y="122" width="3" height="3" fill="#a06a35"/><rect x="28" y="126" width="3" height="3" fill="#6d4320"/><rect x="18" y="128" width="3" height="3" fill="#a06a35"/><rect x="31" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="32" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="32" y="100" width="16" height="6" fill="#5fc23c"/><rect x="32" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="35" y="111" width="3" height="3" fill="#a06a35"/><rect x="42" y="116" width="3" height="3" fill="#6d4320"/><rect x="37" y="122" width="3" height="3" fill="#a06a35"/><rect x="44" y="126" width="3" height="3" fill="#6d4320"/><rect x="34" y="128" width="3" height="3" fill="#a06a35"/><rect x="47" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="48" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="48" y="100" width="16" height="6" fill="#5fc23c"/><rect x="48" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="51" y="111" width="3" height="3" fill="#a06a35"/><rect x="58" y="116" width="3" height="3" fill="#6d4320"/><rect x="53" y="122" width="3" height="3" fill="#a06a35"/><rect x="60" y="126" width="3" height="3" fill="#6d4320"/><rect x="50" y="128" width="3" height="3" fill="#a06a35"/><rect x="63" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="64" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="64" y="100" width="16" height="6" fill="#5fc23c"/><rect x="64" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="67" y="111" width="3" height="3" fill="#a06a35"/><rect x="74" y="116" width="3" height="3" fill="#6d4320"/><rect x="69" y="122" width="3" height="3" fill="#a06a35"/><rect x="76" y="126" width="3" height="3" fill="#6d4320"/><rect x="66" y="128" width="3" height="3" fill="#a06a35"/><rect x="79" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="80" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="80" y="100" width="16" height="6" fill="#5fc23c"/><rect x="80" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="83" y="111" width="3" height="3" fill="#a06a35"/><rect x="90" y="116" width="3" height="3" fill="#6d4320"/><rect x="85" y="122" width="3" height="3" fill="#a06a35"/><rect x="92" y="126" width="3" height="3" fill="#6d4320"/><rect x="82" y="128" width="3" height="3" fill="#a06a35"/><rect x="95" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="96" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="96" y="100" width="16" height="6" fill="#5fc23c"/><rect x="96" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="99" y="111" width="3" height="3" fill="#a06a35"/><rect x="106" y="116" width="3" height="3" fill="#6d4320"/><rect x="101" y="122" width="3" height="3" fill="#a06a35"/><rect x="108" y="126" width="3" height="3" fill="#6d4320"/><rect x="98" y="128" width="3" height="3" fill="#a06a35"/><rect x="111" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="112" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="112" y="100" width="16" height="6" fill="#5fc23c"/><rect x="112" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="115" y="111" width="3" height="3" fill="#a06a35"/><rect x="122" y="116" width="3" height="3" fill="#6d4320"/><rect x="117" y="122" width="3" height="3" fill="#a06a35"/><rect x="124" y="126" width="3" height="3" fill="#6d4320"/><rect x="114" y="128" width="3" height="3" fill="#a06a35"/><rect x="127" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="128" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="128" y="100" width="16" height="6" fill="#5fc23c"/><rect x="128" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="131" y="111" width="3" height="3" fill="#a06a35"/><rect x="138" y="116" width="3" height="3" fill="#6d4320"/><rect x="133" y="122" width="3" height="3" fill="#a06a35"/><rect x="140" y="126" width="3" height="3" fill="#6d4320"/><rect x="130" y="128" width="3" height="3" fill="#a06a35"/><rect x="143" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="144" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="144" y="100" width="16" height="6" fill="#5fc23c"/><rect x="144" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="147" y="111" width="3" height="3" fill="#a06a35"/><rect x="154" y="116" width="3" height="3" fill="#6d4320"/><rect x="149" y="122" width="3" height="3" fill="#a06a35"/><rect x="156" y="126" width="3" height="3" fill="#6d4320"/><rect x="146" y="128" width="3" height="3" fill="#a06a35"/><rect x="159" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="160" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="160" y="100" width="16" height="6" fill="#5fc23c"/><rect x="160" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="163" y="111" width="3" height="3" fill="#a06a35"/><rect x="170" y="116" width="3" height="3" fill="#6d4320"/><rect x="165" y="122" width="3" height="3" fill="#a06a35"/><rect x="172" y="126" width="3" height="3" fill="#6d4320"/><rect x="162" y="128" width="3" height="3" fill="#a06a35"/><rect x="175" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="176" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="176" y="100" width="16" height="6" fill="#5fc23c"/><rect x="176" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="179" y="111" width="3" height="3" fill="#a06a35"/><rect x="186" y="116" width="3" height="3" fill="#6d4320"/><rect x="181" y="122" width="3" height="3" fill="#a06a35"/><rect x="188" y="126" width="3" height="3" fill="#6d4320"/><rect x="178" y="128" width="3" height="3" fill="#a06a35"/><rect x="191" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="192" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="192" y="100" width="16" height="6" fill="#5fc23c"/><rect x="192" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="195" y="111" width="3" height="3" fill="#a06a35"/><rect x="202" y="116" width="3" height="3" fill="#6d4320"/><rect x="197" y="122" width="3" height="3" fill="#a06a35"/><rect x="204" y="126" width="3" height="3" fill="#6d4320"/><rect x="194" y="128" width="3" height="3" fill="#a06a35"/><rect x="207" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="208" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="208" y="100" width="16" height="6" fill="#5fc23c"/><rect x="208" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="211" y="111" width="3" height="3" fill="#a06a35"/><rect x="218" y="116" width="3" height="3" fill="#6d4320"/><rect x="213" y="122" width="3" height="3" fill="#a06a35"/><rect x="220" y="126" width="3" height="3" fill="#6d4320"/><rect x="210" y="128" width="3" height="3" fill="#a06a35"/><rect x="223" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="224" y="100" width="16" height="32" fill="#8a5a2b"/><rect x="224" y="100" width="16" height="6" fill="#5fc23c"/><rect x="224" y="106" width="16" height="2" fill="#4a9e2c"/><rect x="227" y="111" width="3" height="3" fill="#a06a35"/><rect x="234" y="116" width="3" height="3" fill="#6d4320"/><rect x="229" y="122" width="3" height="3" fill="#a06a35"/><rect x="236" y="126" width="3" height="3" fill="#6d4320"/><rect x="226" y="128" width="3" height="3" fill="#a06a35"/><rect x="239" y="100" width="1" height="32" fill="#6d4320" opacity=".5"/><rect x="106" y="46" width="16" height="16" fill="#b5542a"/><rect x="106" y="46" width="16" height="1" fill="#e08a5a"/><rect x="106" y="51" width="16" height="1" fill="#5a240e"/><rect x="106" y="56" width="16" height="1" fill="#5a240e"/><rect x="113" y="46" width="1" height="5" fill="#5a240e"/><rect x="109" y="51" width="1" height="5" fill="#5a240e"/><rect x="117" y="51" width="1" height="5" fill="#5a240e"/><rect x="113" y="56" width="1" height="6" fill="#5a240e"/><rect x="106" y="61" width="16" height="1" fill="#5a240e"/><rect x="122" y="46" width="16" height="16" fill="#b5542a"/><rect x="122" y="46" width="16" height="1" fill="#e08a5a"/><rect x="122" y="51" width="16" height="1" fill="#5a240e"/><rect x="122" y="56" width="16" height="1" fill="#5a240e"/><rect x="129" y="46" width="1" height="5" fill="#5a240e"/><rect x="125" y="51" width="1" height="5" fill="#5a240e"/><rect x="133" y="51" width="1" height="5" fill="#5a240e"/><rect x="129" y="56" width="1" height="6" fill="#5a240e"/><rect x="122" y="61" width="16" height="1" fill="#5a240e"/><rect x="154" y="46" width="16" height="16" fill="#b5542a"/><rect x="154" y="46" width="16" height="1" fill="#e08a5a"/><rect x="154" y="51" width="16" height="1" fill="#5a240e"/><rect x="154" y="56" width="16" height="1" fill="#5a240e"/><rect x="161" y="46" width="1" height="5" fill="#5a240e"/><rect x="157" y="51" width="1" height="5" fill="#5a240e"/><rect x="165" y="51" width="1" height="5" fill="#5a240e"/><rect x="161" y="56" width="1" height="6" fill="#5a240e"/><rect x="154" y="61" width="16" height="1" fill="#5a240e"/><g class="pulse"><rect x="138" y="46" width="16" height="16" fill="#f4b400"/><rect x="138" y="46" width="16" height="2" fill="#ffe27a"/><rect x="138" y="60" width="16" height="2" fill="#a35f00"/><rect x="152" y="46" width="2" height="16" fill="#a35f00"/><rect x="138" y="46" width="2" height="16" fill="#ffd04a"/><rect x="139" y="47" width="2" height="2" fill="#7a4500"/><rect x="151" y="47" width="2" height="2" fill="#7a4500"/><rect x="139" y="59" width="2" height="2" fill="#7a4500"/><rect x="151" y="59" width="2" height="2" fill="#7a4500"/><text x="146" y="59" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="13" fill="#fff" stroke="#7a4500" stroke-width="1.2" paint-order="stroke">?</text></g><g class="drop"><g><ellipse cx="146" cy="34" rx="4.62" ry="6.6" fill="#ffd23a" stroke="#b07800" stroke-width="1.2"/><rect x="145" y="30.15" width="2" height="7.7" fill="#fff3b0"/></g></g><g><ellipse cx="40" cy="82" rx="4.2" ry="6" fill="#ffd23a" stroke="#b07800" stroke-width="1.2"/><rect x="39" y="78.5" width="2" height="7" fill="#fff3b0"/></g><g><ellipse cx="52" cy="76" rx="4.2" ry="6" fill="#ffd23a" stroke="#b07800" stroke-width="1.2"/><rect x="51" y="72.5" width="2" height="7" fill="#fff3b0"/></g><g><ellipse cx="64" cy="72" rx="4.2" ry="6" fill="#ffd23a" stroke="#b07800" stroke-width="1.2"/><rect x="63" y="68.5" width="2" height="7" fill="#fff3b0"/></g><g class="fl" transform="rotate(-6 126 78)"><rect x="106" y="88" width="7" height="2" fill="#ffffff" opacity=".7"/><rect x="102" y="94" width="9" height="2" fill="#ffffff" opacity=".55"/><rect x="108" y="100" width="6" height="2" fill="#ffffff" opacity=".45"/><rect x="118" y="58" width="16" height="16" fill="#c8946a"/><rect x="118" y="58" width="16" height="5" fill="#4a2f1d"/><rect x="118" y="63" width="2" height="3" fill="#4a2f1d"/><rect x="132" y="63" width="2" height="3" fill="#4a2f1d"/><rect x="121" y="66" width="3" height="2" fill="#fff"/><rect x="123" y="66" width="1" height="2" fill="#3b5bdb"/><rect x="128" y="66" width="3" height="2" fill="#fff"/><rect x="128" y="66" width="1" height="2" fill="#3b5bdb"/><rect x="124" y="70" width="4" height="1" fill="#8a5a3a"/><rect x="123" y="69" width="6" height="1" fill="#9c6a48"/><rect x="118" y="74" width="16" height="16" fill="#2fb3b3"/><rect x="118" y="74" width="16" height="2" fill="#4fd0d0"/><rect x="133" y="54" width="6" height="20" fill="#2fb3b3"/><rect x="133" y="48" width="6" height="7" fill="#c8946a"/><rect x="112" y="76" width="6" height="12" fill="#2fb3b3"/><rect x="112" y="87" width="6" height="4" fill="#c8946a"/><rect x="118" y="90" width="8" height="10" fill="#3b4cc0"/><rect x="126" y="90" width="8" height="6" fill="#3b4cc0"/><rect x="128" y="95" width="8" height="6" fill="#3b4cc0"/><rect x="118" y="100" width="8" height="4" fill="#555"/><rect x="130" y="101" width="7" height="3" fill="#555"/></g><rect x="180" y="84" width="16" height="16" fill="#9aa0a8"/><rect x="180" y="84" width="16" height="2" fill="#c5cad1"/><rect x="183" y="89" width="4" height="3" fill="#7b818a"/><rect x="189" y="94" width="4" height="3" fill="#7b818a"/><rect x="195" y="84" width="1" height="16" fill="#6b7079"/><rect x="196" y="84" width="16" height="16" fill="#9aa0a8"/><rect x="196" y="84" width="16" height="2" fill="#c5cad1"/><rect x="199" y="89" width="4" height="3" fill="#7b818a"/><rect x="205" y="94" width="4" height="3" fill="#7b818a"/><rect x="211" y="84" width="1" height="16" fill="#6b7079"/><rect x="196" y="68" width="16" height="16" fill="#9aa0a8"/><rect x="196" y="68" width="16" height="2" fill="#c5cad1"/><rect x="199" y="73" width="4" height="3" fill="#7b818a"/><rect x="205" y="78" width="4" height="3" fill="#7b818a"/><rect x="211" y="68" width="1" height="16" fill="#6b7079"/><rect x="222" y="22" width="3" height="78" fill="#e5e7eb"/><rect x="224" y="22" width="1" height="78" fill="#9ca3af"/><circle cx="223.5" cy="20" r="3.6" fill="#ffd23a" stroke="#b07800"/><g class="fl2"><path d="M221 26 L198 33 L221 40 Z" fill="#22c55e" stroke="#15803d" stroke-width="1"/><rect x="208" y="31" width="4" height="4" fill="#fff"/></g><rect x="214" y="96" width="18" height="4" fill="#6b7079"/></svg>'
 };
-var TAGS={chess:['3D','AI 3단계','스테이지','퍼즐'],omok:['3D','렌주룰','AI'],janggi:['3D','AI','스테이지'],baduk:['9·13·19줄','집 계산','AI'],uno:['2~4인','CPU 대전'],blockaction:['액션','스테이지']};
+var TAGS={chess:['3D','AI 3단계','스테이지','퍼즐'],omok:['3D','렌주룰','AI'],janggi:['3D','AI','스테이지'],baduk:['9·13·19줄','집 계산','AI'],uno:['2~4인','CPU 대전'],blockaction:['점프 액션','스토리','보스전']};
 function cardGame(c){var oc=c.getAttribute('onclick')||'';var m=oc.match(/openGame\('([a-z]+)'\)/);return c.dataset.game||(m&&m[1]);}
 var buildLauncher=safe(function(){
   var L=$('#launcher');if(!L||L.dataset.uix)return;L.dataset.uix='1';
@@ -17923,7 +18073,7 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
 <div id="bfCut"><img><div><b></b><small></small></div></div><div id="bfSong"></div>
 <div id="bfTouch" class="bf-hide"><div id="bfJoyZ"><div id="bfPad"><span class="u"></span><span class="l"></span><span class="r"></span><span class="d"></span><i></i></div></div>
 <div id="bfBtns"><button data-k="atk" class="b-atk" aria-label="공격"><svg viewBox="0 0 24 24"><path fill="#fff" d="M6 9.5a2 2 0 0 1 2-2h1.2V6.6a1.6 1.6 0 0 1 3.2 0v.9h.4V6.9a1.6 1.6 0 0 1 3.2 0v.9a1.6 1.6 0 0 1 3 .8V14a6 6 0 0 1-6 6h-1.4A5.6 5.6 0 0 1 6 14.4z"/><path d="M9.2 7.5v4M12.8 7.5v4M16 8.3v3.2" stroke="rgba(0,0,0,.35)" stroke-width="1.2" stroke-linecap="round"/></svg><small>공격</small></button><button data-k="sp" class="b-sp" aria-label="필살"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 2.5l2.3 6.2 6.6.3-5.2 4.1 1.8 6.4L12 15.8l-5.5 3.7 1.8-6.4-5.2-4.1 6.6-.3z"/><circle cx="12" cy="12" r="2.2" fill="rgba(0,0,0,.25)"/></svg><small>필살</small></button><button data-k="jump" class="b-jump" aria-label="점프"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l7-7 7 7M7.5 19.5l4.5-4.5 4.5 4.5"/></svg><small>점프</small></button><button data-k="g" class="b-g" aria-label="가드"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z"/><path fill="rgba(0,0,0,.22)" d="M12 5.2v14.3c3.2-1.3 5.4-4.1 5.4-7.9V7.2z"/></svg><small>가드</small></button><button data-k="su" class="b-su" aria-label="슈퍼"><svg viewBox="0 0 24 24"><path fill="#fff" d="M13.5 2L5 13.5h6L9.8 22 19 10h-6.2z"/></svg><small>슈퍼</small><b class="rg"></b><i class="bd">MAX</i></button></div></div>
-<div id="bfMenu" class="bfpanel"><div class="bf-logo">블록 파이터<small>BLOCK FIGHTER</small></div>
+<div id="bfMenu" class="bfpanel"><div class="bf-logo">마인크래프트 파이터<small>MINECRAFT FIGHTER</small></div>
 <div class="bf-modes"><button data-m="cpu">🤖 1P vs CPU</button><button data-m="2p">🎮 2P 대전</button><button data-m="arcade">🏆 아케이드</button><button data-m="training">🥋 트레이닝</button></div>
 <div class="bf-opt"><span>난이도</span><span class="chips" id="bfDiff"><button data-d="easy">쉬움</button><button data-d="normal">보통</button><button data-d="hard">어려움</button></span></div>
 <div class="bf-opt"><span>음악</span><button id="bfMus" class="tg"></button><input id="bfVol" type="range" min="0" max="1" step="0.05"></div>
@@ -18128,16 +18278,12 @@ const BF={built:false,on:false,
 function addLauncherCard(){
   const box=D.querySelector('#launcher .game-cards');if(!box||box.querySelector('[data-bf]'))return;
   const c=D.createElement('div');c.className='gcard';c.dataset.bf='1';c.dataset.game='blockfighter';c.tabIndex=0;c.setAttribute('role','button');c.style.setProperty('--ac','#ff7a3d');c.setAttribute('onclick',"openGame('blockfighter')");
-  const thumb='<div class="uix-thumb"><svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice">'+
-    '<rect x="0" y="104" width="240" height="28" fill="#5a3b22"/><rect x="0" y="98" width="240" height="8" fill="#5cb85c"/>'+
-    '<g class="fl"><rect x="58" y="34" width="26" height="26" rx="3" fill="#c8946a"/><rect x="58" y="34" width="26" height="9" fill="#4a2f1d"/><rect x="62" y="46" width="5" height="4" fill="#fff"/><rect x="74" y="46" width="5" height="4" fill="#fff"/><rect x="56" y="60" width="30" height="22" rx="2" fill="#2fb3b3"/><rect x="84" y="62" width="22" height="9" rx="2" fill="#c8946a"/><rect x="58" y="82" width="12" height="16" fill="#3b4cc0"/><rect x="72" y="82" width="12" height="16" fill="#3b4cc0"/></g>'+
-    '<g class="fl2"><rect x="156" y="30" width="28" height="28" rx="3" fill="#5fbf4a"/><rect x="161" y="38" width="7" height="7" fill="#1d3a14"/><rect x="172" y="38" width="7" height="7" fill="#1d3a14"/><rect x="166" y="46" width="8" height="8" fill="#1d3a14"/><rect x="158" y="58" width="24" height="26" rx="2" fill="#56b043"/><rect x="156" y="84" width="12" height="14" fill="#4a9a3a"/><rect x="172" y="84" width="12" height="14" fill="#4a9a3a"/></g>'+
-    '<g class="drop"><polygon points="128,44 134,56 148,54 138,64 146,76 132,70 124,82 122,68 108,66 120,58 114,46 126,52" fill="#ffd34a" stroke="#ff7a3d" stroke-width="2"/></g></svg></div>';
-  c.innerHTML=thumb+`<div class="ic">🥊</div><h2>블록 파이터</h2><small>3D 격투 · 1P/2P/아케이드<br>${ROSTER.length}명 · 스테이지 ${ARENAS.length}개</small><div class="uix-tags"><span>격투</span><span>2인</span><span>CPU</span></div>`+
+  const thumb='<div class="uix-thumb"><svg viewBox="0 0 240 132" preserveAspectRatio="xMidYMid slice" shape-rendering="crispEdges"><defs><radialGradient id="mf584g" cx="50%" cy="45%" r="70%"><stop offset="0" stop-color="#ff7a3d" stop-opacity=".55"/><stop offset=".45" stop-color="#5b1a4a" stop-opacity=".9"/><stop offset="1" stop-color="#140a1e"/></radialGradient><linearGradient id="mf584f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a3a5a"/><stop offset="1" stop-color="#1a1222"/></linearGradient></defs><rect x="0" y="0" width="240" height="132" fill="url(#mf584g)"/><g opacity=".35"><rect x="0" y="58" width="14" height="44" fill="#0c0614"/><rect x="18" y="65" width="14" height="44" fill="#0c0614"/><rect x="36" y="72" width="14" height="44" fill="#0c0614"/><rect x="54" y="62" width="14" height="44" fill="#0c0614"/><rect x="72" y="69" width="14" height="44" fill="#0c0614"/><rect x="90" y="59" width="14" height="44" fill="#0c0614"/><rect x="108" y="66" width="14" height="44" fill="#0c0614"/><rect x="126" y="73" width="14" height="44" fill="#0c0614"/><rect x="144" y="63" width="14" height="44" fill="#0c0614"/><rect x="162" y="70" width="14" height="44" fill="#0c0614"/><rect x="180" y="60" width="14" height="44" fill="#0c0614"/><rect x="198" y="67" width="14" height="44" fill="#0c0614"/><rect x="216" y="74" width="14" height="44" fill="#0c0614"/><rect x="234" y="64" width="14" height="44" fill="#0c0614"/></g><path d="M0 98 L240 98 L240 132 L0 132 Z" fill="url(#mf584f)"/><g stroke="#ffffff" stroke-opacity=".12" stroke-width="1" shape-rendering="geometricPrecision"><path d="M30 98 L-60 132"/><path d="M45 98 L-30 132"/><path d="M60 98 L0 132"/><path d="M75 98 L30 132"/><path d="M90 98 L60 132"/><path d="M105 98 L90 132"/><path d="M120 98 L120 132"/><path d="M135 98 L150 132"/><path d="M150 98 L180 132"/><path d="M165 98 L210 132"/><path d="M180 98 L240 132"/><path d="M195 98 L270 132"/><path d="M0 108 H240 M0 120 H240"/></g><rect x="10" y="8" width="92" height="9" fill="#1b1b1b" stroke="#fff" stroke-width="1"/><rect x="11" y="9" width="78" height="7" fill="#ffd23a"/><rect x="11" y="9" width="78" height="2" fill="#fff6c2"/><rect x="138" y="8" width="92" height="9" fill="#1b1b1b" stroke="#fff" stroke-width="1"/><rect x="168" y="9" width="61" height="7" fill="#ff4d3d"/><rect x="168" y="9" width="61" height="2" fill="#ffb0a6"/><text x="120" y="17" text-anchor="middle" font-family="Arial Black,Arial,sans-serif" font-weight="900" font-size="11" fill="#fff">60</text><g class="fl"><rect x="44" y="96" width="40" height="4" fill="#000" opacity=".35"/><rect x="46" y="40" width="18" height="18" fill="#c8946a"/><rect x="46" y="40" width="18" height="6" fill="#4a2f1d"/><rect x="62" y="46" width="2" height="3" fill="#4a2f1d"/><rect x="55" y="49" width="3" height="2" fill="#fff"/><rect x="57" y="49" width="1" height="2" fill="#3b5bdb"/><rect x="60" y="49" width="3" height="2" fill="#fff"/><rect x="56" y="53" width="6" height="1" fill="#8a5a3a"/><rect x="46" y="58" width="18" height="22" fill="#2fb3b3"/><rect x="46" y="58" width="18" height="2" fill="#4fd0d0"/><rect x="64" y="61" width="30" height="7" fill="#2fb3b3"/><rect x="92" y="59" width="9" height="11" fill="#c8946a"/><rect x="41" y="60" width="6" height="14" fill="#2fb3b3"/><rect x="41" y="73" width="6" height="5" fill="#c8946a"/><rect x="42" y="80" width="9" height="16" fill="#3b4cc0"/><rect x="58" y="80" width="9" height="16" fill="#3b4cc0"/><rect x="40" y="92" width="11" height="4" fill="#555"/><rect x="58" y="92" width="11" height="4" fill="#555"/></g><g class="fl2"><g transform="rotate(9 181 96)"><rect x="170" y="96" width="40" height="4" fill="#000" opacity=".35"/><rect x="172" y="40" width="18" height="18" fill="#5fbf4a"/><rect x="172" y="40" width="18" height="3" fill="#3f8f30"/><rect x="173" y="47" width="5" height="4" fill="#14260e"/><rect x="180" y="47" width="4" height="4" fill="#14260e"/><rect x="175" y="53" width="10" height="2" fill="#2a4d1e"/><rect x="172" y="58" width="18" height="22" fill="#2a9d9d"/><rect x="176" y="62" width="4" height="4" fill="#1f7a7a"/><rect x="150" y="60" width="22" height="7" fill="#5fbf4a"/><rect x="150" y="69" width="20" height="6" fill="#56b043"/><rect x="172" y="80" width="8" height="16" fill="#4b3f9a"/><rect x="182" y="80" width="8" height="16" fill="#4b3f9a"/></g></g><g class="pulse" shape-rendering="geometricPrecision"><polygon points="157.0,66.0 145.5,68.3 152.0,78.0 142.3,71.5 140.0,83.0 137.7,71.5 128.0,78.0 134.5,68.3 123.0,66.0 134.5,63.7 128.0,54.0 137.7,60.5 140.0,49.0 142.3,60.5 152.0,54.0 145.5,63.7" fill="#fff6a8" stroke="#ff7a3d" stroke-width="2"/><circle cx="140" cy="66" r="4" fill="#fff"/></g><g shape-rendering="geometricPrecision"><path d="M161.017 72.5014 L167.705 74.5701" stroke="#ffd23a" stroke-width="2" stroke-linecap="round"/><path d="M147.972 86.5049 L150.508 93.0291" stroke="#ffd23a" stroke-width="2" stroke-linecap="round"/><path d="M123.777 80.8602 L118.616 85.5884" stroke="#ffd23a" stroke-width="2" stroke-linecap="round"/><path d="M120.271 56.2646 L113.994 53.1669" stroke="#ffd23a" stroke-width="2" stroke-linecap="round"/><path d="M137.533 44.1388 L136.748 37.183" stroke="#ffd23a" stroke-width="2" stroke-linecap="round"/><path d="M155.591 50.4781 L160.551 45.5393" stroke="#ffd23a" stroke-width="2" stroke-linecap="round"/></g><text x="120" y="118" text-anchor="middle" font-family="Arial Black,Impact,Arial,sans-serif" font-weight="900" font-style="italic" font-size="30" fill="#fff" stroke="#ff4d1a" stroke-width="3" paint-order="stroke" letter-spacing="1" shape-rendering="geometricPrecision">VS</text></svg></div>';
+  c.innerHTML=thumb+`<div class="ic">⚔️</div><h2>마인크래프트 파이터</h2><small>3D 격투 · 1P/2P/아케이드<br>${ROSTER.length}명 · 스테이지 ${ARENAS.length}개</small><div class="uix-tags"><span>격투</span><span>2인</span><span>CPU</span></div>`+
     '<span class="uix-play"><i class="uix-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="f" d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"></path></svg></i></span>';
   c.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();window.openGame('blockfighter');}});
-  box.appendChild(c);
-  const tag=D.querySelector('#launcher .tag');if(tag&&!/블록 파이터/.test(tag.textContent))tag.textContent=tag.textContent.replace(' — ',' · 블록 파이터 — ');
+  const ba584=box.querySelector('[data-game="blockaction"],[onclick*="blockaction"]');if(ba584)ba584.after(c);else box.prepend(c);
+  const tag=D.querySelector('#launcher .tag');if(tag&&!/마인크래프트 파이터/.test(tag.textContent))tag.textContent=tag.textContent.replace(' — ',' · 마인크래프트 파이터 — ');
 }
 function boot(){
   BF.root();addLauncherCard();
