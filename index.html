@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.8.5">
+<meta name="ba-version" content="v5.9">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -6139,7 +6139,7 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
     gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(15, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(15, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(19, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(19, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
   function saveSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
@@ -8142,6 +8142,18 @@ const BlockAction = (() => {
       crayonboss: { bpm: 158, key: 45, mode: 'min', sw: 0, lead: ['brass', 'sq'], harm: 'brass', bass: 'drive', comp: ['stab', 'pad'], drums: 'boss', perc: 'wood', rev: 0.2, dly: 0.14, hits: 1, form: 'AB',
         A: { ch: ['0m', '8M', '10M', '0m', '0m', '8M', '10M', '7M7'], h: '1 . 3 1 5 . 3 . 4 . 3 . 2 . #7_ .', h2: '1 . 3 1 5 . 8 . 7 . 5 . 4 . 3 .', c: '5 . . 5 . . 6 . 5 . . 4 . . 2 .' },
         B: { ch: ['3M', '10M', '5m', '8M', '3M', '10M', '8M', '7M7'], h: '3 5 8 5 3 5 8 5 2 4 6 4 2 4 6 4', h2: '4 6 8 6 4 6 8 6 3 5 7 5 #7 - - .', c: '8 . 6 . 5 . 3 . #7_ - 2 - #7 - - .' } },
+      book1: { bpm: 108, key: 53, mode: 'maj', sw: 0.33, lead: ['bell', 'whis'], harm: 'pluck', bass: 'oom', comp: ['arp'], drums: 'soft', perc: 'shak', rev: 0.32, dly: 0.24, form: 'AABA',
+        A: { ch: ['0M', '4m', '5M', '0M', '9m', '5M', '2m', '7M'], h: '3 . 5 . 8 . 7 6 5 . 3 . 2 . . .', h2: '3 . 5 . 8 . 9 8 7 . 5 . 8 . . .', c: '1 . . . 3 . . . 2 . . . 5_ . . .' },
+        B: { ch: ['5M', '5M', '9m', '9m', '2m', '7M', '0M', '7M'], h: '6 . 5 . 4 . 3 . 6 . 5 . 2 . . .', h2: '6 . 8 . 9 . 8 . 6 . 7 . 8 . . .', c: '4 . . . 6 . . . 2 . . . 5_ . . .' } },
+      book2: { bpm: 92, key: 50, mode: 'dor', sw: 0.5, lead: ['whis', 'bell'], harm: 'bell', bass: 'walk', comp: ['pad'], drums: 'swing', perc: 'wood', rev: 0.4, dly: 0.3, form: 'AABA',
+        A: { ch: ['0m', '5M', '0m', '5M', '10M', '3M', '7m', '0m'], h: '1 . 3 . 5 . 6 . 5 . 3 . 4 . . .', h2: '1 . 3 . 5 . 8 . 7 . 6 . 5 . . .', c: '5_ . . . 6_ . . . 7_ . . . 1 . . .' },
+        B: { ch: ['3M', '10M', '5M', '0m', '3M', '10M', '7m', '7m'], h: '8 . 7 . 6 . 5 . 6 . 5 . 4 . 3 .', h2: '8 . 9 . 8 . 7 . 6 . 7 . 8 . . .', c: '3 . . . 2 . . . 4 . . . 5 . . .' } },
+      book3: { bpm: 126, key: 55, mode: 'maj', sw: 0, lead: ['brass', 'mar'], harm: 'whis', bass: 'march', comp: ['stab', 'pad'], drums: 'march', perc: 'shak', rev: 0.3, dly: 0.2, form: 'AABA',
+        A: { ch: ['0M', '7M', '9m', '5M', '0M', '7M', '5M', '7M7'], h: '5 . 5 6 5 . 3 . 4 . 4 5 4 . 2 .', h2: '5 . 5 6 5 . 8 . 9 . 8 7 6 . 5 .', c: '3 . . . 2 . . . 1 . . . 7_ . . .' },
+        B: { ch: ['5M', '0M', '5M', '0M', '2m', '7M', '0M', '7M7'], h: '6 . 6 . 8 . 6 . 5 . 5 . 3 . . .', h2: '6 . 8 . 9 . 8 . 7 . 6 . 5 . . .', c: '4 . . . 3 . . . 2 . . . 5 . . .' } },
+      bookboss: { bpm: 152, key: 46, mode: 'hmin', sw: 0, lead: ['syn', 'brass'], harm: 'brass', bass: 'ost', comp: ['stab', 'pad'], drums: 'gallop', perc: 'bongo', rev: 0.22, dly: 0.16, hits: 1, form: 'AB',
+        A: { ch: ['0m', '8M', '5m', '7M7', '0m', '8M', '5m', '7M7'], h: '1 . 2 3 5 . 3 . 6 . 5 . 7_ . . .', h2: '1 . 2 3 5 . 8 . 6 . 5 . 7 . . .', c: '5 . . 5 . . 6 . 5 . . 4 . . 2 .' },
+        B: { ch: ['8M', '3M', '5m', '7M7', '8M', '3M', '5m', '7M7'], h: '3 5 8 5 3 5 8 5 4 6 8 6 2 4 7 4', h2: '6 8 3^ 8 6 8 3^ 8 5 7 2^ 7 7 - - .', c: '8 . 6 . 5 . 3 . 7_ - 2 - 7 - - .' } },
       // ---- one-shot jingles ----
       power: { once: 1, bpm: 176, key: 48, mode: 'maj', sw: 0, lead: ['sq', 'bell'], harm: 'brass', bass: 'pump', comp: ['stab'], drums: 'fan', rev: 0.25, form: 'A',
         A: { ch: ['0M', '0M'], m: '1+3 5+8 3+5 8+3^ 5+8 3^+5^ 8^ - . . . . . . . .' } },
@@ -8309,7 +8321,7 @@ const BlockAction = (() => {
       if (!low && T.Pc) { const p = T.Pc[s]; if (p === 'h') DRUM.hb(S, t + rnd(0.003), vel()); else if (p === 'l') DRUM.lb(S, t + rnd(0.003), vel()); else if (p === 'w') DRUM.w(S, t + rnd(0.002), vel()); else if (p === 'z') DRUM.z(S, t, s % 4 === 0 ? 1 : 0.6); }
     }
     // per-tune loudness trims (calibrated from offline renders, see music_preview)
-    const TRIM = {title: 0.98, map: 1.17, field: 1.14, cave: 1.21, wall: 1.26, castle: 1.24, boss: 1.44, dragon: 1.45, wither: 1.44, nwaste: 1.18, nforest: 1.03, fortress: 1.44, bastion: 1.19, truck: 1.32, story: 1.32, ending: 1.18, space1: 1.59, space2: 1.57, spaceboss: 1.4, crayon1: 1.4, crayon2: 1.45, crayon3: 1.4, crayonboss: 1.38, power: 1.56, clear: 1.22, death: 1.6, gameover: 1.64};   // per-track loudness trims (measured offline, gated RMS ~ -15 dB)
+    const TRIM = {title: 0.98, map: 1.17, field: 1.14, cave: 1.21, wall: 1.26, castle: 1.24, boss: 1.44, dragon: 1.45, wither: 1.44, nwaste: 1.18, nforest: 1.03, fortress: 1.44, bastion: 1.19, truck: 1.32, story: 1.32, ending: 1.18, space1: 1.59, space2: 1.57, spaceboss: 1.4, crayon1: 1.4, crayon2: 1.45, crayon3: 1.4, crayonboss: 1.38, book1: 1.42, book2: 1.5, book3: 1.36, bookboss: 1.38, power: 1.56, clear: 1.22, death: 1.6, gameover: 1.64};   // per-track loudness trims (measured offline, gated RMS ~ -15 dB)
     // ------------------------------------------------------------- live player -------------------------------------------------------------
     let ctx = null, S = null, cur = null, step = 0, nextT = 0, timer = null, paused = false, jing = null, duckG = null, lowQ = false, synG572 = null, setupN572 = 0;
     let musicOn = true, level = 0.4; try { const v = localStorage.getItem('ba_music'); if (v === '0') musicOn = false; const l = parseFloat(localStorage.getItem('ba_music_vol2')); if (l >= 0 && l <= 1) level = l; } catch (e) {}
@@ -8420,6 +8432,7 @@ const BlockAction = (() => {
         if (boss && boss.kind === 'wither' && boss.active && boss.alive) k = 'wither';
         if (boss && boss.kind === 'ufo' && boss.active && boss.alive) k = 'spaceboss';
         if (boss && boss.kind === 'robo58' && boss.active && boss.alive) k = 'crayonboss';
+        if (boss && boss.kind === 'drag59' && boss.active && boss.alive) k = 'bookboss';
         if (pl && pl.truck) k = 'truck';
       }
       else if (st === 'dying' && lastState !== 'dying') k = 'death';
@@ -8677,7 +8690,7 @@ const BlockAction = (() => {
     L.firebars.forEach(fb => { fb.balls = []; for (let i = 0; i <= fb.len; i++) { const b = makeFireball(); b.scale.setScalar(i ? 1.05 : 0.7); group.add(b); fb.balls.push(b); } });
     L.podoboos.forEach(pb => { const m = makeFireball(); m.scale.setScalar(2.2); m.visible = false; group.add(m); pb.mesh = m; });
     // moss on exposed tops (field / wall)
-    if (th.cap && !th.nether && !th.space && !th.crayon) {
+    if (th.cap && !th.nether && !th.space && !th.crayon && !th.book) {
       for (let y = 0; y < L.H; y++) { let x0 = -1; for (let x = 0; x <= L.W; x++) { const top = x < L.W && T(x, y) === S && !T(x, y + 1); if (top && x0 < 0) x0 = x; if (!top && x0 >= 0) { mossVoxels(x0 + 0.05, x - 0.05, y + 1.07, 0.62, -0.62, NP((x - x0) * 7)); x0 = -1; } } }
       const tuft = []; for (let i = 0; i < caps.length; i++) for (let k = 0; k < 2; k++) tuft.push([caps[i][0] + rnd(-0.45, 0.45), caps[i][1] + 0.1, rnd(-0.55, 0.6), 1, rnd(0.6, 1.4), 1, rnd(-0.4, 0.4)]);
       inst(new THREE.BoxGeometry(0.025, 0.12, 0.025), std({ color: 0x5f9a3c, roughness: 0.9 }), tuft, null);
@@ -8718,6 +8731,7 @@ const BlockAction = (() => {
     }
     // exit: castle tower (outdoor) / stone archway (indoor)
     if (th.crayon) crExit58(group);
+    if (th.book) bkExit59(group);
     else if (th.space) spaceExit54(group);
     else if (th.nether) netherExit5(group);
     else if (th.sky) {
@@ -8738,11 +8752,11 @@ const BlockAction = (() => {
       const g0 = makeGate(11); g0.position.set(a.x0 - 0.5, 13, ZP); group.add(g0); a.gateL = g0; a.gateLY = 13;
       const throne = new THREE.Group(); group.add(throne);
       const red = std({ color: 0x7a1424, roughness: 0.7 });
-      for (let i = 0; i < (th.space || th.crayon ? 0 : 3); i++) { const ban = new THREE.Mesh(new THREE.BoxGeometry(1.1, 3.4, 0.05), red); ban.position.set(a.x0 + 5 + i * 9, 8.2, -1.45); group.add(ban);
+      for (let i = 0; i < (th.space || th.crayon || th.book ? 0 : 3); i++) { const ban = new THREE.Mesh(new THREE.BoxGeometry(1.1, 3.4, 0.05), red); ban.position.set(a.x0 + 5 + i * 9, 8.2, -1.45); group.add(ban);
         const em = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.06), M.coin); em.position.set(a.x0 + 5 + i * 9, 8.8, -1.42); group.add(em); }
     }
     // background per theme
-    if (th.nether) buildNether5(def, th, nth5); else if (th.crayon) buildCrayon58(def, th); else if (th.space) buildSpace54(def, th); else buildBackdrop(def, th);
+    if (th.nether) buildNether5(def, th, nth5); else if (th.crayon) buildCrayon58(def, th); else if (th.book) buildBook59(def, th); else if (th.space) buildSpace54(def, th); else buildBackdrop(def, th);
     // torches: lantern posts (outdoor) / wall sconces (indoor)
     L.torches.forEach(t => {
       const post = new THREE.Mesh(new THREE.BoxGeometry(0.09, 0.6, 0.09), M.wood); post.position.set(t.x, t.y + 0.3, -0.48); post.castShadow = true; group.add(post);
@@ -9024,6 +9038,7 @@ const BlockAction = (() => {
     if (e.kind === 'wither') return hitWither5(e, dmg);
     if (e.kind === 'ufo') return hitUfo54(e, dmg);
     if (e.kind === 'robo58') return hitRobo58(e, dmg);
+    if (e.kind === 'drag59') return hitDrag59(e, dmg);
     if (e.inv > 0) return false;
     e.hp -= dmg; e.inv = dmg >= 1 ? 50 : 12; snd('stomp'); cam.shake = 6;
     if (e.hp <= 0.01) {
@@ -9297,6 +9312,7 @@ const BlockAction = (() => {
       else if (boss.kind === 'wither') witherWake5(boss);
       else if (boss.kind === 'ufo') ufoWake54(boss);
       else if (boss.kind === 'robo58') roboWake58(boss);
+      else if (boss.kind === 'drag59') dragWake59(boss);
       else { banner('골렘 왕', '머리를 5번 밟거나 불덩이로!', 1500); snd('check'); bossIntro53(boss); }
       updBossBar();
     }
@@ -9409,7 +9425,7 @@ const BlockAction = (() => {
     cam.runK = snap || cam.runK === undefined ? runK : lerp(cam.runK, runK, fk(0.02));
     let wantW = (6.2 + 1.3 * cam.runK) * a;
     if (a < 1) wantW = Math.max(wantW, 5.8 + 0.6 * cam.runK);
-    if (cam.lockX && L && L.arena) wantW = Math.max(wantW, (L.def.bossKind === 'ufo' || L.def.bossKind === 'robo58') ? (a >= 1 ? 21 : 10.5) : (dragon || L.def.bossKind === 'wither') ? (a >= 1 ? 16 : 8.6) : (a >= 1 ? 14 : 7.2));   // boss fights pull back a bit
+    if (cam.lockX && L && L.arena) wantW = Math.max(wantW, (L.def.bossKind === 'ufo' || L.def.bossKind === 'robo58' || L.def.bossKind === 'drag59') ? (a >= 1 ? 21 : 10.5) : (dragon || L.def.bossKind === 'wither') ? (a >= 1 ? 16 : 8.6) : (a >= 1 ? 14 : 7.2));   // boss fights pull back a bit
     cam.wantW = snap || cam.wantW === undefined ? wantW : lerp(cam.wantW, wantW, fk(0.03)); wantW = cam.wantW;
     const tanH = Math.tan(camera.fov * Math.PI / 360);
     let d = (wantW / a) / (2 * tanH);
@@ -9963,7 +9979,7 @@ const BlockAction = (() => {
   function updBossBar() {
     const el = $('baBoss'); if (!el) return;
     const on = boss && boss.active && boss.alive && state !== 'select';
-    const nm = el.querySelector('b'); if (nm) nm.textContent = boss && boss.kind === 'dragon' ? '엔더 드래곤' : boss && boss.kind === 'wither' ? '위더' : boss && boss.kind === 'ufo' ? '우주 해적 UFO' : boss && boss.kind === 'robo58' ? '크레용 로봇' : '골렘 왕';
+    const nm = el.querySelector('b'); if (nm) nm.textContent = boss && boss.kind === 'dragon' ? '엔더 드래곤' : boss && boss.kind === 'wither' ? '위더' : boss && boss.kind === 'ufo' ? '우주 해적 UFO' : boss && boss.kind === 'robo58' ? '크레용 로봇' : boss && boss.kind === 'drag59' ? '잉크 드래곤' : '골렘 왕';
     el.style.display = on ? 'block' : 'none';
     if (on) el.querySelector('i').style.width = Math.max(0, boss.hp / (boss.maxHp || 5) * 100) + '%';
   }
@@ -10076,7 +10092,7 @@ const BlockAction = (() => {
     bindInput();
     window.addEventListener('resize', onResize);
     dom5(); showSelect(); showMap5();
-    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); installDebug54(); installDebug56(); installDebug57(); installDebug58(); }
+    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); installDebug54(); installDebug56(); installDebug57(); installDebug58(); installDebug59(); }
     last = performance.now(); requestAnimationFrame(animate);
   }
   function bindInput() {
@@ -10132,7 +10148,7 @@ const BlockAction = (() => {
     if (state === 'map' && mapFrame5(dt)) return;
     if (!L) return;
     animHero(dt); polish53(dt); animActors(dt); animStriders5(); rigTick58(dt); feetFix55(); fxTick3();
-    placeCamera(false); bossCam53(); space54(dt); crayon58(dt); fx59(dt); updLights(); updateHUD(); hud53(); updBossBar();
+    placeCamera(false); bossCam53(); space54(dt); crayon58(dt); fx59(dt); bk59(dt); bossBar59(); updLights(); updateHUD(); hud53(); updBossBar();
     speedFx5(state === 'play' && RUN5.sprinting());
     postRender52(scene, camera);
     } catch (err) { tickErr5(err); }
@@ -10223,7 +10239,7 @@ const BlockAction = (() => {
       dragon: { f: 75, w: 'sawtooth', fs: 0.6, p: 0.1, r: 0.75 }, grak: { f: 130, w: 'square', fs: 0.8, p: 0.55, r: 0.95 },
       wither: { f: 62, w: 'sawtooth', fs: 0.55, p: 0.1, r: 0.7, dual: 1 }, moosh: { f: 230, w: 'triangle', fs: 0.95, p: 0.9, r: 0.9 },
       iron: { f: 110, w: 'square', fs: 0.75, p: 0.4, r: 0.8 }, snow: { f: 380, w: 'sine', fs: 1.25, p: 1.4, r: 1.0 },
-      villager: { f: 200, w: 'sawtooth', fs: 0.9, p: 0.8, r: 0.95 }, crobo: { f: 150, w: 'square', fs: 0.85, p: 0.5, r: 1.05 }
+      villager: { f: 200, w: 'sawtooth', fs: 0.9, p: 0.8, r: 0.95 }, crobo: { f: 150, w: 'square', fs: 0.85, p: 0.5, r: 1.05 }, narr59: { f: 120, w: 'triangle', fs: 0.8, p: 0.85, r: 0.9 }, toto59: { f: 330, w: 'sine', fs: 1.15, p: 1.35, r: 1.12 }, drag59: { f: 85, w: 'sawtooth', fs: 0.75, p: 0.55, r: 0.9 }
     };
     // vowel (중성) → [F1, F2] Hz, rough Korean monophthong values (diphthongs mapped to their target)
     const VF = [[800, 1300], [700, 1900], [750, 1350], [700, 1950], [550, 1800], [500, 2000], [550, 1800], [500, 2050], [450, 900], [700, 1250], [650, 1550], [450, 1700],
@@ -10506,7 +10522,7 @@ const BlockAction = (() => {
   function angerPack5(e, kind) { enemies.forEach(o => { if (o.alive && (o.kind === kind || (kind === 'piglin' && o.kind === 'piglin')) && Math.abs(o.x - e.x) < 10) { o.angry = 1; o.active = true; } }); if (!G.angerMsg) { G.angerMsg = 1; floatText(kind === 'zpiglin' ? '무리가 화났다!' : '피글린이 화났다!', e.x, e.y + 1.8); } }
   function face5Dir(e) { return Math.sign(pl.x - e.x) || e.dir; }
   function addBall50(kind, x, y, vx, vy, o) {
-    const m = kind === 'skull' ? makeSkull5(o && o.blue) : kind === 'plasma' ? makePlasma54() : kind === 'crayon' ? makeWax58() : makeFireball(); if (kind === 'ghast') m.scale.setScalar(2.1); else if (kind === 'blaze') m.scale.setScalar(1.05);
+    const m = kind === 'skull' ? makeSkull5(o && o.blue) : kind === 'plasma' ? makePlasma54() : kind === 'crayon' ? makeWax58() : kind === 'ink59' ? makeInk59() : makeFireball(); if (kind === 'ghast') m.scale.setScalar(2.1); else if (kind === 'blaze') m.scale.setScalar(1.05);
     m.position.set(x, y, ZP); W3.group.add(m);
     nballs.push(Object.assign({ kind, x, y, vx, vy, r: kind === 'ghast' ? 0.34 : kind === 'skull' ? 0.22 : 0.16, mesh: m, life: 360, refl: false, owner: null }, o || {}));
   }
@@ -10522,7 +10538,7 @@ const BlockAction = (() => {
       b.x += b.vx; b.y += b.vy;
       if (solidAt(Math.floor(b.x), Math.floor(b.y)) || b.life <= 0 || b.y < -3 || Math.abs(b.x - pl.x) > 30) { b.gone = true; if (b.life > 0 && b.y > -3) miniBlast5(b.x, b.y, b.kind === 'ghast' ? 1.4 : b.kind === 'skull' ? 1.1 : 0.6, !b.refl); return; }
       // reflect: punch (dash key) / stomp it / player fireball / truck
-      if (!b.refl && (b.kind === 'ghast' || b.kind === 'skull' || b.kind === 'plasma' || b.kind === 'crayon') && state === 'play') {
+      if (!b.refl && (b.kind === 'ghast' || b.kind === 'skull' || b.kind === 'plasma' || b.kind === 'crayon' || b.kind === 'ink59') && state === 'play') {
         const dx = b.x - pl.x, dy = b.y - (pl.y + pl.h * 0.5), near = Math.abs(dx) < 1.25 && Math.abs(dy) < 1.1;
         const punch = near && prevIn.runP, stomp = pl.vy < 0 && Math.abs(dx) < 0.6 && dy < 0 && dy > -1.0;
         let fire = false; for (const f of fballs) if (!f.gone && Math.abs(f.x - b.x) < b.r + 0.25 && Math.abs(f.y - b.y) < b.r + 0.25) { f.gone = true; fire = true; break; }
@@ -10531,7 +10547,7 @@ const BlockAction = (() => {
           floatText('반사!', b.x, b.y + 0.8); spawnParts(b.x, b.y, ZP, 0xffffff, NP(10), 0.1, 0.1); G.reflects = (G.reflects || 0) + 1; if (stomp) { pl.vy = 0.26; pl.jumping = !!prevIn.jump; } return; }
       }
       if (b.refl) { for (const e of enemies) if (e.alive && e.active && HOSTILE[e.kind] || (e.alive && BOSSK[e.kind] && e.active)) { if (Math.abs(e.x - b.x) < e.hw + b.r && b.y > e.y - b.r && b.y < e.y + e.h + b.r) { b.gone = true; miniBlast5(b.x, b.y, 1, false);
-          if (BOSSK[e.kind]) hitBoss(e, (b.kind === 'skull' || b.kind === 'plasma' || b.kind === 'crayon') ? 1 : 0.6); else if (e.kind === 'ghast') { killFlip(e, 1000); floatText('고스트 격파!', e.x, e.y + 2); } else killFlip(e, 300); return; } } }
+          if (BOSSK[e.kind]) hitBoss(e, (b.kind === 'skull' || b.kind === 'plasma' || b.kind === 'crayon' || b.kind === 'ink59') ? 1 : 0.6); else if (e.kind === 'ghast') { killFlip(e, 1000); floatText('고스트 격파!', e.x, e.y + 2); } else killFlip(e, 300); return; } } }
       else if (state === 'play' && !pl.truck && Math.abs(b.x - pl.x) < pl.hw + b.r && b.y > pl.y - b.r && b.y < pl.y + pl.h + b.r) { b.gone = true; hurt(); miniBlast5(b.x, b.y, 0.6, false); return; }
       if (b.mesh) { b.mesh.position.set(b.x, b.y, ZP); b.mesh.rotation.z += 0.15; b.mesh.rotation.y += 0.1; if (clock % 2 === 0) spawnParts(b.x, b.y, ZP, b.kind === 'skull' ? 0x302838 : b.kind === 'plasma' ? 0x60ff90 : 0xff9030, 1, 0.02, 0.01); }
     });
@@ -10782,7 +10798,7 @@ const BlockAction = (() => {
   // nether-only tile kinds use the same solid-collision path (tile !== E)
   function lightColors5(th) {
     if (!LT._c0) LT._c0 = { hs: LT.hemi.color.getHex(), hg: LT.hemi.groundColor.getHex(), amb: LT.amb.color.getHex(), moon: LT.moon.color.getHex(), key: LT.key.color.getHex(), rim: LT.rim.color.getHex() };
-    const c = th.crayon ? CCOL58 : th.space ? SCOL54 : th.nether ? { hs: NCOL.hemi[0], hg: NCOL.hemi[1], amb: NCOL.amb, moon: NCOL.moon, key: NCOL.key, rim: NCOL.rim } : LT._c0;
+    const c = th.book ? (th.lc || CCOL58) : th.crayon ? CCOL58 : th.space ? SCOL54 : th.nether ? { hs: NCOL.hemi[0], hg: NCOL.hemi[1], amb: NCOL.amb, moon: NCOL.moon, key: NCOL.key, rim: NCOL.rim } : LT._c0;
     LT.hemi.color.setHex(c.hs); LT.hemi.groundColor.setHex(c.hg); LT.amb.color.setHex(c.amb); LT.moon.color.setHex(c.moon); LT.key.color.setHex(c.key); LT.rim.color.setHex(c.rim);
   }
 
@@ -11165,7 +11181,7 @@ const BlockAction = (() => {
 #baMap{position:absolute;left:0;right:0;bottom:0;z-index:8;display:none;justify-content:center;padding:0 10px 12px;pointer-events:none;font-family:'Segoe UI',system-ui,sans-serif;}
 #baMap.show{display:flex;}
 #baMap .mp{pointer-events:auto;width:min(100%,640px);background:rgba(14,10,30,.86);border:2px solid rgba(248,231,176,.7);border-radius:18px;padding:10px 14px 12px;color:#fff;box-shadow:0 10px 30px rgba(0,0,0,.5);}
-#baMap .mid{font-size:12px;letter-spacing:.18em;color:#fcd34d;font-weight:800;}#baMap h3{margin:2px 0 2px;font-size:clamp(17px,3.6vw,22px);}#baMap p{margin:0 0 8px;font-size:13px;opacity:.85;}
+#baMap .mid{font-size:12px;letter-spacing:.18em;color:#fcd34d;font-weight:800;}#baMap h3{margin:2px 0 2px;font-size:clamp(17px,3.6vw,22px);}#baMap p{margin:0 0 8px;font-size:13px;opacity:.85;word-break:keep-all;overflow-wrap:break-word;text-wrap:pretty;}
 #baMap .ba-btns{display:flex;flex-wrap:wrap;gap:6px;}#baMap .ba-btns button{flex:1 1 auto;min-width:92px;padding:9px 10px;border-radius:12px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;font-weight:800;font-size:14px;cursor:pointer;}
 #baMap .ba-btns button.pri{background:linear-gradient(180deg,#f8d36a,#e0a020);color:#2a1a04;border-color:#f8e7b0;}#baMap .ba-btns button:disabled{opacity:.45;cursor:not-allowed;}
 #baMapT{position:absolute;top:58px;left:50%;transform:translateX(-50%);z-index:8;display:none;color:#fff;font:800 clamp(16px,3.6vw,22px) 'Segoe UI',system-ui,sans-serif;text-shadow:0 2px 8px rgba(0,0,0,.8);pointer-events:none;white-space:nowrap;}
@@ -11210,6 +11226,7 @@ const BlockAction = (() => {
   function sayStart5(who, text) {
     const D = dom5(); if (!D) return;
     const C = CH5[who] || CH5.villager;
+    try { D.dlg.classList.toggle('narr59', who === 'narr59'); } catch (e) {}
     Object.assign(DLG5, { on: true, who, text, n: 0, shown: 0, done: false, hold: 0 });
     const url = portrait5(who); D.dlg.querySelector('.pt').style.backgroundImage = url ? `url(${url})` : 'none';
     const b = D.dlg.querySelector('b'); b.textContent = C.name; b.style.background = C.col;
@@ -11300,7 +11317,7 @@ const BlockAction = (() => {
   function endCut5() {
     if (!CUT.on) return; CUT.on = false; cine5(false); cam.ov = null; VOICE.cancel();
     const id = CUT.id, after = CUT.after; CUT.after = null;
-    if (id === 'intro') story5().intro = 1; if (id === 'portal') story5().portal = 1; if (id === 'ending') story5().ending = 1; if (id === 'crayon') story5().crayon58 = 1; if (id === 'rocket58') story5().rocket58 = 1; saveSave();
+    if (id === 'intro') story5().intro = 1; if (id === 'portal') story5().portal = 1; if (id === 'ending') story5().ending = 1; if (id === 'crayon') story5().crayon58 = 1; if (id === 'rocket58') story5().rocket58 = 1; if (id === 'book59') story5().book59 = 1; saveSave();
     if (after) after(); else showMap5();
   }
   function abortCut5() { if (!CUT.on) return; CUT.on = false; CUT.after = null; CUT.hero = null; cine5(false); cam.ov = null; VOICE.cancel(); }
@@ -11488,7 +11505,7 @@ const BlockAction = (() => {
   function talksFor5(def) { return TALKS5[def.id] || def.talks || []; }
   function tick5() {
     if (!L || L.def.cut) return;
-    tickHaz5(); tickBalls5(); tickSpace54(); tickCrayon58();
+    tickHaz5(); tickBalls5(); tickSpace54(); tickCrayon58(); tickBook59();
     if (pl.fireRes > 0) { pl.fireRes--; if (pl.fireRes === 180) banner('화염 저항이 곧 끝나요!', '', 900); }
     const D = dom5(); if (D) { const on = pl.fireRes > 0; D.fr.style.display = on ? 'block' : 'none'; if (on) D.fr.querySelector('b').textContent = Math.ceil(pl.fireRes / 60); }
     // nether ground: magma burns, soul sand slows
@@ -11512,7 +11529,8 @@ const BlockAction = (() => {
   function afterClear5(def, info) {
     if (def.id === '1-4') { const first = !story5().portal; if (first || STORY5.forcePortal) { playCut5('portal', () => { save.node = 6; saveSave(); showMap5({ celebrate: 6 }); }); return true; } }
     if (def.id === '2-4' && (!story5().ending || STORY5.forceEnding)) { playCut5('ending', () => { if (!story5().crayon58) playCut5('crayon', () => { save.node = 10; saveSave(); showMap5({ celebrate: 11 }); }); else { save.node = 9; saveSave(); showMap5(); } }); return true; }
-    if (def.id === '4-3' && (!story5().seen.finale583 || STORY5.forceFinale583)) { playFinale583(); return true; }
+    if (def.id === '4-3' && !story5().book59) { playCut5('book59', () => { save.node = 19; saveSave(); showMap5({ celebrate: 20 }); }); return true; }
+    if (def.id === '5-4' && (!story5().fin59 || STORY5.forceFinale583)) { playCut5('bookend59', () => playFinale583()); return true; }
     if (def.id === '3-4' && !story5().rocket58) { playCut5('rocket58', () => { save.node = 15; saveSave(); showMap5({ celebrate: 16 }); }); return true; }
     return false;
   }
@@ -11534,6 +11552,8 @@ const BlockAction = (() => {
     const n = MAPN5[i], S = story5(); if (!n) return false;
     if (n.k === 'village') return true;
     if (n.k === 'rocket') return w4Open58();
+    if (n.k === 'book') return w5Open59();
+    if (n.s >= 15 && !w5Open59()) return false;
     if (n.k === 'crayon') return w3Open54();
     if (n.s >= 12 && !w4Open58()) return false;
     if (n.s >= 8 && !w3Open54()) return false;
@@ -11541,7 +11561,7 @@ const BlockAction = (() => {
     if (n.s >= 4 && !S.portal && !(save.best['1-4'] && save.best['1-4'].clear)) return false;
     return n.s < save.unlocked && n.s < STAGES.length;
   }
-  function nodeClear5(i) { const n = MAPN5[i]; if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
+  function nodeClear5(i) { const n = MAPN5[i]; if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
   function buildMap5() {
     const sc = new THREE.Scene(); MAP.scene = sc; MAP.cam = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
     sc.background = new THREE.Color(0x8ec5f0); sc.fog = new THREE.Fog(0x8ec5f0, 22, 60);
@@ -11604,7 +11624,7 @@ const BlockAction = (() => {
     // node pads + labels
     MAP.pads = MAPN5.map((n, i) => {
       const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.56, 0.22, 20), std({ color: 0xffffff, roughness: 0.5, metalness: 0.2 })); pad.position.set(n.x, 0.11, n.z); g.add(pad);
-      const lab = n.s !== undefined ? STAGES[n.s].id : n.k === 'village' ? '마을' : n.k === 'rocket' ? '로켓' : n.k === 'crayon' ? '크레용' : '포탈';
+      const lab = n.s !== undefined ? STAGES[n.s].id : n.k === 'village' ? '마을' : n.k === 'rocket' ? '로켓' : n.k === 'crayon' ? '크레용' : n.k === 'book' ? '그림책' : '포탈';
       const t = canvasTex((c, w, h) => { c.font = 'bold 54px "Segoe UI",sans-serif'; c.textAlign = 'center'; c.lineWidth = 10; c.strokeStyle = 'rgba(20,10,40,.9)'; c.strokeText(lab, w / 2, 62); c.fillStyle = '#fff6d0'; c.fillText(lab, w / 2, 62); }, 192, 80);
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false })); sp.scale.set(1.5, 0.62, 1); sp.position.set(n.x, 1.0, n.z + 0.7); g.add(sp);
       const flag = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.24, 0.03), std({ color: 0xffd040, emissive: 0x6a4a00, emissiveIntensity: 0.5 })); flag.position.set(n.x + 0.3, 0.95, n.z - 0.3); g.add(flag);
@@ -11620,9 +11640,9 @@ const BlockAction = (() => {
     const n = 160, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) { pos[i * 3] = rnd(22, 46); pos[i * 3 + 1] = rnd(0, 6); pos[i * 3 + 2] = rnd(-5, 5); }
     const eg = new THREE.BufferGeometry(); eg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     MAP.embers = new THREE.Points(eg, new THREE.PointsMaterial({ color: LIN(0xffa050), size: 0.09, transparent: true, opacity: 0.85, toneMapped: false })); g.add(MAP.embers);
-    buildMapCrayon58(g); { const g4 = new THREE.Group(); g4.position.x = 22; g.add(g4); buildMapSpace54(g4); } MAP.built = true; MAP.cx = 0; MAP.hx = MAPN5[0].x; MAP.hz = MAPN5[0].z; MAP.ph = 0;
+    buildMapCrayon58(g); { const g4 = new THREE.Group(); g4.position.x = 22; g.add(g4); buildMapSpace54(g4); } buildMapBook59(g); MAP.built = true; MAP.cx = 0; MAP.hx = MAPN5[0].x; MAP.hz = MAPN5[0].z; MAP.ph = 0;
   }
-  function refreshMap5() { refreshMap5b(); refreshMapCrayon58(); refreshMapSpace54(); }
+  function refreshMap5() { refreshMap5b(); refreshMapCrayon58(); refreshMapSpace54(); refreshMapBook59(); }
   function refreshMap5b() {
     MAP.pads.forEach((p, i) => { const open = nodeOpen5(i), clr = nodeClear5(i), w2 = i >= 5;
       p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : w2 ? 0xff5a3a : 0x4aa0ff); p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : w2 ? 0x3a0a00 : 0x0a2a5a) : 0); p.pad.material.emissiveIntensity = 0.6;
@@ -11634,9 +11654,10 @@ const BlockAction = (() => {
     const D = dom5(), n = MAPN5[MAP.at], i = MAP.at, S = story5(), P = D.map;
     const mid = P.querySelector('.mid'), h = P.querySelector('h3'), p = P.querySelector('p'), btns = P.querySelector('.ba-btns'); btns.innerHTML = '';
     const add = (txt, fn, cls, dis) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.className = cls || ''; b.disabled = !!dis; b.onclick = (ev) => { ev.stopPropagation(); snd('select'); fn(); }; btns.appendChild(b); return b; };
-    if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = (n.s >= 12 ? '월드 4 · 우주' : n.s >= 8 ? '월드 3 · 크레용 나라' : n.s >= 4 ? '월드 2 · 네더' : '월드 1 · 성') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}${bestLine57(st.id)} — ${st.sub}` : st.sub; add('▶ 시작', () => shopGo582(n.s, () => playFromMap5(n.s)), 'pri'); }
+    if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = (n.s >= 15 ? '월드 5 · 그림책 나라' : n.s >= 12 ? '월드 4 · 우주' : n.s >= 8 ? '월드 3 · 크레용 나라' : n.s >= 4 ? '월드 2 · 네더' : '월드 1 · 성') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}${bestLine57(st.id)} — ${st.sub}` : st.sub; add('▶ 시작', () => shopGo582(n.s, () => playFromMap5(n.s)), 'pri'); }
     else if (n.k === 'village') { mid.textContent = '월드 1 · 시작'; h.textContent = '꾸꾸의 마을'; p.textContent = S.ending ? '모두가 돌아온 평화로운 마을. 축제가 한창이에요!' : '골렘 왕에게 습격당한 마을. 뚜뚜와 마을 주민들을 구하러 가자!'; add('📜 프롤로그 보기', () => playCut5('intro'), 'pri'); }
     else if (n.k === 'rocket') { mid.textContent = '월드 4 · 우주'; h.textContent = '크레용 로켓 발사대'; p.textContent = '크레용 로봇이 그려 준 로켓! 우주 해적 UFO가 달과 정거장을 노리고 있어요.'; add('🚀 발사 장면 보기', () => rocketCut54(), 'pri'); add('📜 크레용 로켓 장면 보기', () => playCut5('rocket58'), '', !S.rocket58); }
+    else if (n.k === 'book') { mid.textContent = '월드 5 · 그림책 나라'; h.textContent = '커다란 그림책'; p.textContent = 'UFO를 물리치자 펼쳐진 커다란 그림책! 잉크 낙서 드래곤이 페이지를 까맣게 칠하고 있어요.'; add('📖 그림책 장면 보기', () => playCut5('book59', () => showMap5()), 'pri', !S.book59); }
     else if (n.k === 'crayon') { mid.textContent = '월드 3 · 크레용 나라'; h.textContent = '이상한 포털'; p.textContent = '위더를 물리친 뒤 포털이 오작동! 모든 것이 크레용으로 그려진 나라로 이어져요.'; add('📜 크레용 나라 장면 보기', () => playCut5('crayon'), 'pri', !S.crayon58); }
     else { mid.textContent = '차원문'; h.textContent = '네더 포탈'; p.textContent = '성 깊은 곳에 열린 보랏빛 차원문. 위더가 기다리는 네더로 이어져요.'; add('📜 포탈 장면 보기', () => playCut5('portal'), 'pri', !S.portal); }
     add('🛒 상점 · 🪙 ' + shopSt582().w.toLocaleString(), () => shopOpen582(() => mapPanel5()), 'shop582');
@@ -12186,8 +12207,8 @@ const BlockAction = (() => {
   };
   // ===== v5.8.3 FINALE: after the World 4 UFO boss — home, Cybertruck, cameos, fireworks, credits, 끝 card, stats =====
   function st583() { if (!save.st583 || typeof save.st583 !== 'object') save.st583 = { c: 0, d: 0, t: 0 }; return save.st583; }
-  function allClear583() { const b = save.best && save.best['4-3']; return !!(b && b.clear); }
-  function finIdx583() { const i = MAPN5.findIndex(n => n.s !== undefined && STAGES[n.s] && STAGES[n.s].id === '4-3'); return i < 0 ? MAPN5.length - 1 : i; }
+  function allClear583() { const b = save.best && save.best['5-4']; return !!(b && b.clear); }
+  function finIdx583() { const i = MAPN5.findIndex(n => n.s !== undefined && STAGES[n.s] && STAGES[n.s].id === '5-4'); return i < 0 ? MAPN5.length - 1 : i; }
   function finStats583() {
     const S = st583(), ids = STAGES.map(s => s.id), B = save.best || {};
     let clr = 0, sc = 0, tm = 0; ids.forEach(id => { const b = B[id]; if (b && b.clear) { clr++; sc += b.score || 0; tm += b.time || 0; } });
@@ -12215,7 +12236,7 @@ const BlockAction = (() => {
     FIN583.card = c;
   }
   function finHide583() { if (FIN583.card) FIN583.card.classList.remove('show'); const D = typeof dom5 === 'function' ? dom5() : null; if (D && D.cred) D.cred.classList.remove('show'); if (FIN583.tr && FIN583.tr.m && FIN583.tr.m.parent) FIN583.tr.m.parent.remove(FIN583.tr.m); FIN583.tr = null; }
-  const FINCRED583 = () => CREDITS5.replace('<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>', '<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루, 크레용 나라, 그리고 우주까지</div>')
+  const FINCRED583 = () => CREDITS5.replace('<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>', '<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루, 크레용 나라, 우주, 그리고 그림책 나라까지</div>')
     .replace('<h3>CAST</h3>', '<h3>CAST</h3><div class="l">사이버트럭 — 꾸꾸의 든든한 단짝</div>')
     .replace('<h3>THANK YOU</h3>', '<div class="fin583"><h2>👑 모든 월드 클리어!</h2><div class="l">' + finStats583().slice(0, 6).map(r => r[0] + ' ' + r[1]).join('</div><div class="l">') + '</div></div><h3>THANK YOU</h3>');
   function finTruck583(x) {   // the Cybertruck as a cut prop (no rainbow aura / arcs)
@@ -12241,6 +12262,7 @@ const BlockAction = (() => {
     A('grak', makePiglinBase('chief'), 34.6, -1);
     try { A('crab', makeCrab58(), 36.6, -1, 0.9); } catch (e) {}
     try { A('crobo', makeRobo58(), 39, -1, 0.55); } catch (e) {}
+    try { A('toto59', makeBun59(), 43.6, -1, 0.9); } catch (e) {}
     try { A('alien', makeAlien54(), 41.6, -1, 0.9); } catch (e) {}
     try { const u = A('ufo', makeUfo54(), 46, -1, 0.32); u.y = 7.2; u.fly = 7.2; u.z = -3; } catch (e) {}
     const cr = makeCrystal(); cr.scale.setScalar(0.5); cr.position.set(18, 5.2, -1.6); W3.group.add(cr);
@@ -12249,17 +12271,18 @@ const BlockAction = (() => {
     const cheer = on => Object.keys(CUT.actors).forEach(k => { const a = CUT.actors[k]; if (k !== 'ufo') { a.hop = on ? 1 : 0; a.cheer = on; } });
     return [
       { wait: 30 },
-      { fn: () => { banner('🏠 꾸꾸의 마을', '우주 해적을 물리치고 집으로!', 2200); } },
+      { fn: () => { banner('🏠 꾸꾸의 마을', '그림책의 마지막 페이지를 덮고 집으로!', 2200); } },
       { walk: 'haru', to: 12.2, sp: 0.06, nb: 1 }, { cam: [12, 3.3, 9.4], t: 120 },
-      { say: 'bori', text: '꾸꾸! 정말 돌아왔구나! 우주 해적 UFO까지 물리쳤다며?' },
-      { say: 'haru', text: '응! 이제 달도, 유성우 정거장도 모두 안전해!' },
+      { say: 'bori', text: '꾸꾸! 정말 돌아왔구나! 그림책 나라의 잉크 드래곤까지 물리쳤다며?' },
+      { say: 'haru', text: '응! 달도, 유성우 정거장도, 그림책 나라도 모두 안전해!' },
       { fn: () => { cheer(1); fw5(14, 8.6); fw5(20, 9); } }, { wait: 40 }, { fn: () => cheer(0) },
-      { say: 'elder', text: '네 개의 세계를 모두 구한 우리 마을의 영웅이로구나! 오늘은 최고의 축제를 열자꾸나!' },
+      { say: 'elder', text: '다섯 개의 세계를 모두 구한 우리 마을의 영웅이로구나! 오늘은 최고의 축제를 열자꾸나!' },
       { fn: () => { finTruck583(-12).tx = 8.6; sfx5('firework'); cam.shake = 4; } },
       { cam: [5, 3.2, 9.2], t: 80, nb: 1 }, { wait: 150 },
       { say: 'haru', text: '부릉부릉~ 사이버트럭! 너도 축하하러 와 줬구나!' },
       { cam: [30, 3.9, 13.5], t: 110 },
       { say: 'grak', text: '꿀꿀! 네더 대표로 축하하러 왔다. 금으로 만든 케이크다!' },
+      { say: 'toto59', text: '깡총! 그림책 나라에서도 축하하러 왔어! 이야기꾼 할아버지가 오늘 이야기를 새 책으로 엮어 주신대!' },
       { say: 'crobo', text: '삐빅! 크레용 나라 친구들도 다 같이 왔어! 로켓 여행 즐거웠지?' },
       { say: 'moosh', text: '음머~ 축하해! 오늘은 버섯 수프 파티야!' },
       { say: 'golem', text: '마을은 내가 지키겠다. 영웅이여, 마음껏 즐겨라.' },
@@ -12277,11 +12300,11 @@ const BlockAction = (() => {
       { credits: 2, tick(adv) { const s = this; if (!s._on) { s._on = 1; s._t = 0; FIN583.go = 0; FIN583.card.querySelector('.gr').innerHTML = finStats583().map(r => '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>').join(''); FIN583.card.classList.add('show'); sfx5('firework'); }
           s._t++; if ((FIN583.go || adv) && s._t > 40 || s._t > 20 * 60 || (STORY5.auto && s._t > 90)) { FIN583.card.classList.remove('show'); return true; } return false; } }
     ]; } };
-  function finAfter583() { CUT.every = null; finHide583(); story5().finale583 = 1; save.node = finIdx583(); saveSave(); MAP.at = finIdx583(); showMap5(); }
+  function finAfter583() { CUT.every = null; finHide583(); story5().finale583 = 1; story5().fin59 = 1; save.node = finIdx583(); saveSave(); MAP.at = finIdx583(); showMap5(); }
   function playFinale583() { playCut5('finale583', finAfter583); }
   function finAuto583() {   // players who already beat 4-3 before v5.8.3 get the ending once when the map opens
-    if (!allClear583() || story5().seen.finale583 || STORY5.noFinale583) return;
-    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().seen.finale583) playFinale583(); }, 700);
+    if (!allClear583() || story5().fin59 || STORY5.noFinale583) return;
+    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().fin59) playFinale583(); }, 700);
   }
   function mapCrown583() {   // clear badge: a gold crown on map-Steve once everything is cleared
     const H = MAP.hero; if (!H) return;
@@ -12448,6 +12471,7 @@ const BlockAction = (() => {
     if (!el.querySelector('.ba-tomap')) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ba-tomap'; b.textContent = '🗺 월드맵으로'; b.style.cssText = 'margin:4px 0 10px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#f8d36a,#e0a020);color:#2a1a04;font-weight:900;cursor:pointer;'; b.onclick = () => { snd('select'); showMap5(); }; panel.insertBefore(b, panel.querySelector('.ba-cards')); }
     const grid = el.querySelector('.ba-cards'); if (grid && !grid.querySelector('.ba-wtitle')) { const cards = grid.querySelectorAll('.ba-card'); const t1 = document.createElement('div'); t1.className = 'ba-wtitle'; t1.textContent = '월드 1 · 골렘 왕의 성'; grid.insertBefore(t1, cards[0]); if (cards[4]) { const t2 = document.createElement('div'); t2.className = 'ba-wtitle'; t2.textContent = '월드 2 · 네더'; grid.insertBefore(t2, cards[4]); }
       if (cards[8]) { const t3 = document.createElement('div'); t3.className = 'ba-wtitle'; t3.textContent = '월드 3 · 크레용 나라'; grid.insertBefore(t3, cards[8]); }
+      if (cards[15]) { const t5 = document.createElement('div'); t5.className = 'ba-wtitle'; t5.textContent = '월드 5 · 그림책 나라'; grid.insertBefore(t5, cards[15]); }
       if (cards[12]) { const t4 = document.createElement('div'); t4.className = 'ba-wtitle'; t4.textContent = '월드 4 · 우주'; grid.insertBefore(t4, cards[12]); }
       cards.forEach((c, i) => { if (i >= 4 && !nodeOpen5(nodeOf58(i)) && !c.disabled) { c.disabled = true; c.classList.add('locked'); } }); }
   }
@@ -12461,7 +12485,7 @@ const BlockAction = (() => {
     let at = typeof save.node === 'number' ? save.node : 0; if (!nodeOpen5(at)) at = 0;
     MAP.at = at; MAP.walk = null; MAP.path = []; MAP.hx = MAPN5[at].x; MAP.hz = MAPN5[at].z; MAP.cx = MAP.hx; MAP.leaving = false;
     if (o.celebrate !== undefined && nodeOpen5(o.celebrate)) { MAP.at = Math.max(0, o.celebrate - 2); MAP.hx = MAPN5[MAP.at].x; MAP.hz = MAPN5[MAP.at].z; MAP.cx = MAP.hx; walkTo5(o.celebrate); }
-    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583();
+    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59();
     if (MAP.exp0 === undefined) MAP.exp0 = renderer.toneMappingExposure;
   }
   function walkTo5(target) {
@@ -12497,7 +12521,7 @@ const BlockAction = (() => {
     MAP.cx = lerp(MAP.cx, MAP.hx, 0.06);
     const w2 = Math.max(0, Math.min(1, (MAP.cx - 19) / 6));
     const bg = new THREE.Color(0x8ec5f0).lerp(new THREE.Color(0x4a1010), w2); MAP.scene.background.copy(bg); MAP.scene.fog.color.copy(bg);
-    MAP.sun.color.setHex(0xfff2d8).lerp(new THREE.Color(0xff8a5a), w2); mapCrayon58(MAP.cx); mapSpace54(MAP.cx);
+    MAP.sun.color.setHex(0xfff2d8).lerp(new THREE.Color(0xff8a5a), w2); mapCrayon58(MAP.cx); mapSpace54(MAP.cx); mapBook59(MAP.cx);
     const dist = a < 1 ? 16 : 13.5;
     const sh583 = (m.clientHeight || 800) < 520 ? 1.6 : 0;   // v5.8.3: short (phone landscape) screens -> keep Steve above the node panel
     MAP.cam.position.set(MAP.cx, 13.5 + (a < 1 ? 3.5 : 0), MAP.hz * 0.3 + dist + sh583); MAP.cam.lookAt(MAP.cx, 0, MAP.hz * 0.3 + (a < 1 ? 1.6 : 1.1) + sh583);
@@ -12645,9 +12669,9 @@ const BlockAction = (() => {
     return Math.max(0, Math.min(0.4, (b - mr.top) / Math.max(1, mr.height)));
   }
   function witherFrame5(ty, Hh, a) {
-    if (!(cam.lockX && L && L.arena && (L.def.bossKind === 'wither' || L.def.bossKind === 'ufo')) || a >= 1) return ty;
-    const w = enemies.find(e => (e.kind === 'wither' || e.kind === 'ufo') && e.alive !== false && e.active); if (!w) return ty;
-    const top = w.y + (w.kind === 'ufo' ? 1.9 : 3.1) * (w.mesh ? w.mesh.scale.y : 1);
+    if (!(cam.lockX && L && L.arena && (L.def.bossKind === 'wither' || L.def.bossKind === 'ufo' || L.def.bossKind === 'drag59')) || a >= 1) return ty;
+    const w = enemies.find(e => (e.kind === 'wither' || e.kind === 'ufo' || e.kind === 'drag59') && e.alive !== false && e.active); if (!w) return ty;
+    const top = w.y + (w.kind === 'drag59' ? 2.0 : w.kind === 'ufo' ? 1.9 : 3.1) * (w.mesh ? w.mesh.scale.y : 1);
     const need = top + hudFrac5() * Hh + 0.25 - Hh / 2;
     return Math.max(ty, Math.min(need, pl.y + Hh / 2 - 2.2));
   }
@@ -13156,7 +13180,7 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     let el = document.getElementById('tc53');
     if (!el) { el = document.createElement('div'); el.id = 'tc53'; el.innerHTML = '<div class="bar"><div class="w"></div><div class="id"></div><div class="nm"></div><div class="sub"></div><div class="lv"></div></div>'; host53().appendChild(el); }
     const wn = String(def.id).split('-')[0];
-    const WN = { 1: '오버월드', 2: '네더', 3: '우주' };
+    const WN = { 1: '오버월드', 2: '네더', 3: '크레용 나라', 4: '우주', 5: '그림책 나라' }; el.classList.toggle('bk59', wn === '5'); if (wn === '5') bkPage59(def.name, 'WORLD 5 · 그림책 나라');
     el.querySelector('.w').textContent = 'WORLD ' + wn + (WN[wn] ? ' · ' + WN[wn] : '');
     el.querySelector('.id').textContent = def.id; el.querySelector('.nm').textContent = def.name; el.querySelector('.sub').textContent = def.sub || '';
     el.querySelector('.lv').textContent = '♥ × ' + (G ? G.lives : 3);
@@ -14914,7 +14938,7 @@ const CRD={
     if (typeof o.node === 'number' && o.node >= 10) o.node = Math.min(18, o.node + 5);
     o.v58 = 1; return o;
   }
-  function nodeOf58(s) { return s < 4 ? s + 1 : s < 8 ? s + 2 : s < 12 ? s + 3 : s + 4; }
+  function nodeOf58(s) { return s < 4 ? s + 1 : s < 8 ? s + 2 : s < 12 ? s + 3 : s < 15 ? s + 4 : s + 5; }
   function w4Open58() { const S = story5(); return save.unlocked >= 13 || !!(save.best['3-4'] && save.best['3-4'].clear) || !!S.rocket58; }
   // ---- world map: crayon island between the nether and the moon ----
   MAPN5.push({ k: 'crayon', x: 45, z: 0.4 }, { s: 8, x: 49.5, z: -0.7 }, { s: 9, x: 53.5, z: 0.8 }, { s: 10, x: 57.5, z: -0.6 }, { s: 11, x: 62, z: 0.6 },
@@ -15462,6 +15486,571 @@ const CRD={
       stages: () => STAGES.map(s => s.id + ':' + (s.theme || '')),
       hero: () => ({ x: player.position.x, y: player.position.y, s: player.scale.y }), en: () => enemies.map(e => ({ kind: e.kind, x: e.x, y: e.y, alive: e.alive, h: e.h })) }; } catch (e) { }
   /* /FX59 */
+  /* W59 */
+  /* W59 — v5.9 World 5 · 그림책 나라 (watercolour + coloured pencil storybook) */
+  const BK59 = { tex: {}, mats: {}, par: [], anim: [], fl: [], bill: [], sky: null, w3: null, ov: null, pg: null, pgT: 0, f: -1, q: [] };
+  const BKMOB59 = CRMOB58;
+  const BKCOL59 = { hs: 0xfff6ea, hg: 0xe6dcc8, amb: 0xfff2e2, moon: 0xfff6ee, key: 0xfff0dc, rim: 0xffffff };
+  const BKINK59 = '#2b2440';
+  // ---------- watercolour kit (canvas) ----------
+  const WK59 = (() => {
+    let R = Math.random; const rnd = (a, b) => a + R() * (b - a);
+    const seed = s => { let x = s >>> 0 || 1; R = () => { x ^= x << 13; x >>>= 0; x ^= x >>> 17; x ^= x << 5; x >>>= 0; return (x % 100000) / 100000; }; };
+    const unseed = () => { R = Math.random; };
+    const cv = (w, h) => { const c = document.createElement('canvas'); c.width = w; c.height = h; return c; };
+    const ell = (cx, cy, rx, ry, n) => { const p = []; n = n || 28; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2; p.push([cx + Math.cos(a) * rx, cy + Math.sin(a) * ry]); } return p; };
+    const rect = (x, y, w, h, n) => { n = n || 5; const p = []; for (let i = 0; i < n; i++) p.push([x + w * i / n, y]); for (let i = 0; i < n; i++) p.push([x + w, y + h * i / n]); for (let i = 0; i < n; i++) p.push([x + w - w * i / n, y + h]); for (let i = 0; i < n; i++) p.push([x, y + h - h * i / n]); return p; };
+    const jit = (p, j) => p.map(([x, y]) => [x + rnd(-j, j), y + rnd(-j, j)]);
+    const path = (g, p, closed) => { g.beginPath(); p.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); if (closed !== false) g.closePath(); };
+    const paper = (g, w, h, base, k) => { g.fillStyle = base || '#fbf5e6'; g.fillRect(0, 0, w, h); k = k === undefined ? 1 : k;
+      const n = Math.floor(w * h / 70 * k); for (let i = 0; i < n; i++) { g.fillStyle = R() < 0.5 ? 'rgba(120,96,60,.06)' : 'rgba(255,255,255,.10)'; g.fillRect(R() * w, R() * h, 1 + R() * 1.6, 1 + R() * 1.6); }
+      g.strokeStyle = 'rgba(150,120,80,.07)'; g.lineWidth = 1; for (let i = 0; i < 14 * k; i++) { const x = R() * w, y = R() * h; g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(x + rnd(-14, 14), y + rnd(-6, 6), x + rnd(-22, 22), y + rnd(-10, 10)); g.stroke(); } };
+    // wash: layered translucent fills + darker dried edge + granulation
+    const wash = (g, p, col, o) => { o = o || {}; const L = o.layers || 4, a = o.a === undefined ? 0.6 : o.a; g.save();
+      for (let k = 0; k < L; k++) { g.globalAlpha = a / L * 1.7; g.fillStyle = col; path(g, jit(p, o.j === undefined ? 3 : o.j)); g.fill(); }
+      if (o.edge !== 0) { g.globalAlpha = o.edge || 0.32; g.strokeStyle = o.ec || col; g.lineWidth = o.ew || 2.4; path(g, jit(p, 1.2)); g.stroke(); }
+      if (o.gran !== 0) { path(g, p); g.clip(); g.globalAlpha = 0.16; g.fillStyle = o.gc || 'rgba(60,40,30,1)'; const bb = bbox(p), n = Math.min(400, (bb[2] - bb[0]) * (bb[3] - bb[1]) / 90); for (let i = 0; i < n; i++) g.fillRect(rnd(bb[0], bb[2]), rnd(bb[1], bb[3]), 1.3, 1.3);
+        if (o.bloom !== 0) { g.globalAlpha = 0.12; g.fillStyle = '#ffffff'; for (let i = 0; i < 3; i++) { path(g, ell(rnd(bb[0], bb[2]), rnd(bb[1], bb[3]), (bb[2] - bb[0]) * rnd(0.08, 0.2), (bb[3] - bb[1]) * rnd(0.08, 0.2), 14)); g.fill(); } } }
+      g.restore(); };
+    const bbox = p => { let a = 1e9, b = 1e9, c = -1e9, d = -1e9; p.forEach(([x, y]) => { a = Math.min(a, x); b = Math.min(b, y); c = Math.max(c, x); d = Math.max(d, y); }); return [a, b, c, d]; };
+    // coloured pencil: several thin jittery passes
+    const pencil = (g, p, col, lw, closed, passes) => { g.save(); g.strokeStyle = col; g.lineCap = 'round'; g.lineJoin = 'round'; for (let k = 0; k < (passes || 3); k++) { g.globalAlpha = 0.45; g.lineWidth = (lw || 1.6) * rnd(0.7, 1.1); path(g, jit(p, 0.9), closed); g.stroke(); } g.restore(); };
+    const hatch = (g, p, col, ang, gap, lw, a) => { g.save(); path(g, p); g.clip(); const bb = bbox(p), cx = (bb[0] + bb[2]) / 2, cy = (bb[1] + bb[3]) / 2, r = Math.hypot(bb[2] - bb[0], bb[3] - bb[1]) / 2 + 4;
+      g.translate(cx, cy); g.rotate(ang || 0.8); g.strokeStyle = col; g.globalAlpha = a || 0.4; g.lineWidth = lw || 1.2; for (let y = -r; y < r; y += gap || 5) { g.beginPath(); g.moveTo(-r, y + rnd(-0.8, 0.8)); g.lineTo(r, y + rnd(-0.8, 0.8)); g.stroke(); } g.restore(); };
+    // ink: dark line with a nib-like width wobble
+    const ink = (g, p, lw, closed, col) => { g.save(); g.strokeStyle = col || BKINK59; g.lineCap = 'round'; g.lineJoin = 'round'; const q = closed === false ? p : p.concat([p[0]]);
+      for (let i = 1; i < q.length; i++) { g.lineWidth = (lw || 3) * (0.65 + 0.55 * Math.abs(Math.sin(i * 1.7 + q[i][0] * 0.05))); g.globalAlpha = 0.9; g.beginPath(); g.moveTo(q[i - 1][0], q[i - 1][1]); g.lineTo(q[i][0] + rnd(-0.4, 0.4), q[i][1] + rnd(-0.4, 0.4)); g.stroke(); } g.restore(); };
+    const sky = (g, w, h, stops) => { const gr = g.createLinearGradient(0, 0, 0, h); stops.forEach(([o, c]) => gr.addColorStop(o, c)); g.fillStyle = gr; g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 9; i++) { const s = stops[Math.floor(R() * stops.length)][1]; wash(g, ell(R() * w, R() * h, rnd(w * 0.1, w * 0.3), rnd(h * 0.04, h * 0.12), 18), s, { a: 0.25, edge: 0.08, gran: 0, j: 8 }); } };
+    return { rnd, seed, unseed, cv, ell, rect, jit, path, paper, wash, pencil, hatch, ink, sky, bbox, R: () => R() };
+  })();
+  function bkTexOf59(c, rep) { const t = new THREE.CanvasTexture(c); if (THREE.sRGBEncoding) t.encoding = THREE.sRGBEncoding; t.anisotropy = 4; if (rep) { t.wrapS = t.wrapT = THREE.RepeatWrapping; } keepTex(t); return t; }
+  // standee drawings: key -> [w, h, draw]
+  const BKD59 = {};
+  function bkTex59(k) { if (BK59.tex[k]) return BK59.tex[k]; const d = BKD59[k]; const sc = BKMOB59 ? 0.5 : 1, w = Math.round(d[0] * sc), h = Math.round(d[1] * sc), c = WK59.cv(w, h), g = c.getContext('2d');
+    WK59.seed(k.length * 977 + k.charCodeAt(0) * 31 + (k.charCodeAt(1) || 3)); g.save(); g.scale(sc, sc); d[2](g, d[0], d[1]); g.restore(); WK59.unseed(); return (BK59.tex[k] = bkTexOf59(c)); }
+  function bkSt59(k, H, o) { o = o || {}; const id = k + (o.lit ? '|l' : ''); let m = BK59.mats[id];
+    if (!m) m = BK59.mats[id] = o.lit ? new THREE.MeshLambertMaterial({ map: bkTex59(k), transparent: true, alphaTest: 0.05, side: THREE.DoubleSide, emissive: 0xffffff, emissiveMap: bkTex59(k), emissiveIntensity: 0.35 })
+      : new THREE.MeshBasicMaterial({ map: bkTex59(k), transparent: true, alphaTest: 0.05, side: THREE.DoubleSide, toneMapped: false, fog: !!o.fog, depthWrite: !o.nodw });
+    const d = BKD59[k], p = new THREE.Mesh(new THREE.PlaneGeometry(H * d[0] / d[1], H), m); p.geometry.translate(0, H / 2, 0); return p; }
+  function bkAdd59(k, x, y, z, H, o) { o = o || {}; const m = bkSt59(k, H, o); m.position.set(x, y, z); if (o.flip) m.scale.x = -1; if (o.ry) m.rotation.y = o.ry; if (o.rz) m.rotation.z = o.rz;
+    (o.to || W3.group).add(m); if (o.k) BK59.par.push({ o: m, x0: x, k: o.k }); if (o.a) BK59.anim.push(Object.assign({ o: m, x0: x, y0: y }, o.a)); return m; }
+  // pop-up paper prop: two crossed standees, folds open when the hero approaches
+  function bkPop59(k, x, y, z, H, o) { o = o || {}; const g = new THREE.Group(); g.position.set(x, y, z); const a = bkSt59(k, H, o), b = bkSt59(k, H, o); a.rotation.y = 0.55; b.rotation.y = -0.55; g.add(a); g.add(b); (o.to || W3.group).add(g);
+    BK59.anim.push({ o: g, x0: x, y0: y, pop: 1, sway: o.sway || 0.03 }); return g; }
+  const BKW = WK59;
+  // ----- drawings -----
+  const bkFlowerD = (petal, mid) => (g, w, h) => { const K = BKW, cx = w / 2;
+    K.pencil(g, [[cx, h - 2], [cx + K.rnd(-6, 6), h * 0.62], [cx, h * 0.36]], '#3f8a3a', 5, false, 4);
+    [[cx - 26, h * 0.7, -0.6], [cx + 24, h * 0.62, 0.6]].forEach(([x, y, a]) => { const p = K.ell(x, y, 22, 9, 16).map(([px, py]) => [x + (px - x) * Math.cos(a) - (py - y) * Math.sin(a), y + (px - x) * Math.sin(a) + (py - y) * Math.cos(a)]); K.wash(g, p, '#7cc46a', { a: 0.75 }); K.ink(g, p, 1.6); });
+    for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2, x = cx + Math.cos(a) * 30, y = h * 0.3 + Math.sin(a) * 30, p = K.ell(x, y, 24, 18, 18); K.wash(g, p, petal, { a: 0.7 }); K.ink(g, p, 1.8); }
+    const c = K.ell(cx, h * 0.3, 17, 17, 16); K.wash(g, c, mid, { a: 0.9 }); K.hatch(g, c, '#8a5a1a', 0.7, 4, 1.2, 0.5); K.ink(g, c, 2); };
+  BKD59.fl1 = [160, 256, bkFlowerD('#f49ab8', '#ffd25a')]; BKD59.fl2 = [160, 256, bkFlowerD('#9ab8f4', '#fff0a0')]; BKD59.fl3 = [160, 256, bkFlowerD('#f8c46a', '#e8723a')]; BKD59.fl4 = [160, 256, bkFlowerD('#c8a0f0', '#ffe07a')];
+  BKD59.tuft = [192, 96, (g, w, h) => { const K = BKW; for (let i = 0; i < 26; i++) { const x = K.rnd(8, w - 8); K.pencil(g, [[x, h], [x + K.rnd(-10, 10), K.rnd(h * 0.2, h * 0.7)]], i % 3 ? '#4f9a3c' : '#86c45a', 3, false, 2); }
+    for (let i = 0; i < 4; i++) { const p = K.ell(K.rnd(20, w - 20), K.rnd(h * 0.2, h * 0.5), 7, 7, 10); K.wash(g, p, ['#f49ab8', '#fff07a', '#9ab8f4', '#ffffff'][i], { a: 0.9 }); K.ink(g, p, 1.2); } }];
+  BKD59.tree = [256, 384, (g, w, h) => { const K = BKW, cx = w / 2; const tr = [[cx - 14, h], [cx - 10, h * 0.5], [cx + 10, h * 0.5], [cx + 16, h]]; K.wash(g, tr, '#9a6a42', { a: 0.85 }); K.hatch(g, tr, '#5a3a22', 1.4, 5, 1.4, 0.55); K.ink(g, tr, 2.2);
+    [[cx, h * 0.3, 92, 80], [cx - 52, h * 0.46, 56, 48], [cx + 54, h * 0.44, 58, 50]].forEach(([x, y, rx, ry], i) => { const p = K.jit(K.ell(x, y, rx, ry, 26), 6); K.wash(g, p, ['#6ab45a', '#4f9a4a', '#82c46a'][i], { a: 0.75, j: 5 }); K.hatch(g, p, '#2f6a32', 0.6 + i, 6, 1.2, 0.3); K.ink(g, p, 2); });
+    for (let i = 0; i < 5; i++) { const p = K.ell(K.rnd(cx - 70, cx + 70), K.rnd(h * 0.2, h * 0.5), 6, 6, 10); K.wash(g, p, '#e8503a', { a: 0.9 }); K.ink(g, p, 1.2); } }];
+  BKD59.hills1 = [1024, 256, (g, w, h) => { const K = BKW; const mk = (y0, amp, col, hc) => { const p = [[0, h]]; for (let x = 0; x <= w; x += 32) p.push([x, y0 + Math.sin(x * 0.011 + y0) * amp + Math.sin(x * 0.03) * amp * 0.3]); p.push([w, h]); K.wash(g, p, col, { a: 0.7, j: 4 }); if (hc) K.hatch(g, p, hc, 0.9, 7, 1.2, 0.22); K.pencil(g, p.slice(1, -1), hc || col, 1.4, false, 2); };
+    mk(h * 0.35, 26, '#a8c8d8'); mk(h * 0.52, 20, '#9ccf8a', '#5a9a4a'); mk(h * 0.72, 14, '#7cc06a', '#3f8a3a'); }];
+  BKD59.cottage = [320, 320, (g, w, h) => { const K = BKW; const b = K.rect(60, 150, 200, 160); K.wash(g, b, '#f6dcb0', { a: 0.85 }); K.hatch(g, b, '#b88a5a', 0.8, 7, 1, 0.25); K.ink(g, b, 2.4);
+    const r = [[40, 156], [160, 40], [280, 156]]; K.wash(g, r, '#d8604a', { a: 0.85 }); K.hatch(g, r, '#8a2a1a', -0.6, 6, 1.3, 0.4); K.ink(g, r, 2.6);
+    const d = K.rect(140, 220, 44, 90, 3); K.wash(g, d, '#7a4a2a', { a: 0.9 }); K.ink(g, d, 2); [[80, 190], [206, 190]].forEach(([x, y]) => { const q = K.rect(x, y, 36, 34, 3); K.wash(g, q, '#ffe89a', { a: 0.9 }); K.ink(g, q, 2); K.ink(g, [[x + 18, y], [x + 18, y + 34]], 1.4, false); });
+    const ch = K.rect(210, 60, 26, 60, 3); K.wash(g, ch, '#a05a3a', { a: 0.9 }); K.ink(g, ch, 2); }];
+  BKD59.sun = [256, 256, (g, w, h) => { const K = BKW; for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; K.pencil(g, [[128 + Math.cos(a) * 70, 128 + Math.sin(a) * 70], [128 + Math.cos(a) * 110, 128 + Math.sin(a) * 110]], '#f0a830', 4, false, 3); }
+    const p = K.ell(128, 128, 60, 60, 30); K.wash(g, p, '#ffd25a', { a: 0.9 }); K.wash(g, K.ell(118, 116, 30, 26, 16), '#fff2b0', { a: 0.5, edge: 0 }); K.ink(g, p, 2.2, true, '#c07a20'); }];
+  BKD59.cloud = [384, 192, (g, w, h) => { const K = BKW; const p = []; [[110, 110, 80, 52], [190, 84, 88, 64], [276, 112, 78, 50], [190, 132, 140, 40]].forEach(([x, y, rx, ry]) => K.ell(x, y, rx, ry, 22).forEach(q => p.push(q)));
+    [[110, 110, 80, 52], [190, 84, 88, 64], [276, 112, 78, 50], [190, 132, 140, 40]].forEach(([x, y, rx, ry]) => K.wash(g, K.ell(x, y, rx, ry, 22), '#ffffff', { a: 0.95, edge: 0.2, ec: '#a8b8e0', gran: 0 }));
+    K.wash(g, K.ell(196, 150, 130, 18, 18), '#c8d0f0', { a: 0.5, edge: 0, gran: 0 }); K.pencil(g, K.ell(190, 104, 176, 74, 30).slice(14, 30), '#7a88c0', 1.5, false, 2); }];
+  BKD59.bird = [128, 64, (g, w, h) => { const K = BKW; K.ink(g, [[10, 40], [34, 20], [60, 38], [86, 18], [118, 40]], 3, false); }];
+  // night forest
+  BKD59.pine = [192, 384, (g, w, h) => { const K = BKW, cx = w / 2; const tr = K.rect(cx - 10, h - 70, 20, 70, 3); K.wash(g, tr, '#3a2a3a', { a: 0.9 }); K.ink(g, tr, 2);
+    for (let i = 0; i < 4; i++) { const y = 30 + i * 70, s = 40 + i * 18, p = [[cx, y - 20], [cx + s, y + 70], [cx - s, y + 70]]; K.wash(g, p, ['#2a3a6a', '#2f4470', '#34507a', '#3a5a80'][i], { a: 0.85 }); K.hatch(g, p, '#141a3a', 0.7, 6, 1.2, 0.35); K.ink(g, p, 2, true, '#10122a'); } }];
+  BKD59.forest2 = [1024, 256, (g, w, h) => { const K = BKW; [[h * 0.3, '#3a4a86', 0.6], [h * 0.48, '#2c3a70', 0.75], [h * 0.66, '#1f2a58', 0.9]].forEach(([y0, col, a]) => { const p = [[0, h]];
+      for (let x = 0; x <= w; x += 24) p.push([x, y0 + ((x / 24) % 2 ? -K.rnd(16, 34) : K.rnd(0, 10))]); p.push([w, h]); K.wash(g, p, col, { a, j: 2 }); K.hatch(g, p, '#0e1230', 1.1, 8, 1, 0.25); }); }];
+  BKD59.moon = [256, 256, (g, w, h) => { const K = BKW, p = K.ell(128, 128, 84, 84, 32); K.wash(g, p, '#fff4c8', { a: 0.95, gran: 0 }); [[100, 110, 14], [150, 150, 20], [146, 92, 9]].forEach(([x, y, r]) => K.wash(g, K.ell(x, y, r, r, 14), '#e8d8a0', { a: 0.6, edge: 0.2 })); K.ink(g, p, 2, true, '#a8945a'); }];
+  BKD59.mush = [128, 128, (g, w, h) => { const K = BKW; const st = K.rect(54, 64, 20, 60, 2); K.wash(g, st, '#f4ecd8', { a: 0.95 }); K.ink(g, st, 1.6); const c = [[18, 70], [30, 36], [64, 22], [98, 36], [110, 70]]; K.wash(g, c, '#7ae0d0', { a: 0.95 }); [[46, 50], [76, 42], [90, 60]].forEach(([x, y]) => K.wash(g, K.ell(x, y, 6, 5, 10), '#ffffff', { a: 0.9, edge: 0 })); K.ink(g, c, 2); }];
+  BKD59.ffly = [64, 64, (g, w, h) => { const gr = g.createRadialGradient(32, 32, 1, 32, 32, 30); gr.addColorStop(0, 'rgba(255,250,190,1)'); gr.addColorStop(0.3, 'rgba(255,220,120,.55)'); gr.addColorStop(1, 'rgba(255,200,80,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); }];
+  // cloud castle
+  BKD59.castle = [512, 512, (g, w, h) => { const K = BKW; const tw = (x, y, tw, th, col, roof) => { const b = K.rect(x, y, tw, th, 4); K.wash(g, b, col, { a: 0.85 }); K.hatch(g, b, '#8a7aa8', 1.1, 7, 1, 0.22); K.ink(g, b, 2.2);
+      const r = [[x - 8, y + 2], [x + tw / 2, y - tw * 0.9], [x + tw + 8, y + 2]]; K.wash(g, r, roof, { a: 0.9 }); K.ink(g, r, 2.2); K.ink(g, [[x + tw / 2, y - tw * 0.9], [x + tw / 2, y - tw * 0.9 - 30]], 1.6, false); K.wash(g, [[x + tw / 2, y - tw * 0.9 - 30], [x + tw / 2 + 26, y - tw * 0.9 - 22], [x + tw / 2, y - tw * 0.9 - 14]], '#ff6a8a', { a: 0.9 });
+      for (let i = 0; i < Math.floor(th / 60); i++) { const wnd = K.rect(x + tw / 2 - 8, y + 26 + i * 56, 16, 26, 2); K.wash(g, wnd, '#ffe6a0', { a: 0.95 }); K.ink(g, wnd, 1.4); } };
+    tw(60, 220, 80, 230, '#e8e0f8', '#9a7ae0'); tw(372, 210, 80, 240, '#e8e0f8', '#9a7ae0'); tw(160, 150, 190, 300, '#f4eefc', '#7a9ae8'); tw(220, 70, 70, 120, '#f4eefc', '#e87ab0');
+    const gate = [[222, 450], [222, 380], [255, 350], [288, 380], [288, 450]]; K.wash(g, gate, '#6a5a8a', { a: 0.9 }); K.ink(g, gate, 2.4);
+    g.save(); g.translate(64, 330); BKD59.cloud[2](g, 384, 192); g.restore(); }];
+  BKD59.cloudbank = [1024, 256, (g, w, h) => { const K = BKW; for (let i = 0; i < 16; i++) { const x = i * 68 + K.rnd(-10, 10), y = h * 0.55 + K.rnd(-20, 20); K.wash(g, K.ell(x, y, K.rnd(60, 100), K.rnd(40, 64), 20), i % 2 ? '#fff6f0' : '#f6e8f4', { a: 0.9, edge: 0.18, ec: '#c0a8d8', gran: 0 }); }
+    K.wash(g, K.rect(0, h * 0.7, w, h * 0.3, 8), '#f4e6f0', { a: 0.95, edge: 0, gran: 0 }); }];
+  BKD59.balloon = [128, 256, (g, w, h) => { const K = BKW, p = K.ell(64, 70, 48, 60, 24); K.wash(g, p, '#f4806a', { a: 0.9 }); K.hatch(g, p, '#b84a3a', 0.4, 8, 1.2, 0.35); K.ink(g, p, 2); [[40, 126], [88, 126]].forEach(([x, y]) => K.ink(g, [[x, y], [x + (64 - x) * 0.3, 190]], 1.2, false)); const b = K.rect(46, 188, 36, 30, 3); K.wash(g, b, '#a8743a', { a: 0.95 }); K.ink(g, b, 1.8); }];
+  // ink storm
+  BKD59.splat = [256, 256, (g, w, h) => { const K = BKW; const p = []; for (let i = 0; i < 36; i++) { const a = i / 36 * Math.PI * 2, r = 70 + (i % 3 === 0 ? K.rnd(20, 46) : K.rnd(-8, 10)); p.push([128 + Math.cos(a) * r, 128 + Math.sin(a) * r]); }
+    K.wash(g, p, '#2b2448', { a: 0.85, edge: 0.4 }); for (let i = 0; i < 8; i++) { const a = K.rnd(0, 6.28), r = K.rnd(96, 118); K.wash(g, K.ell(128 + Math.cos(a) * r, 128 + Math.sin(a) * r, K.rnd(4, 9), K.rnd(4, 9), 10), '#2b2448', { a: 0.9 }); } }];
+  BKD59.scrib = [256, 256, (g, w, h) => { const K = BKW; const p = []; for (let i = 0; i < 90; i++) { const a = i * 0.32, r = 20 + i * 1.1; p.push([128 + Math.cos(a) * r * 0.9 + K.rnd(-4, 4), 128 + Math.sin(a) * r * 0.7 + K.rnd(-4, 4)]); } K.ink(g, p, 3, false, '#3a2a60'); }];
+  BKD59.page = [256, 320, (g, w, h) => { const K = BKW; const p = [[10, 14], [240, 6], [246, 300], [200, 312], [150, 300], [100, 316], [50, 302], [14, 310]]; K.wash(g, p, '#fbf3de', { a: 0.98, edge: 0.3, ec: '#b8a070', gran: 0 });
+    for (let y = 40; y < 280; y += 18) K.pencil(g, [[30, y], [K.rnd(150, 220), y + K.rnd(-1, 1)]], '#6a5a7a', 1.4, false, 1); K.ink(g, p, 1.4, true, '#8a7a5a'); }];
+  BKD59.quill = [96, 384, (g, w, h) => { const K = BKW, p = [[48, 10], [80, 90], [70, 230], [50, 330], [30, 230], [18, 90]]; K.wash(g, p, '#f4f0ff', { a: 0.95 }); K.hatch(g, p, '#8a7ab0', -0.5, 5, 1, 0.4); K.ink(g, p, 2); K.ink(g, [[48, 30], [48, 374]], 2, false); }];
+  BKD59.books = [256, 192, (g, w, h) => { const K = BKW; let x = 14; ['#c0504a', '#4a7ac0', '#e0a84a', '#5aa06a', '#8a5ac0', '#d07aa0'].forEach((c, i) => { const bw = K.rnd(26, 40), bh = K.rnd(110, 170), b = K.rect(x, h - bh, bw, bh, 3); K.wash(g, b, c, { a: 0.9 }); K.ink(g, b, 1.8); K.ink(g, [[x + 3, h - bh + 18], [x + bw - 3, h - bh + 18]], 1.2, false, '#f8e8b0'); x += bw + 2; }); }];
+  BKD59.bkdoor = [384, 384, (g, w, h) => { const K = BKW; const L0 = [[20, 380], [24, 60], [100, 40], [188, 70], [188, 380]], R0 = [[364, 380], [360, 60], [284, 40], [196, 70], [196, 380]];
+    [L0, R0].forEach(p => { K.wash(g, p, '#fbf3de', { a: 0.98, edge: 0.3, ec: '#b8a070', gran: 0 }); K.ink(g, p, 2.2); });
+    for (let i = 0; i < 9; i++) { K.pencil(g, [[40, 110 + i * 28], [170, 116 + i * 28]], '#7a6a8a', 1.4, false, 1); K.pencil(g, [[214, 116 + i * 28], [344, 110 + i * 28]], '#7a6a8a', 1.4, false, 1); }
+    const gl = g.createRadialGradient(192, 230, 10, 192, 230, 150); gl.addColorStop(0, 'rgba(255,236,150,.95)'); gl.addColorStop(1, 'rgba(255,236,150,0)'); g.fillStyle = gl; g.fillRect(60, 80, 264, 300); }];
+  // skies (drawn wide; mapped onto the camera-facing sheet)
+  BKD59.sky1 = [512, 512, (g, w, h) => BKW.sky(g, w, h, [[0, '#a8d4f0'], [0.55, '#d8ecf4'], [1, '#fde8d4']])];
+  BKD59.sky2 = [512, 512, (g, w, h) => { BKW.sky(g, w, h, [[0, '#141a44'], [0.55, '#2a2f6a'], [1, '#5a4a7e']]); for (let i = 0; i < 90; i++) { g.fillStyle = 'rgba(255,246,210,' + BKW.rnd(0.4, 0.95) + ')'; const s = BKW.rnd(1, 2.6); g.fillRect(BKW.rnd(0, w), BKW.rnd(0, h * 0.75), s, s); } }];
+  BKD59.sky3 = [512, 512, (g, w, h) => BKW.sky(g, w, h, [[0, '#b8b0e8'], [0.45, '#f4c8d8'], [1, '#ffe4c0']])];
+  BKD59.skyb = [512, 512, (g, w, h) => { BKW.sky(g, w, h, [[0, '#6a6290'], [0.5, '#a89cc0'], [1, '#e4dcec']]); for (let i = 0; i < 6; i++) BKW.wash(g, BKW.ell(BKW.rnd(0, w), BKW.rnd(0, h * 0.6), BKW.rnd(40, 90), BKW.rnd(20, 40), 20), '#3a3060', { a: 0.3, edge: 0.15 }); }];
+  // ---------- book themes ----------
+  function bkTile59(kind, base, shade, top) { return tilePair('bk59' + kind, (g, w, h, bump) => { const K = WK59; K.seed(kind.length * 131 + kind.charCodeAt(0));
+    if (bump) { g.fillStyle = '#808080'; g.fillRect(0, 0, w, h); g.globalAlpha = 0.22; for (let i = 0; i < 900; i++) { g.fillStyle = Math.random() < 0.5 ? '#fff' : '#000'; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } g.globalAlpha = 1; K.unseed(); return; }
+    K.paper(g, w, h, '#fbf4e2'); K.wash(g, K.rect(-8, -8, w + 16, h + 16, 6), base, { a: 0.62, j: 6, edge: 0 });
+    for (let i = 0; i < 6; i++) K.wash(g, K.ell(K.rnd(20, w - 20), K.rnd(h * 0.3, h - 20), K.rnd(18, 40), K.rnd(10, 24), 14), shade, { a: 0.3, edge: 0.2 });
+    K.hatch(g, K.rect(0, 0, w, h, 2), shade, 0.9, 9, 1.4, 0.18); if (top) K.wash(g, [[-6, -6], [w + 6, -6], [w + 6, h * 0.16], [w * 0.7, h * 0.22], [w * 0.4, h * 0.14], [w * 0.15, h * 0.24], [-6, h * 0.16]], top, { a: 0.8, edge: 0.35 });
+    for (let i = 0; i < 4; i++) { const x = K.rnd(20, w - 30), y = K.rnd(h * 0.35, h - 20); K.pencil(g, [[x, y], [x + K.rnd(8, 20), y + K.rnd(-4, 4)]], shade, 2, false, 2); }
+    K.ink(g, [[3, 3], [w - 3, 3], [w - 3, h - 3], [3, h - 3]], 2.6, true, 'rgba(43,36,64,.75)'); K.unseed(); }); }
+  // bricks are book spines on a shelf
+  function bkBrick59() { return tilePair('bk59brick', (g, w, h, bump) => { const K = WK59; K.seed(77);
+    if (bump) { g.fillStyle = '#909090'; g.fillRect(0, 0, w, h); g.fillStyle = '#404040'; for (let x = 0; x < w; x += w / 5) g.fillRect(x, 0, 5, h); K.unseed(); return; }
+    K.paper(g, w, h, '#f6ead0'); const cols = ['#c0504a', '#4a7ac0', '#e0a84a', '#5aa06a', '#8a5ac0']; let x = 0;
+    for (let i = 0; i < 5; i++) { const bw = w / 5, b = K.rect(x + 2, 4, bw - 4, h - 8, 3); K.wash(g, b, cols[i], { a: 0.85, j: 2 }); K.hatch(g, b, '#3a2a30', 1.3, 6, 1, 0.2);
+      [0.18, 0.82].forEach(f => K.ink(g, [[x + 6, h * f], [x + bw - 6, h * f]], 1.6, false, '#f8e2a0')); K.ink(g, b, 2.2); x += bw; } K.unseed(); }); }
+  function bkCapTex59(k, base, shade, blades) { const id = 'cap|' + k; if (BK59.tex[id]) return BK59.tex[id]; const K = WK59, c = K.cv(256, 64), g = c.getContext('2d'); K.seed(k.charCodeAt(0) * 7);
+    K.paper(g, 256, 64, '#fbf4e2'); K.wash(g, K.rect(-6, -6, 268, 76, 6), base, { a: 0.8, edge: 0 });
+    for (let i = 0; i < (blades || 26); i++) { const x = K.rnd(0, 256); K.pencil(g, [[x, 64], [x + K.rnd(-6, 6), K.rnd(8, 40)]], shade, 2.2, false, 2); }
+    K.ink(g, [[0, 2], [256, 2]], 2, false, 'rgba(43,36,64,.6)'); K.unseed(); return (BK59.tex[id] = bkTexOf59(c)); }
+  const bkCap59 = (k, base, shade, bl) => () => new THREE.MeshLambertMaterial({ color: 0xffffff, map: bkCapTex59(k, base, shade, bl) });
+  // page-bridge movers: paper page with written lines + ink edge
+  function bkMover59() { const id = 'mover'; let t = BK59.tex[id]; if (!t) { const K = WK59, c = K.cv(256, 64), g = c.getContext('2d'); K.seed(5); K.paper(g, 256, 64, '#fdf6e4');
+      for (let y = 14; y < 56; y += 9) K.pencil(g, [[14, y], [K.rnd(150, 240), y]], '#7a6a8a', 1.3, false, 1); K.wash(g, K.rect(220, 6, 30, 52, 2), '#f0c0d0', { a: 0.5, edge: 0 }); K.ink(g, [[2, 2], [254, 2], [254, 62], [2, 62]], 2.4, true); K.unseed();
+      t = BK59.tex[id] = bkTexOf59(c); } return new THREE.MeshLambertMaterial({ color: 0xffffff, map: t, emissive: 0xffffff, emissiveMap: t, emissiveIntensity: 0.15 }); }
+  const bkTh59 = (o) => Object.assign({ sky: false, bg: 0xfbf3e2, fog: 0xfbf3e2, fogNear: 36, fogFar: 160, ceil: false, groundCol: 0xffffff, cap: true, brick: () => bkBrick59(), hemi: 0.95, amb: 0.72, moon: 0.8, key: 0.5, rim: 0.22, torch: 1.0, moverMat: () => bkMover59(), book: 'meadow' }, o);
+  Object.assign(THEMES, {
+    book1: bkTh59({ ground: () => bkTile59('soil1', '#c89a6a', '#8a5a3a', '#86c45a'), capMat: bkCap59('m', '#8ad06a', '#3f8a3a'), book: 'meadow' }),
+    book2: bkTh59({ bg: 0x1e2350, fog: 0x232a5a, fogNear: 26, fogFar: 110, ground: () => bkTile59('soil2', '#6a6aa0', '#3a3a6a', '#4a8a8a'), capMat: bkCap59('n', '#4a9a9a', '#1f5a6a'), book: 'night', hemi: 0.6, amb: 0.42, moon: 0.9, key: 0.35, rim: 0.3, torch: 1.6, lc: { hs: 0xb8c4ff, hg: 0x3a3a6a, amb: 0x8a90d0, moon: 0xd8e0ff, key: 0xffd8a0, rim: 0xa8b0ff } }),
+    book3: bkTh59({ bg: 0xf8e4ea, fog: 0xf8e4ea, ground: () => bkTile59('cloud3', '#e8e0f4', '#a898d0', '#ffffff'), capMat: bkCap59('c', '#ffffff', '#b8a8e0', 6), book: 'cloud', groundCol: 0xffffff }),
+    bookb: bkTh59({ bg: 0xe4dcec, fog: 0xe4dcec, ground: () => bkTile59('inkb', '#9a90b8', '#4a4070', '#c8c0dc'), capMat: bkCap59('i', '#c8b8e8', '#4a3a7a'), book: 'ink', amb: 0.64, lc: { hs: 0xf4ecff, hg: 0xb8b0d0, amb: 0xf0e8ff, moon: 0xf8f0ff, key: 0xffe8f0, rim: 0xffffff } })
+  });
+  ['book1', 'book2', 'book3', 'bookb'].forEach(k => { GRADE52[k] = { tint: [1, 1, 1], sat: k === 'book2' ? 1.0 : 1.06, con: 1.02, vig: k === 'book2' ? 0.22 : 0.1, bl: k === 'book2' ? 0.3 : 0.15, th: 0.95, lift: [0, 0, 0] }; STEPSURF53[k] = 'stepG'; });
+  Object.assign(WX59, { book1: 'paper', book2: 'ember', book3: 'dust', bookb: 'paper' });
+  const bkTh59Of = t => t === 'book1' || t === 'book2' || t === 'book3' || t === 'bookb';
+  function bkReset59() { BK59.mats = {}; BK59.par = []; BK59.anim = []; BK59.fl = []; BK59.sky = null; BK59.w3 = W3; }
+  function buildBook59(def, th) {
+    bkReset59(); const g = W3.group, kind = th.book, R = srng(def.id.charCodeAt(2) * 53 + 11), r = (a, b) => a + R() * (b - a), Wd = L.W || def.w || 200, mob = BKMOB59, tier = (typeof fxTier59 === 'function') ? fxTier59() : 2;
+    const skyK = { meadow: 'sky1', night: 'sky2', cloud: 'sky3', ink: 'skyb' }[kind] || 'sky1';
+    const sky = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: bkTex59(skyK), depthWrite: false, fog: false, toneMapped: false }));
+    sky.renderOrder = -10; sky.frustumCulled = false; g.add(sky); BK59.sky = sky;
+    const top = x => (L.topAt ? L.topAt(Math.floor(x)) : 2);
+    const P = (k, x, y, z, H, o) => bkAdd59(k, x, y, z, H, o);
+    const dens = mob ? 1.5 : 1;
+    if (kind === 'meadow') {
+      P('sun', 14, 16, -60, 9, { k: 0.94, a: { spin: 0.001 } });
+      for (let i = 0; i < 7; i++) P('cloud', r(-20, Wd * 0.12 + 40), r(12, 19), -54 - i, r(3.5, 6), { k: 0.88, a: { bob: 0.2 } });
+      for (let x = -40; x < Wd * 0.25 + 60; x += 40) P('hills1', x, -2, -44, 11, { k: 0.75, flip: R() < 0.5 });
+      for (let i = 0; i < 5; i++) P('bird', r(0, Wd * 0.3), r(10, 15), -40, 0.8, { k: 0.7, a: { bob: 0.5 } });
+      for (let x = 10; x < Wd - 6; x += r(14, 24) * dens) P(R() < 0.25 ? 'cottage' : 'tree', x, 0.2, r(-12, -9), r(4.2, 6), { flip: R() < 0.5, k: 0.25 });
+      for (let x = 4; x < Wd - 4; x += r(3, 6) * dens) { const gy = top(x); if (gy > 5 || gy < 1) continue; bkPop59('fl' + (1 + Math.floor(R() * 4)), x, gy - 0.05, r(-1.6, -1.1), r(0.9, 1.5), {}); }
+      for (let x = 2; x < Wd - 2; x += r(4, 8) * dens) { const gy = top(x); if (gy > 5 || gy < 1) continue; P('tuft', x, gy - 0.05, 0.62, 0.42, {}); }
+    } else if (kind === 'night') {
+      const mn = P('moon', 18, 13, -58, 7, { k: 0.95 }); const mg = glowSprite(LIN(0xfff0c0), 16); mg.material.opacity = 0.35; mg.material.fog = false; mg.position.set(18 + 3.5 * 0, 16.5, -59); g.add(mg); BK59.par.push({ o: mg, x0: mg.position.x, k: 0.95 });
+      for (let x = -40; x < Wd * 0.25 + 60; x += 40) P('forest2', x, -2, -42, 12, { k: 0.74, flip: R() < 0.5 });
+      for (let x = -6; x < Wd + 10; x += r(4, 7) * dens) P('pine', x, -0.4, r(-14, -8), r(5, 8), { flip: R() < 0.5, k: 0.2 });
+      for (let x = 6; x < Wd - 6; x += r(5, 9) * dens) { const gy = top(x); if (gy > 5 || gy < 1) continue; P('mush', x, gy - 0.05, r(-1.6, -1.0), r(0.6, 1.0), { lit: true }); }
+      // paper lanterns: real 3D boxes with a watercolour skin + warm glow
+      const lm = bkLantMat59(); const lg = new THREE.BoxGeometry(0.5, 0.62, 0.5);
+      for (let x = 8; x < Wd - 8; x += r(9, 13) * (mob ? 1.4 : 1)) { const gy = top(x); if (gy > 6 || gy < 1) continue; const y = gy + r(2.6, 3.6), z = r(-1.6, -0.9);
+        const b = new THREE.Mesh(lg, lm); b.position.set(x, y, z); g.add(b); BK59.anim.push({ o: b, x0: x, y0: y, bob: 0.12, sway: 0.06 });
+        const s = new THREE.Mesh(new THREE.BoxGeometry(0.02, 3, 0.02), new THREE.MeshBasicMaterial({ color: 0x2b2440 })); s.position.set(0, 1.8, 0); b.add(s);
+        const gl = glowSprite(LIN(0xffc070), 2.2); gl.material.opacity = 0.6; gl.position.set(x, y, z + 0.3); g.add(gl); fx.flicker.push({ s: gl, base: 0.6, ph: x }); BK59.anim.push({ o: gl, x0: x, y0: y, bob: 0.12 });
+        if (tier >= 2 || W3.lightSpots.length < 6) W3.lightSpots.push({ x, y, z: 0.4, col: 0xffb060, i: 1.6 }); }
+      const nF = mob ? 14 : 30; for (let i = 0; i < nF; i++) { const f = bkSt59('ffly', 0.35, { nodw: true }); f.material.blending = THREE.AdditiveBlending; f.position.set(r(0, Wd), r(1.5, 7), r(-3, 0.6)); g.add(f); BK59.fl.push({ o: f, x0: f.position.x, y0: f.position.y, ph: r(0, 6.28) }); }
+    } else if (kind === 'cloud') {
+      P('castle', Wd * 0.18, 2, -56, 26, { k: 0.86 });
+      for (let x = -40; x < Wd * 0.3 + 60; x += 40) P('cloudbank', x, -4, -40, 12, { k: 0.7, flip: R() < 0.5 });
+      for (let i = 0; i < 10; i++) P('cloud', r(-20, Wd * 0.2 + 30), r(4, 18), -46 - i, r(4, 7), { k: 0.8, a: { bob: 0.3 } });
+      for (let i = 0; i < 6; i++) P('balloon', r(10, Wd * 0.5), r(8, 14), -26, r(2, 3), { k: 0.5, a: { bob: 0.5, sway: 0.04 } });
+      for (let x = -4; x < Wd + 6; x += r(5, 9) * dens) P('cloud', x, r(-2.5, -0.8), r(-8, -4), r(2.4, 3.6), { k: 0.1 });
+      for (let x = 6; x < Wd - 6; x += r(10, 18) * dens) { const gy = top(x); if (gy > 6 || gy < 1) continue; P('books', x, gy - 0.05, r(-1.7, -1.2), r(1.0, 1.4), {}); }
+    } else {
+      for (let i = 0; i < 8; i++) P('splat', r(-10, Wd * 0.2 + 30), r(6, 18), -50 - i, r(4, 8), { k: 0.86, rz: r(0, 6) });
+      for (let i = 0; i < 6; i++) P('scrib', r(0, Wd * 0.3), r(8, 16), -40, r(3, 5), { k: 0.75, a: { spin: 0.004 * (R() < 0.5 ? -1 : 1) } });
+      for (let x = -10; x < Wd + 10; x += r(8, 14) * dens) P('page', x, r(-1, 2), r(-12, -7), r(3, 5), { k: 0.15, rz: r(-0.3, 0.3), a: { bob: 0.2, sway: 0.03 } });
+      for (let x = 4; x < Wd - 4; x += r(12, 20) * dens) P('quill', x, top(x) - 0.4, r(-2.4, -1.8), r(2.2, 3), { rz: r(-0.3, 0.3) });
+      if (L.arena) { const a = L.arena; for (let i = 0; i < 3; i++) P('books', a.x0 + 4 + i * 8, 2, -1.7, 1.3, {}); P('splat', a.x0 + 12, 8, -6, 6, { a: { spin: 0.002 } }); }
+    }
+    // page-bridge movers: paper page with curled corners, hide iron trims
+    L.movers.forEach(m => { if (!m.mesh) return; m.mesh.children.forEach(c => { c.visible = false; }); for (const s of [-1, 1]) { const cu = new THREE.Mesh(new THREE.CylinderGeometry(0.14, 0.14, 1.1, 8, 1, true, 0, Math.PI * 1.3), bkMover59()); cu.rotation.x = Math.PI / 2; cu.position.set(s * (m.w / 2 - 0.05), 0.16, 0); m.mesh.add(cu); } });
+    const gcol = { meadow: 0x9ad070, night: 0x2a3a6a, cloud: 0xf8eef6, ink: 0xc8c0dc }[kind];
+    const gs = new THREE.Mesh(new THREE.PlaneGeometry(Wd + 120, 24), new THREE.MeshBasicMaterial({ color: gcol, fog: false, toneMapped: false })); gs.rotation.x = -Math.PI / 2; gs.position.set(Wd / 2, -1.3, -14); g.add(gs);
+    bkGrain59(true);
+  }
+  function bkLantMat59() { const id = 'lant'; let t = BK59.tex[id]; if (!t) { const K = WK59, c = K.cv(128, 160), g = c.getContext('2d'); K.seed(9); K.paper(g, 128, 160, '#fff2d8'); K.wash(g, K.rect(4, 4, 120, 152, 4), '#ffb060', { a: 0.55 });
+      for (let y = 20; y < 150; y += 22) K.pencil(g, [[6, y], [122, y]], '#c0602a', 1.4, false, 2); K.ink(g, K.rect(2, 2, 124, 156, 3), 3); K.wash(g, K.ell(64, 80, 30, 34, 16), '#fff6c0', { a: 0.5, edge: 0 }); K.unseed(); t = BK59.tex[id] = bkTexOf59(c); }
+    let m = BK59.mats[id]; if (!m) m = BK59.mats[id] = new THREE.MeshBasicMaterial({ map: t, toneMapped: false }); return m; }
+  function bkExit59(group) { const x = L.exitX, y = L.topAt ? L.topAt(Math.floor(x)) : 2; const m = bkSt59('bkdoor', 3.6, {}); m.position.set(x, y - 0.05, -0.9); group.add(m);
+    const dg = glowSprite(LIN(0xffe8a0), 2.8); dg.material.opacity = 0.5; dg.position.set(x, y + 1.5, -0.8); group.add(dg); }
+  // paper grain + soft warm vignette overlay
+  function bkGrain59(on) { let d = BK59.ov; if (!d && on) { try { const c = WK59.cv(256, 256), g = c.getContext('2d'); WK59.paper(g, 256, 256, '#ffffff', 2.2);
+      d = BK59.ov = document.createElement('div'); d.id = 'bkGrain59'; d.style.cssText = 'position:fixed;inset:0;pointer-events:none;mix-blend-mode:multiply;opacity:' + (BKMOB59 ? '.5' : '.65') + ';display:none;z-index:1;background-size:256px 256px,100% 100%';
+      d.style.backgroundImage = 'url(' + c.toDataURL() + '),radial-gradient(ellipse at center,rgba(255,255,255,0) 60%,rgba(200,170,120,.35) 100%)'; const cv = renderer.domElement; (cv.parentNode || document.body).insertBefore(d, cv.nextSibling); } catch (e) { return; } }
+    if (d) d.style.display = on ? 'block' : 'none'; }
+  // page-turn transition (CSS 3D), never blocks input
+  function bkPage59(title, sub) { try { let d = BK59.pg; if (!d) { const st = document.createElement('style'); st.textContent = '#bkPage59{position:fixed;inset:0;pointer-events:none;z-index:40;perspective:1600px;display:none;overflow:hidden}#bkPage59 .lf{position:absolute;top:0;left:0;width:100%;height:100%;transform-origin:0 50%;background:#fbf3de;box-shadow:inset -40px 0 60px rgba(120,90,50,.25),8px 0 30px rgba(0,0,0,.25);display:flex;flex-direction:column;align-items:center;justify-content:center;backface-visibility:hidden}#bkPage59.go .lf{animation:bkTurn59 .95s cubic-bezier(.5,.05,.4,1) forwards}#bkPage59 .lf b{font:700 clamp(22px,6vw,44px)/1.25 Georgia,"Nanum Myeongjo",serif;color:#3a2a4a;word-break:keep-all;text-align:center;max-width:calc(100% - 32px)}#bkPage59 .lf i{font:clamp(13px,3.6vw,20px)/1.4 Georgia,serif;color:#6a5a7a;margin-top:8px;word-break:keep-all;text-align:center;max-width:calc(100% - 40px)}#bkPage59 .lf:after{content:"";position:absolute;inset:14px;border:2px solid rgba(58,42,74,.35);border-radius:6px}@keyframes bkTurn59{0%{transform:rotateY(0)}35%{transform:rotateY(0)}100%{transform:rotateY(-100deg);opacity:.2}}#baDlg.narr59 .bx{background:rgba(251,243,222,.97);color:#3a2a4a;border-color:#8a7a5a;font-family:Georgia,"Nanum Myeongjo",serif}#baDlg.narr59 .pt{border-color:#8a7a5a;background-color:#efe2c4}#baDlg.narr59 p{color:#3a2a4a;font-style:italic}#baDlg.narr59 .nx{color:#8a7a5a}#tc53.bk59 .bar{background:linear-gradient(180deg,rgba(251,243,222,.97),rgba(238,224,192,.97))!important;box-shadow:0 8px 0 rgba(138,122,90,.45),0 10px 24px rgba(0,0,0,.25)!important;border:2px solid #8a7a5a;color:#3a2a4a!important}#tc53.bk59 .lv{background:rgba(138,122,90,.2)!important}#tc53.bk59 .bar *{color:#3a2a4a!important;text-shadow:none!important}';
+        document.head.appendChild(st); d = BK59.pg = document.createElement('div'); d.id = 'bkPage59'; d.innerHTML = '<div class="lf"><b></b><i></i></div>'; }
+      const hp = (typeof host53 === 'function' && host53()) || document.body; if (d.parentNode !== hp) hp.appendChild(d);
+      d.querySelector('b').textContent = title || ''; d.querySelector('i').textContent = sub || ''; d.classList.remove('go'); d.style.display = 'block'; void d.offsetWidth; d.classList.add('go');
+      sfxBk59('page'); clearTimeout(BK59.pgT); BK59.pgT = setTimeout(() => { d.style.display = 'none'; d.classList.remove('go'); }, 1000); } catch (e) {} }
+  const BKV59 = new THREE.Vector3();
+  function bk59(dt) {
+    const on = !!(W3 && W3.th && W3.th.book) && BK59.w3 === W3 && state !== 'map';
+    if (BK59.ov) { const v = on && state !== 'select'; if ((BK59.ov.style.display !== 'none') !== v) bkGrain59(v); }
+    if (!on) return;
+    if (BK59.sky) { const s = BK59.sky, d = 100, fov = (camera.fov || 50) * Math.PI / 180, h = 2 * d * Math.tan(fov / 2) * 1.25, w = h * (camera.aspect || 1.6) * 1.1;
+      camera.getWorldDirection(BKV59); s.position.copy(camera.position).addScaledVector(BKV59, d); s.quaternion.copy(camera.quaternion); s.scale.set(w, h, 1); }
+    BK59.par.forEach(p => { p.o.position.x = p.x0 + p.k * cam.x; });
+    const t = clock;
+    BK59.anim.forEach(a => { if (a.bob) a.o.position.y = a.y0 + Math.sin(t * 0.03 + a.x0) * a.bob; if (a.sway) a.o.rotation.z = Math.sin(t * 0.025 + a.x0) * a.sway; if (a.spin) a.o.rotation.z += a.spin;
+      if (a.pop) { const near = Math.abs(pl.x - a.x0) < 6 ? 1 : 0.15; a.k = lerp(a.k === undefined ? 0.15 : a.k, near, 0.08); a.o.scale.y = 0.25 + 0.75 * a.k; a.o.children[0].rotation.y = 0.15 + 0.55 * a.k; a.o.children[1].rotation.y = -0.15 - 0.55 * a.k; a.o.rotation.z = Math.sin(t * 0.03 + a.x0) * a.sway; } });
+    BK59.fl.forEach(f => { f.o.position.x = f.x0 + Math.sin(t * 0.011 + f.ph) * 1.4; f.o.position.y = f.y0 + Math.sin(t * 0.023 + f.ph * 2) * 0.6; f.o.material.opacity = 0.5 + 0.5 * Math.sin(t * 0.08 + f.ph); });
+  }
+  function tickBook59() { for (const b of nballs) if (b.kind === 'ink59' && b.mesh) { b.mesh.rotation.z += 0.2; } }
+  // ---------- blocky watercolour mobs ----------
+  function bkFT59(id, base, shade, extra, sz) { const k = 'ft|' + id; if (BK59.tex[k]) return BK59.tex[k]; const K = WK59, n = sz || 128, c = K.cv(n, n), g = c.getContext('2d'); K.seed(id.length * 101 + id.charCodeAt(0) * 13 + (id.charCodeAt(id.length - 1) || 1));
+    K.paper(g, n, n, '#fbf4e2', 0.6); K.wash(g, K.rect(-4, -4, n + 8, n + 8, 4), base, { a: 0.8, j: 3, edge: 0 }); K.wash(g, K.ell(n * 0.7, n * 0.75, n * 0.35, n * 0.25, 14), shade, { a: 0.35, edge: 0.2 });
+    K.hatch(g, K.rect(0, n * 0.55, n, n * 0.45, 2), shade, 0.8, 7, 1.2, 0.22); if (extra) extra(g, n, n, K); K.ink(g, [[3, 3], [n - 3, 3], [n - 3, n - 3], [3, n - 3]], 3.2, true); K.unseed();
+    return (BK59.tex[k] = bkTexOf59(c)); }
+  const bkEyes59 = (g, w, h, K, o) => { o = o || {}; const y = h * (o.y || 0.42), dx = w * (o.dx || 0.2), r = w * (o.r || 0.075); [w / 2 - dx, w / 2 + dx].forEach((x, i) => {
+      if (o.white) { K.wash(g, K.ell(x, y, r * 1.7, r * 1.7, 14), '#ffffff', { a: 1, edge: 0, gran: 0 }); K.ink(g, K.ell(x, y, r * 1.7, r * 1.7, 14), 1.6); }
+      g.fillStyle = BKINK59; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill(); g.fillStyle = '#fff'; g.beginPath(); g.arc(x - r * 0.3, y - r * 0.35, r * 0.35, 0, 7); g.fill();
+      if (o.angry) K.ink(g, [[x - r * 2 * (i ? -1 : 1), y - r * 2.6], [x + r * 1.6 * (i ? -1 : 1), y - r * 1.4]], 3, false); });
+    if (o.cheek) [w / 2 - dx * 1.6, w / 2 + dx * 1.6].forEach(x => K.wash(g, K.ell(x, y + r * 2.6, r * 1.5, r, 10), o.cheek, { a: 0.7, edge: 0, gran: 0 })); };
+  function bkMat59(id, tex, o) { const k = 'm|' + id; let m = BK59.mats[k]; if (m) return m; m = new THREE.MeshLambertMaterial(Object.assign({ map: tex, color: 0xffffff, emissive: 0xffffff, emissiveMap: tex, emissiveIntensity: 0.22 }, o || {})); return (BK59.mats[k] = m); }
+  // box with faces [+x,-x,+y,-y,+z(front),-z]; f = { s: side tex, t: top, f: front }
+  function bkBox59(sx, sy, sz, f) { const s = f.s, arr = [f.r || s, f.l || s, f.t || s, f.b || s, f.f || s, f.k || s]; const g = new THREE.BoxGeometry(sx, sy, sz); const m = new THREE.Mesh(g, arr); m.castShadow = true; return m; }
+  function bkMob59(build) { const g = new THREE.Group(), model = new THREE.Group(); g.add(model); build(model, model.userData); return g; }
+  const BKP59 = {};
+  function bkPal59(id) { if (BKP59[id] && BK59.mats['m|' + id + 's']) return BKP59[id]; const P = {
+      bun: ['#fbf6ee', '#e0c0c8', (g, w, h, K) => { bkEyes59(g, w, h, K, { cheek: '#f49ab8' }); K.ink(g, [[w * 0.44, h * 0.62], [w / 2, h * 0.67], [w * 0.56, h * 0.62]], 2.4, false); K.wash(g, K.ell(w / 2, h * 0.58, 5, 4, 8), '#f07a9a', { a: 1, edge: 0, gran: 0 }); }],
+      blot: ['#3a3266', '#18142e', (g, w, h, K) => { bkEyes59(g, w, h, K, { white: 1, angry: 1, r: 0.06 }); K.ink(g, [[w * 0.36, h * 0.72], [w * 0.5, h * 0.66], [w * 0.64, h * 0.72]], 3, false, '#fbf4e2'); for (let i = 0; i < 3; i++) K.wash(g, K.rect(w * (0.2 + i * 0.28), h * 0.84, 8, h * 0.16, 2), '#18142e', { a: 1, edge: 0 }); }],
+      moth: ['#d8c8f4', '#8a6ac0', (g, w, h, K) => bkEyes59(g, w, h, K, { r: 0.1, dx: 0.22, white: 1 })],
+      crane: ['#f4a0a0', '#c0505a', (g, w, h, K) => { K.ink(g, [[0, 0], [w, h]], 1.4, false, 'rgba(120,40,50,.6)'); K.ink(g, [[w, 0], [0, h]], 1.4, false, 'rgba(120,40,50,.6)'); bkEyes59(g, w, h, K, { r: 0.06, dx: 0.16, y: 0.36 }); }],
+      knight: ['#c8d4e8', '#5a6a8a', (g, w, h, K) => { K.wash(g, K.rect(w * 0.14, h * 0.3, w * 0.72, h * 0.22, 3), '#2b2440', { a: 0.95, edge: 0 }); bkEyes59(g, w, h, K, { r: 0.05, dx: 0.17, y: 0.41, white: 1 }); K.wash(g, K.rect(w * 0.42, h * 0.02, w * 0.16, h * 0.2, 2), '#e84a5a', { a: 0.9 }); }],
+      ribbon: ['#e84a5a', '#9a2a3a', (g, w, h, K) => { for (let y = 10; y < h; y += 16) K.pencil(g, [[6, y], [w - 6, y + 6]], '#ffd0a0', 1.6, false, 1); }],
+      puff: ['#ffffff', '#c0b8e8', (g, w, h, K) => { K.ink(g, [[w * 0.28, h * 0.45], [w * 0.36, h * 0.5], [w * 0.44, h * 0.45]], 2.4, false); K.ink(g, [[w * 0.56, h * 0.45], [w * 0.64, h * 0.5], [w * 0.72, h * 0.45]], 2.4, false); K.wash(g, K.ell(w / 2, h * 0.64, 6, 4, 8), '#f49ab8', { a: 0.9, edge: 0, gran: 0 }); }],
+      owl: ['#c89a6a', '#7a5030', (g, w, h, K) => { [w * 0.32, w * 0.68].forEach(x => { K.wash(g, K.ell(x, h * 0.42, w * 0.15, w * 0.15, 16), '#fff6d8', { a: 1, edge: 0, gran: 0 }); K.ink(g, K.ell(x, h * 0.42, w * 0.17, w * 0.17, 16), 3); g.fillStyle = BKINK59; g.beginPath(); g.arc(x, h * 0.43, w * 0.05, 0, 7); g.fill(); }); K.ink(g, [[w * 0.49, h * 0.42], [w * 0.51, h * 0.42]], 3, false); K.wash(g, [[w * 0.44, h * 0.58], [w * 0.56, h * 0.58], [w / 2, h * 0.72]], '#f0b040', { a: 1 }); K.ink(g, [[w * 0.44, h * 0.58], [w * 0.56, h * 0.58], [w / 2, h * 0.72]], 1.8); }],
+      dragon: ['#4a3a7a', '#1e1838', (g, w, h, K) => { K.wash(g, K.ell(w * 0.62, h * 0.38, w * 0.14, w * 0.12, 14), '#ffe050', { a: 1, edge: 0, gran: 0 }); g.fillStyle = BKINK59; g.fillRect(w * 0.6, h * 0.3, w * 0.05, h * 0.16); K.ink(g, [[w * 0.42, h * 0.26], [w * 0.74, h * 0.3]], 4, false, '#ff7a9a');
+        for (let i = 0; i < 4; i++) K.wash(g, [[w * (0.12 + i * 0.18), h * 0.66], [w * (0.21 + i * 0.18), h * 0.66], [w * (0.165 + i * 0.18), h * 0.8]], '#fbf4e2', { a: 1, edge: 0, gran: 0 }); K.ink(g, [[w * 0.06, h * 0.66], [w * 0.94, h * 0.66]], 3, false); }],
+      dragonF: ['#4a3a7a', '#1e1838', (g, w, h, K) => { bkEyes59(g, w, h, K, { white: 1, angry: 1, r: 0.07, y: 0.36 }); [0.4, 0.6].forEach(x => { g.fillStyle = BKINK59; g.beginPath(); g.arc(w * x, h * 0.7, 4, 0, 7); g.fill(); }); }],
+      dscale: ['#5a4a8a', '#24204a', (g, w, h, K) => { for (let y = 16; y < h; y += 26) for (let x = (y / 26 % 2) * 13; x < w; x += 26) K.ink(g, [[x, y], [x + 13, y + 12], [x + 26, y]], 1.6, false, 'rgba(20,16,40,.7)'); }],
+      wing: ['#9a8ad0', '#3a2a6a', (g, w, h, K) => { for (let i = 0; i < 4; i++) K.ink(g, [[w * 0.1, h * 0.1], [w * (0.3 + i * 0.22), h * 0.95]], 2, false, 'rgba(30,20,60,.7)'); }]
+    }[id]; const tF = bkFT59(id + 'F', P[0], P[1], P[2]), tS = bkFT59(id + 'S', P[0], P[1]), tT = bkFT59(id + 'T', P[0], P[0]);
+    return (BKP59[id] = { f: bkMat59(id + 'f', tF), s: bkMat59(id + 's', tS), t: bkMat59(id + 't', tT) }); }
+  const bkPart59 = (pal, sx, sy, sz, face) => { const P = bkPal59(pal); return bkBox59(sx, sy, sz, { s: P.s, t: P.t, f: face === false ? P.s : P.f }); };
+  function makeBun59() { return bkMob59((md, ud) => { const b = bkPart59('bun', 0.62, 0.42, 0.5, false); b.position.y = 0.21; md.add(b); const h = bkPart59('bun', 0.5, 0.44, 0.46); h.position.set(0, 0.62, 0.04); md.add(h);
+    [-0.12, 0.12].forEach(x => { const e = bkPart59('bun', 0.1, 0.36, 0.08, false); e.position.set(x, 1.0, 0); md.add(e); (ud.ears = ud.ears || []).push(e); }); const t = bkPart59('bun', 0.16, 0.16, 0.16, false); t.position.set(0, 0.3, -0.3); md.add(t); ud.h = h; }); }
+  function makeBlot59(sm) { return bkMob59((md, ud) => { const s = sm ? 0.55 : 0.82, b = bkPart59('blot', s, s, s); b.position.y = s / 2; md.add(b); ud.b = b; ud.s = s; }); }
+  const makeBlots59 = () => makeBlot59(true);
+  function makeMoth59() { return bkMob59((md, ud) => { const b = bkPart59('moth', 0.34, 0.3, 0.42); b.position.y = 0.3; md.add(b); ud.w = [];
+    [-1, 1].forEach(s => { const p = new THREE.Group(); p.position.set(s * 0.17, 0.36, 0); const w = bkPart59('wing', 0.6, 0.04, 0.5, false); w.position.x = s * 0.3; p.add(w); md.add(p); ud.w.push(p); });
+    const gl = glowSprite(LIN(0xe8d0ff), 1.3); gl.material.opacity = 0.35; gl.position.y = 0.3; md.add(gl); }); }
+  function makeCrane59() { return bkMob59((md, ud) => { const b = bkPart59('crane', 0.5, 0.3, 0.34); b.position.y = 0.3; md.add(b); const n = bkPart59('crane', 0.12, 0.42, 0.12, false); n.position.set(0, 0.58, 0.18); n.rotation.x = 0.5; md.add(n);
+    const h = bkPart59('crane', 0.16, 0.14, 0.24); h.position.set(0, 0.8, 0.3); md.add(h); ud.w = [];
+    [-1, 1].forEach(s => { const p = new THREE.Group(); p.position.set(s * 0.22, 0.4, 0); const w = bkPart59('crane', 0.62, 0.03, 0.32, false); w.position.x = s * 0.3; w.rotation.y = s * 0.3; p.add(w); md.add(p); ud.w.push(p); }); }); }
+  function makeKnight59() { return bkMob59((md, ud) => { const b = bkPart59('ribbon', 0.5, 0.62, 0.22, false); b.position.y = 0.42; md.add(b); const h = bkPart59('knight', 0.5, 0.46, 0.44); h.position.set(0, 0.96, 0); md.add(h);
+    const tl = bkPart59('ribbon', 0.12, 0.22, 0.06, false); tl.position.set(0, 0.06, 0); md.add(tl); const sw = bkPart59('knight', 0.07, 0.7, 0.07, false); sw.position.set(0.34, 0.6, 0.12); sw.rotation.z = -0.3; md.add(sw); ud.sw = sw;
+    const sh = bkPart59('knight', 0.08, 0.42, 0.36); sh.position.set(-0.3, 0.5, 0.1); md.add(sh); ud.h = h; }); }
+  function makePuff59() { return bkMob59((md, ud) => { const c = bkPart59('puff', 0.8, 0.5, 0.6); c.position.y = 0.3; md.add(c); [[-0.42, 0.24, 0.42], [0.42, 0.26, 0.4], [0, 0.6, 0.44]].forEach(([x, y, s]) => { const p = bkPart59('puff', s, s, s, false); p.position.set(x, y, -0.05); md.add(p); }); ud.c = c; }); }
+  const bkPop2 = (e, c) => spawnParts(e.x, e.y + 0.4, ZP, c, NP(10), 0.07, 0.08);
+  function tickBun59(e) { if (e._h === undefined) e._h = 30 + (e.id % 3) * 15; if (e.onG) { e.vx = 0; if (--e._h <= 0) { e._h = 45 + Math.floor(rnd(0, 40)); e.vy = 0.19; e.vx = e.dir * e.sp * 2.6; } } else e.vx = e.dir * e.sp * 2.6; bodyPhys(e, true); }
+  function tickBlot59(e) { e.vx = e.dir * e.sp; bodyPhys(e, true); }
+  function tickMoth59(e) { if (e._b === undefined) { e._b = e.y; e.ph = e.id; e.x0 = e.x; } e.ph += 0.04; const dx = pl.x - e.x;
+    if (!e.sw && Math.abs(dx) < 4.5 && pl.y < e.y && onScreen(e)) { e.sw = 1; e.dir = Math.sign(dx) || e.dir; }
+    if (e.sw) { e.sw++; e.x += e.dir * 0.055; e.y = e._b - Math.sin(Math.min(Math.PI, e.sw * 0.04)) * Math.max(0, e._b - 2.8); if (e.sw > 80) e.sw = 0; }
+    else { e.x += e.dir * e.sp; e.y = e._b + Math.sin(e.ph * 1.6) * 0.6; if (Math.abs(e.x - e.x0) > 4) e.dir *= -1; } }
+  function tickCrane59(e) { if (e._b === undefined) { e._b = e.y; e.x0 = e.x; e.ph = e.id; } e.ph += 0.05; const dx = pl.x - e.x;
+    if (!e.sw && Math.abs(dx) < 3 && pl.y < e.y - 1 && onScreen(e)) { e.sw = 1; e.dir = Math.sign(dx) || e.dir; sfxBk59('swoop'); }
+    if (e.sw) { e.sw++; e.x += e.dir * 0.08; e.y = e._b - Math.sin(Math.min(Math.PI, e.sw * 0.05)) * Math.max(0, e._b - 2.4); if (e.sw > 63) e.sw = 0; }
+    else { e.x += e.dir * e.sp; e.y = e._b + Math.sin(e.ph) * 0.3; if (Math.abs(e.x - e.x0) > 5) e.dir *= -1; } }
+  function tickKnight59(e) { if (e.onG) { if (!e.chg && !e.rest && sees5(e, 6, 1.6)) { e.chg = 60; e.dir = face5Dir(e); if (onScreen(e)) { floatText('돌격!', e.x, e.y + 1.6); sfxBk59('clank'); } }
+      if (e.chg > 0 && --e.chg === 0) e.rest = 50; if (e.rest > 0) e.rest--; e.vx = e.rest > 0 ? 0 : e.dir * e.sp * (e.chg > 0 ? 3.4 : 1); } bodyPhys(e, true); }
+  function tickPuff59(e) { if (e._b === undefined) { e._b = e.y; e.x0 = e.x; } e.x += e.dir * e.sp; if (Math.abs(e.x - e.x0) > 2.5) e.dir *= -1; e.y = e._b + Math.sin(clock * 0.03 + e.id) * 0.15; if (e.sq > 0) e.sq--; }
+  const bkFace59 = (e, m) => { m.rotation.y = lerp(m.rotation.y, (e.dir > 0 ? 1 : -1) * 0.9, 0.18); };
+  function animBk59(e, m, ud, t) { bkFace59(e, m); const walk = Math.abs(e.vx || 0) > 0.002 && e.onG;
+    if (e.kind === 'bun59') { const air = !e.onG; m.scale.y = air ? 1.12 : 1; m.scale.x = m.scale.z = air ? 0.92 : 1; if (ud.ears) ud.ears.forEach((o, i) => { o.rotation.z = (i ? -1 : 1) * (air ? 0.4 : 0.1); }); }
+    else if (e.kind === 'blot59' || e.kind === 'blots59') { const q = Math.sin(t * 0.25 + e.id); m.scale.set(1 + q * 0.06, 1 - q * 0.08, 1 + q * 0.06); }
+    else if (e.kind === 'moth59' || e.kind === 'crane59') { const f = Math.sin(t * (e.kind === 'moth59' ? 0.6 : 0.3) + e.id) * (e.sw ? 0.2 : 0.7); if (ud.w) { ud.w[0].rotation.z = f; ud.w[1].rotation.z = -f; } m.rotation.x = e.sw ? 0.3 : 0; }
+    else if (e.kind === 'knight59') { if (ud.sw) ud.sw.rotation.z = e.chg > 0 ? -1.2 : -0.3 + Math.sin(t * 0.2) * (walk ? 0.2 : 0); m.position.y = walk ? Math.abs(Math.sin(t * 0.35 + e.id)) * 0.06 : 0; m.rotation.z = e.chg > 0 ? -0.15 * (e.dir > 0 ? 1 : -1) : 0; }
+    else if (e.kind === 'puff59') { const s = e.sq > 0 ? 1 - Math.sin(e.sq / 14 * Math.PI) * 0.35 : 1; m.scale.set(2 - s, s, 2 - s); m.rotation.y = Math.sin(t * 0.02 + e.id) * 0.3; }
+    if (!(e.kind === 'moth59' || e.kind === 'crane59' || e.kind === 'puff59' || e.kind === 'knight59')) m.position.y = walk ? Math.abs(Math.sin(t * 0.35 + e.id)) * 0.05 : 0; }
+  Object.assign(SPEC, { bun59: { hw: 0.34, h: 0.8, sp: 0.02 }, blot59: { hw: 0.42, h: 0.82, sp: 0.014 }, blots59: { hw: 0.3, h: 0.55, sp: 0.026 }, moth59: { hw: 0.4, h: 0.55, sp: 0.018 }, crane59: { hw: 0.4, h: 0.6, sp: 0.024 }, knight59: { hw: 0.32, h: 1.2, sp: 0.016 }, puff59: { hw: 0.62, h: 0.62, sp: 0.008 }, drag59: { hw: 1.2, h: 1.6, sp: 0.03, hp: 8 } });
+  Object.assign(MOB2, { bun59: makeBun59, blot59: () => makeBlot59(false), blots59: makeBlots59, moth59: makeMoth59, crane59: makeCrane59, knight59: makeKnight59, puff59: makePuff59, drag59: () => makeDrag59() });
+  Object.assign(TICK2, { bun59: tickBun59, blot59: tickBlot59, blots59: tickBlot59, moth59: tickMoth59, crane59: tickCrane59, knight59: tickKnight59, puff59: tickPuff59, drag59: e => tickDrag59(e) });
+  ['bun59', 'blot59', 'blots59', 'moth59', 'crane59', 'knight59'].forEach(k => { HOSTILE[k] = 1; ANIM5[k] = animBk59; }); ANIM5.puff59 = animBk59; BOSSK.drag59 = 1;
+  Object.assign(TOUCH5, {
+    bun59(e, st) { if (st) { stompBounce5(e); bkPop2(e, 0xffffff); sfxBk59('pop'); killSquash(e, 200); return; } hurt(); },
+    blot59(e, st) { if (st) { stompBounce5(e); bkPop2(e, 0x2b2448); sfxBk59('splat'); killSquash(e, 200);
+        if (enemies.filter(o => o.alive && o.kind === 'blots59').length < 6) [-1, 1].forEach(s => { const b = addEnemy('blots59', e.x + s * 0.5, e.y + 0.2); b.active = true; b.dir = s; b.vy = 0.12; b.inv = 20; }); return; } hurt(); },
+    blots59(e, st) { if (e.inv > 0) return; if (st) { stompBounce5(e); bkPop2(e, 0x2b2448); sfxBk59('splat'); killSquash(e, 100); return; } hurt(); },
+    moth59(e, st) { if (st) { stompBounce5(e); bkPop2(e, 0xd8c8f4); sfxBk59('pop'); killFlip(e, 300); return; } hurt(); },
+    crane59(e, st) { if (st) { stompBounce5(e); bkPop2(e, 0xf4a0a0); sfxBk59('page'); killFlip(e, 400); return; } hurt(); },
+    knight59(e, st) { if (st) { stompBounce5(e); bkPop2(e, 0xe84a5a); sfxBk59('clank'); killFlip(e, 400); return; } hurt(); },
+    puff59(e, st) { if (st) { pl.vy = 0.42; pl.jumping = false; pl.y = e.y + e.h + 0.01; e.sq = 14; sfxBk59('boing'); spawnParts(e.x, e.y + e.h, ZP, 0xffffff, NP(6), 0.06, 0.04); return; } pushOff5(e, 0.07); },
+    drag59(e, st) { if (e.ai === 'die' || e.ai === 'spawn') return;
+      if (st) { if (e.ai === 'dizzy' && !(e.inv > 0)) { stompBounce5(e); hitBoss(e, 1); return; } pl.vy = 0.26; pl.y = e.y + e.h + 0.01; floatText('미끌!', e.x, e.y + e.h + 0.4); sfxBk59('boing'); return; }
+      if (e.ai === 'dizzy' || e.ai === 'recover') { pushOff5(e, 0.09); return; } hurt(); pushOff5(e, 0.12); }
+  });
+  Object.assign(FIRE5, { puff59(e) { bkPop2(e, 0xffffff); sfxBk59('pop'); killSquash(e, 50); }, drag59(e, f) { if (e.ai !== 'dizzy') { floatText('튕김!', e.x, e.y + e.h + 0.3); sfxBk59('boing'); return; } hitBoss(e, 0.34); } });
+  // ink ball (boss shot)
+  function makeInk59() { const g = new THREE.Group(); if (!BK59.inkG) { BK59.inkG = new THREE.BoxGeometry(0.34, 0.34, 0.34); BK59.inkG.userData.keep = true; BK59.inkS = new THREE.PlaneGeometry(0.75, 0.75); BK59.inkS.userData.keep = true; }
+    g.add(new THREE.Mesh(BK59.inkG, bkPal59('blot').s)); bkSt59('splat', 0.7, {}); g.add(new THREE.Mesh(BK59.inkS, BK59.mats.splat)); return g; }
+  // ---------- boss: 잉크 낙서 드래곤 (ink-scribble dragon, chained box segments) ----------
+  function makeDrag59() { return bkMob59((md, ud) => { const inner = new THREE.Group(); md.add(inner); ud.inner = inner; const P = bkPal59('dragon'), F = bkPal59('dragonF'), Sc = bkPal59('dscale');
+    const pd = { s: bkPal59('dragon').f, t: Sc.t };
+    const head = bkBox59(0.95, 0.75, 0.8, { r: F.f, l: Sc.s, t: Sc.t, b: Sc.s, f: P.f, k: P.f }); head.position.set(0.3, 1.0, 0); inner.add(head); ud.head = head;
+    const snout = bkBox59(0.5, 0.36, 0.56, { s: Sc.s, t: Sc.t, r: F.f }); snout.position.set(0.68, -0.14, 0); head.add(snout);
+    [-0.22, 0.22].forEach(z => { const h = bkBox59(0.12, 0.42, 0.12, { s: bkPal59('puff').s }); h.position.set(-0.3, 0.5, z); h.rotation.z = 0.5; head.add(h); });
+    ud.seg = []; for (let i = 0; i < 6; i++) { const s = 0.78 - i * 0.09, b = bkBox59(s, s, s, { s: Sc.s, t: Sc.t }); inner.add(b); ud.seg.push(b);
+      if (i % 2 === 0) { const sp = bkBox59(0.1, 0.22, 0.1, { s: bkPal59('puff').s }); sp.position.y = s / 2 + 0.08; b.add(sp); } }
+    ud.w = []; [-1, 1].forEach(sd => { const p = new THREE.Group(); p.position.set(-0.6, 1.25, sd * 0.3); const w = bkBox59(1.3, 0.05, 0.9, { s: bkPal59('wing').s, t: bkPal59('wing').s }); w.position.set(-0.2, 0, sd * 0.45); p.add(w); inner.add(p); ud.w.push(p); });
+    ud.hist = []; ud.mark = null; }); }
+  ANIM5.drag59 = function (e, m, ud, t) { const inn = ud.inner; if (!inn) return; const sg = e.dir > 0 ? 1 : -1; inn.scale.x = lerp(inn.scale.x || 1, sg, 0.25);
+    // segment chain follows the head's recent path
+    ud.hist.unshift([e.x, e.y]); if (ud.hist.length > 60) ud.hist.length = 60;
+    ud.seg.forEach((b, i) => { const hp = ud.hist[Math.min(ud.hist.length - 1, (i + 1) * 5)] || [e.x, e.y]; const sx = inn.scale.x || 1; b.position.set((hp[0] - e.x) / (Math.abs(sx) < 0.2 ? 0.2 * Math.sign(sx || 1) : sx) - (i + 1) * 0.55 * (e.ai === 'fly' || e.ai === 'spawn' || e.ai === 'rise' ? 0.4 : 0.9) - 0.1, 1.0 + (hp[1] - e.y) - i * 0.06 + Math.sin(t * 0.12 - i * 0.7) * 0.18, 0); b.rotation.z = Math.sin(t * 0.1 - i) * 0.2; });
+    const fl = e.ai === 'dizzy' ? 0.1 : Math.sin(t * (e.ai === 'dive' ? 0.5 : 0.22)) * 0.6; ud.w[0].rotation.x = fl; ud.w[1].rotation.x = -fl;
+    ud.head.rotation.z = e.ai === 'dizzy' ? Math.sin(t * 0.3) * 0.3 : e.ai === 'tele' ? -0.4 : e.ai === 'dive' ? -0.6 : Math.sin(t * 0.06) * 0.08;
+    m.rotation.y = 0; };
+  const DY59 = 2;   // arena floor
+  function dragWake59(e) { e.ai = 'spawn'; e.aiT = 0; e.maxHp = e.hp = bossHp57(8); e.inv = 0; e.mesh.visible = true; e.x = L.arena.x1 + 4; e.y = 9; e.vy = 0; e.dir = -1;
+    banner('잉크 낙서 드래곤', '내려꽂힌 뒤 어지러울 때 머리를 밟아라!', 1900); cam.shake = Math.max(cam.shake, 5); sfxBk59('roar'); bossIntro53(e); }
+  function dragShoot59(e, p2) { const sx = e.x + e.dir * 1.0, sy = e.y + 0.9, a = Math.atan2(pl.y + 0.6 - sy, pl.x - sx), sp = 0.095;
+    (p2 ? [-0.22, 0, 0.22] : [0]).forEach(d => addBall5('ink59', sx, sy, Math.cos(a + d) * sp, Math.sin(a + d) * sp, { owner: e, r: 0.2 })); sfxBk59('splat'); }
+  function dragMark59(e, on, x) { const ud = e.mesh.children[0].userData; if (on) { if (!ud.mark) { ud.mark = bkSt59('splat', 1.6, {}); ud.mark.rotation.x = -Math.PI / 2; ud.mark.geometry = new THREE.PlaneGeometry(2.2, 1.2); W3.group.add(ud.mark); } ud.mark.visible = true; ud.mark.position.set(x, DY59 + 0.03, ZP); }
+    else if (ud.mark) ud.mark.visible = false; }
+  function dragLand59(e) { cam.shake = Math.max(cam.shake, 11); dustRing(e.x, DY59); sfxBk59('thud'); vib(30); for (let i = 0; i < 3; i++) spawnParts(e.x + rnd(-1.5, 1.5), DY59 + 0.2, ZP, 0x2b2448, NP(4), 0.06, 0.07);
+    const b = DF().boss, rad = b <= 0.7 ? 1.8 : b >= 1.2 ? 3.2 : 2.5;
+    if (state === 'play' && !pl.truck && pl.onG !== false && pl.y < DY59 + 0.6 && Math.abs(pl.x - e.x) < rad) hurt();
+    if (e.phase2) { const A = L.arena; [A.x0 + 3, A.x1 - 3].forEach(x => { if (enemies.filter(o => o.alive && (o.kind === 'blot59' || o.kind === 'blots59')).length < 2) { const s = addEnemy('blot59', x, DY59); s.active = true; bkPop2(s, 0x2b2448); } }); } }
+  function tickDrag59(e) {
+    const A = L.arena, p2 = !!e.phase2, D = DF(), bs = D.bspd || 1; e.aiT++; const lo = A.x0 + 2, hi = A.x1 - 1.5, hy = 7.2;
+    switch (e.ai) {
+      case 'spawn': e.inv = 2; e.x = lerp(e.x, A.x1 - 4, 0.04); e.y = lerp(e.y, hy, 0.05); if (e.aiT > 70) { e.ai = 'fly'; e.aiT = 0; } break;
+      case 'fly': { e.dir = face5Dir(e); const tx = Math.max(lo, Math.min(hi, pl.x - e.dir * 4)); e.x = lerp(e.x, tx, 0.012 * bs * (p2 ? 1.4 : 1)); e.y = hy + Math.sin(e.aiT * 0.05) * 0.6;
+        const per = p2 ? 55 : 80; if (e.aiT % per === per - 1) dragShoot59(e, p2);
+        if (e.aiT > (p2 ? 190 : 240)) { e.ai = 'tele'; e.aiT = 0; e.tx = Math.max(lo, Math.min(hi, pl.x)); sfxBk59('roar'); } break; }
+      case 'tele': e.y = hy + 0.6 + Math.sin(e.aiT * 0.6) * 0.1; dragMark59(e, true, e.tx); if (e.aiT >= 40) { e.ai = 'dive'; e.aiT = 0; e.sx = e.x; e.sy = e.y; e.dir = Math.sign(e.tx - e.x) || e.dir; } break;
+      case 'dive': { const k = Math.min(1, e.aiT / 32); e.x = lerp(e.sx, e.tx, k); e.y = lerp(e.sy, DY59, k * k); if (k >= 1) { e.y = DY59; dragMark59(e, false); dragLand59(e); e.ai = 'dizzy'; e.aiT = 0; } break; }
+      case 'dizzy': e.y = DY59; if (e.aiT % 10 === 0) spawnParts(e.x + rnd(-0.6, 0.6), e.y + e.h + 0.3, ZP, 0xffe040, 1, 0.02, 0.03); if (e.aiT > (p2 ? 90 : 120) / bs) { e.ai = 'rise'; e.aiT = 0; } break;
+      case 'recover': e.y = DY59; if (e.aiT > 30) { e.ai = 'rise'; e.aiT = 0; } break;
+      case 'rise': e.y = lerp(e.y, hy, 0.06); if (e.aiT > 45) { e.ai = 'fly'; e.aiT = 0; } break;
+      case 'die': e.inv = 99; e.y = Math.max(DY59, e.y - 0.05); e.mesh.rotation.z = Math.sin(e.aiT * 0.5) * 0.1; if (e.aiT % 12 === 0) { spawnParts(e.x + rnd(-1, 1), e.y + rnd(0.5, 2), ZP, 0x2b2448, NP(10), 0.1, 0.1); flashScreen(0.2); sfxBk59('splat'); }
+        if (e.aiT >= 120) dragDead59(e); break;
+    }
+    e.x = Math.max(lo - 0.4, Math.min(hi + 0.6, e.x));
+  }
+  function hitDrag59(e, dmg) {
+    if (e.ai === 'spawn' || e.ai === 'die' || e.inv > 0) return false;
+    e.hp -= dmg; e.inv = dmg >= 1 ? 50 : 12; hitFlash(e); cam.shake = Math.max(cam.shake, dmg >= 1 ? 9 : 3); sfxBk59('roar'); G.hitstop = Math.max(G.hitstop || 0, dmg >= 1 ? 6 : 2);
+    if (e.ai === 'dizzy' && dmg >= 1) { e.ai = 'recover'; e.aiT = 0; }
+    if (e.hp <= 0.01) { e.hp = 0; e.ai = 'die'; e.aiT = 0; dragMark59(e, false); G.slow = 30; banner('잉크 낙서 드래곤 격파!', '', 1600); updBossBar(); return true; }
+    if (!e.phase2 && e.hp <= e.maxHp / 2) { e.phase2 = true; banner('드래곤이 화났다!', '3갈래 잉크 + 잉크 방울 증원', 1600); flashScreen(0.3, 'radial-gradient(circle,rgba(120,100,200,.7),rgba(30,20,60,.2))');
+      const A = L.arena; [A.x0 + 3, A.x1 - 3].forEach(x => { const s = addEnemy('blot59', x, DY59); s.active = true; bkPop2(s, 0x2b2448); }); }
+    updBossBar(); return true;
+  }
+  function dragDead59(e) {
+    e.alive = false; e.dead = 120; e.mode = 'flip'; e.vy = 0.12; e.vx = 0; addScore(10000, e.x, e.y + 2.5); dragMark59(e, false);
+    explode(e.x, e.y + 1.0, 3.0, { owner: 'tnt', ultra: true }); G.dragDown59 = true; cam.lockX = null;
+    const A = L.arena; for (let y = 2; y < 13; y++) setTile(A.x1 + 1, y, E);
+    if (A.gateR) pops.push({ type: 'gate', m: A.gateR, t: 0, dir: 1 }); updBossBar();
+    banner('잉크 낙서 드래곤 퇴치!', '그림책의 마지막 페이지로!', 1600); snd('wave');
+    nballs.forEach(b => b.gone = true);
+    enemies.forEach(o => { if (o.alive && (o.kind === 'blot59' || o.kind === 'blots59')) killFlip(o, 100); });
+  }
+  // ---------- sfx ----------
+  function sfxBk59(name) {
+    try {
+      if (!AFX.on()) return; const c = AFX.ac(); if (!c) return; const out = AFX.sfxBus(); if (!out) return;
+      const now = performance.now(); sfxBk59.last = sfxBk59.last || {}; if (sfxBk59.last[name] && now - sfxBk59.last[name] < 70) return; sfxBk59.last[name] = now;
+      const T = (f0, f1, dur, type, gain, delay) => { const t = c.currentTime + (delay || 0); const o = c.createOscillator(), g = c.createGain(); o.type = type || 'sine';
+        o.frequency.setValueAtTime(Math.max(20, f0), t); if (f1) o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur);
+        g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+        o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.05); };
+      const N = (dur, gain, f0, delay, q) => { const t = c.currentTime + (delay || 0), len = Math.max(1, Math.floor(c.sampleRate * dur)), b = c.createBuffer(1, len, c.sampleRate), d = b.getChannelData(0);
+        for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len); const s = c.createBufferSource(); s.buffer = b; const f = c.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = f0 || 2000; f.Q.value = q || 1.2;
+        const g = c.createGain(); g.gain.value = gain; s.connect(f); f.connect(g); g.connect(out); s.start(t); };
+      if (name === 'page') { N(0.22, 0.14, 3200, 0, 0.6); N(0.12, 0.08, 1400, 0.12, 0.8); }
+      else if (name === 'pop') { T(500, 1100, 0.07, 'sine', 0.12); }
+      else if (name === 'splat') { N(0.18, 0.22, 500, 0, 0.9); T(180, 60, 0.15, 'sine', 0.12); }
+      else if (name === 'boing') { T(240, 720, 0.2, 'triangle', 0.12); }
+      else if (name === 'clank') { T(900, 700, 0.09, 'square', 0.05); N(0.08, 0.1, 4200, 0, 3); }
+      else if (name === 'swoop') { N(0.3, 0.1, 1200, 0, 0.5); }
+      else if (name === 'roar') { T(120, 70, 0.45, 'sawtooth', 0.09); N(0.4, 0.16, 300, 0, 0.7); }
+      else if (name === 'thud') { T(100, 36, 0.4, 'sine', 0.3); N(0.3, 0.2, 380); }
+      else if (name === 'chime') { [784, 988, 1175].forEach((f, i) => T(f, 0, 0.5, 'sine', 0.06, i * 0.08)); }
+    } catch (e) {}
+  }
+  // ---------- World 5 · 그림책 나라 stages ----------
+  STAGES.push(
+    { id: '5-1', name: '종이 꽃 초원', sub: '수채화로 칠한 종이 꽃밭! 깡총 토끼와 잉크 방울을 밟아라', theme: 'book1', w: 196, time: 400, world: 5, music: 'book1',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 40); b.q(12, 5, 'grow'); b.brick(13, 5, 2); b.coin(16, 3, 4); b.e('bun59', 24); b.e('blot59', 33); b.arc(36, 4, 4);
+        b.ground(44, 78); b.e('bun59', 50); b.solid(54, 5, 3, 1); b.coin(54, 6, 3); b.q(60, 6, 'coin'); b.e('crane59', 64, 7); b.e('puff59', 70); b.e('blot59', 75);
+        b.mover(79, 2, 3, 'x', 4, 0.015, -P258);
+        b.ground(87, 124); b.cp(90); b.e('puff59', 97); b.stairsUp(102, 3); b.solid(105, 2, 6, 3); b.arc(105, 6, 5); b.q(108, 9, 'grow'); b.e('bun59', 114); b.e('crane59', 118, 7);
+        b.ground(128, 160); b.e('blot59', 133); b.brick(138, 6, 2); b.q(140, 6, 'tnt'); b.brick(141, 6, 2); b.e('bun59', 146); b.e('blot59', 154);
+        b.mover(161, 3, 2, 'y', 2.5, 0.02, 0);
+        b.ground(166, 195); b.e('bun59', 170); b.stairsUp(176, 4); b.solid(180, 2, 2, 4); b.goal(186); b.exit(192);
+      } },
+    { id: '5-2', name: '등불 숲', sub: '밤의 숲에 등불이 깜빡! 종이 나방과 깡통 기사를 조심해', theme: 'book2', w: 200, time: 420, world: 5, music: 'book2',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 30); b.q(10, 5, 'grow'); b.brick(11, 5, 2); b.e('bun59', 16); b.e('moth59', 22, 5); b.coin(25, 3, 4);
+        b.ground(34, 66); b.e('knight59', 40); b.solid(45, 5, 3, 1); b.coin(45, 6, 3); b.e('moth59', 50, 6); b.e('blot59', 56); b.q(60, 6, 'coin');
+        b.mover(67, 2, 3, 'x', 3.5, 0.016, -P258);
+        b.ground(75, 112); b.cp(78); b.e('bun59', 84); b.stairsUp(88, 3); b.solid(91, 2, 5, 3); b.arc(91, 6, 4); b.e('blot59', 98); b.e('knight59', 104); b.e('moth59', 108, 6);
+        b.ground(116, 150); b.item('grow', 118); b.e('knight59', 126); b.e('bun59', 132); b.e('blot59', 138); b.e('moth59', 144, 5);
+        b.mover(151, 3, 2, 'y', 2.5, 0.02, 0); b.mover(155, 4, 2, 'y', 2.5, 0.02, 1.6);
+        b.ground(159, 199); b.e('knight59', 164); b.brick(168, 6, 2); b.q(170, 6, 'tnt'); b.brick(171, 6, 2); b.e('moth59', 174, 6); b.stairsUp(176, 4); b.solid(180, 2, 2, 4); b.goal(184); b.exit(191);
+      } },
+    { id: '5-3', name: '구름 성', sub: '구름 위의 성! 펄럭이는 책장 다리를 건너자', theme: 'book3', w: 204, time: 420, world: 5, music: 'book3',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 17); b.q(9, 5, 'grow'); b.coin(12, 3, 3); b.e('puff59', 14);
+        b.ground(21, 26);
+        b.mover(27, 2, 3, 'x', 4, 0.016, -P258);
+        b.ground(35, 49); b.e('knight59', 38); b.e('crane59', 43, 7); b.q(45, 6, 'coin'); b.brick(46, 6, 2);
+        b.ground(53, 70); b.e('puff59', 57); b.solid(60, 5, 3, 1); b.coin(60, 6, 3); b.e('knight59', 65);
+        b.mover(71, 3, 2, 'y', 3, 0.022, 0); b.mover(74, 4, 2, 'y', 3, 0.022, 1.6); b.mover(77, 3, 2, 'y', 3, 0.022, 3.1);
+        b.ground(81, 105); b.cp(84); b.e('crane59', 90, 7); b.e('knight59', 96); b.q(98, 6, 'tnt'); b.e('puff59', 101);
+        b.ground(109, 120); b.e('crane59', 116, 7);
+        b.mover(121, 2, 3, 'x', 4.2, 0.015, -P258);
+        b.ground(130, 149); b.e('knight59', 136); b.q(140, 6, 'grow'); b.brick(141, 6, 2); b.e('puff59', 145);
+        b.ground(153, 203); b.e('crane59', 162, 7); b.e('knight59', 168); b.e('puff59', 174); b.stairsUp(182, 4); b.solid(186, 2, 2, 4); b.goal(194); b.exit(200);
+      } },
+    { id: '5-4', name: '잉크 드래곤', sub: '낙서로 그린 잉크 드래곤! 잉크 방울을 튕겨내고 어지러울 때 머리를 밟아라', theme: 'bookb', w: 160, time: 420, world: 5, music: 'book3', bossKind: 'drag59',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 30); b.q(10, 5, 'grow'); b.brick(11, 5, 2); b.e('bun59', 15); b.e('crane59', 22, 6); b.coin(24, 3, 4);
+        b.mover(31, 2, 3, 'x', 3.5, 0.015, -P258);
+        b.ground(37, 70); b.cp(40); b.e('knight59', 48); b.q(52, 6, 'coin'); b.e('blot59', 56); b.e('moth59', 62, 5); b.solid(65, 5, 2, 1);
+        b.mover(71, 3, 2, 'y', 3, 0.02, 0); b.mover(75, 4, 2, 'y', 3, 0.02, 2);
+        b.ground(79, 159); b.e('bun59', 86); b.item('grow', 92); b.coin(94, 3, 4); b.item('truck', 99);
+        b.solid(108, 6, 3, 1); b.solid(116, 8, 3, 1); b.solid(124, 6, 3, 1);
+        b.arena(104, 127, 121);
+        b.goal(142); b.exit(150);
+      } });
+  // ---------- cast ----------
+  CH5.narr59 = { name: '이야기꾼', col: '#e9d8a6', mk: () => makeOwl59(), hf: 0.42, span: 0.78, yaw: 0.3 };
+  CH5.toto59 = { name: '토토', col: '#f9a8d4', mk: () => makeBun59(), hf: 0.5, span: 0.78, yaw: 0.4 };
+  CH5.drag59 = { name: '잉크 드래곤', col: '#a5b4fc', mk: () => { const o = makeDrag59(); o.traverse(n => { const u = n.userData; if (u && u.inner) { (u.seg || []).concat(u.w || []).forEach(b => { if (b.parent) b.parent.remove(b); }); } }); return o; }, hf: 0.5, span: 0.95, yaw: 0.9 };
+  function makeOwl59() { return bkMob59((md, ud) => { const P = bkPal59('owl'); const b = bkBox59(0.8, 0.9, 0.7, { f: P.f, s: P.s, t: P.t }); b.position.y = 0.45; md.add(b);
+    [-1, 1].forEach(s => { const w = bkBox59(0.12, 0.6, 0.5, { s: P.s, t: P.t }); w.position.set(s * 0.46, 0.45, 0); w.rotation.z = s * 0.12; md.add(w); const ear = bkBox59(0.16, 0.2, 0.12, { s: P.s, t: P.t }); ear.position.set(s * 0.28, 1.0, 0.05); md.add(ear); });
+    const hat = bkBox59(0.5, 0.08, 0.5, { s: bkPal59('knight').s, t: bkPal59('knight').t }); hat.position.y = 1.0; md.add(hat); }); }
+  Object.assign(TALK5, {
+    bk_hi: [['narr59', '옛날 옛적, 종이 꽃이 피는 그림책 나라가 있었단다…'], ['toto59', '꾸꾸! 깡총! 나는 토토야. 잉크 방울이 꽃밭을 마구 번지게 하고 있어!'], ['toto59', '잉크 방울은 밟으면 작게 쪼개져. 구름 솜뭉치는 밟으면 높이 튕겨 줄 거야!'], ['haru', '좋아, 그림책을 지켜 보자!']],
+    bk_night: [['narr59', '해가 지자 숲속 등불이 하나둘 켜졌단다.'], ['toto59', '밤에는 종이 나방이 등불 근처를 날아다녀. 깡통 기사는 돌격해 오니까 위에서 밟아!'], ['haru', '어두워도 등불이 길을 비춰 주네!']],
+    bk_cloud: [['narr59', '꾸꾸는 구름 위의 성에 다다랐어. 책장이 다리처럼 펄럭였지.'], ['toto59', '책장 다리는 움직여! 타이밍 맞춰서 건너야 해.'], ['haru', '종이학이 내려꽂히는 것도 조심할게!']],
+    bk_boss: [['drag59', '크르릉! 이 그림책의 마지막 장은 내가 새까맣게 칠해 주마!'], ['haru', '안 돼! 이야기는 행복하게 끝나야 해!'], ['narr59', '잉크 방울을 튕겨내고, 드래곤이 땅에 내려와 어지러울 때 머리를 밟으렴!']]
+  });
+  Object.assign(TALKS5, { '5-1': [{ x: 9, id: 'bk_hi' }], '5-2': [{ x: 8, id: 'bk_night' }], '5-3': [{ x: 7, id: 'bk_cloud' }], '5-4': [{ x: 'arena', id: 'bk_boss' }] });
+  // ---------- story cuts ----------
+  Object.assign(CUTS5, {
+    book59: { music: 'story', setup() {
+      cutWorld5({ theme: 'book1', w: 50, hero: 10 }); player.visible = false;
+      const to = actor5('toto59', makeBun59(), 24, 2, -1); to.g.visible = false;
+      const ow = actor5('narr59', makeOwl59(), 30, 2, -1); ow.g.visible = false;
+      CUT.cam0 = [16, 4.2, 12];
+      return [
+        { wait: 20 },
+        { fn: () => bkPage59('월드 5', '그림책 나라') }, { wait: 60 },
+        { fn: () => { player.visible = true; flashScreen(0.6, '#fbf3de'); sfxBk59('chime'); spawnParts(10, 3, ZP, 0xf49ab8, NP(24), 0.1, 0.05); } }, { wait: 30 },
+        { say: 'haru', text: '어…? UFO를 물리쳤더니 커다란 책이 펼쳐졌어!' },
+        { fn: () => { ow.g.visible = true; sfxBk59('page'); } }, { cam: [24, 4.4, 11], t: 60, nb: 1 }, { wait: 30 },
+        { say: 'narr59', text: '어서 오렴, 꼬마 영웅. 여기는 수채화와 색연필로 그린 그림책 나라란다.' },
+        { say: 'narr59', text: '그런데 잉크 낙서 드래곤이 페이지마다 잉크를 쏟고 있지 뭐니.' },
+        { fn: () => { to.g.visible = true; sfxBk59('boing'); } }, { walk: 'toto59', to: 15, sp: 0.06 },
+        { say: 'toto59', text: '깡총! 나는 토토야. 드래곤을 막으면 이야기가 다시 행복해질 거야!' },
+        { say: 'haru', text: '좋아! 한 장 한 장 넘기면서 그림책을 구하자!' },
+        { fn: () => bkPage59('첫 번째 이야기', '종이 꽃 초원') }, { wait: 50 }
+      ]; } },
+    bookend59: { music: 'story', setup() {
+      cutWorld5({ theme: 'book3', w: 50, hero: 12 });
+      const to = actor5('toto59', makeBun59(), 15, 2, -1), ow = actor5('narr59', makeOwl59(), 18, 2, -1);
+      CUT.cam0 = [16, 4, 11];
+      return [
+        { wait: 20 },
+        { say: 'toto59', text: '해냈다! 잉크 드래곤이 사라지고 페이지가 다시 알록달록해졌어!' },
+        { say: 'narr59', text: '그렇게 꼬마 영웅은 다섯 번째 세계까지 지켜 냈단다.' },
+        { say: 'haru', text: '고마워, 토토! 이야기꾼 할아버지! 이제 마을로 돌아갈게.' },
+        { say: 'narr59', text: '마지막 장을 넘기면 집으로 가는 길이 열린단다. 그리고 모두 행복하게 살았대.' },
+        { fn: () => { bkPage59('끝', '— 그리고 모두 행복하게 살았답니다 —'); sfxBk59('chime'); } }, { wait: 70 }
+      ]; } }
+  });
+  // ---------- map: picture-book island after the moon ----------
+  function w5Open59() { const S = story5(); return save.unlocked >= 16 || !!(save.best['4-3'] && save.best['4-3'].clear) || !!S.book59; }
+  MAPN5.push({ k: 'book', x: 88, z: 0.4 }, { s: 15, x: 91.5, z: -0.7 }, { s: 16, x: 96, z: 0.8 }, { s: 17, x: 100.5, z: -0.6 }, { s: 18, x: 105, z: 0.5 });
+  function buildMapBook59(g) {
+    const cube = new THREE.BoxGeometry(1, 1, 1); cube.userData.keep = true;
+    const hsh = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return s - Math.floor(s); };
+    const pap = (base, wash) => { const c = WK59.cv(64, 64), q = c.getContext('2d'); WK59.seed(7); WK59.paper(q, 64, 64, base, 1.2); WK59.wash(q, WK59.ell(32, 32, 30, 26, 14), wash, { a: 0.5, edge: 0.4, gran: 0.3 }); WK59.unseed(); return bkTexOf59(c); };
+    const top = new THREE.MeshLambertMaterial({ map: pap('#cfe6b0', '#9cc77a') }), side = new THREE.MeshLambertMaterial({ map: pap('#f6ecd4', '#e3cfa6') });
+    const T = [], S = [];
+    for (let x = 87; x <= 108; x++) for (let z = -5; z <= 4; z++) { if (Math.abs(z) > 3 + (hsh(x, 11) > 0.5 ? 1 : 0) || x > 107 - (hsh(z, 3) > 0.6 ? 1 : 0)) continue; T.push([x, 0, z]); S.push([x, -1, z]); }
+    const im = (list, mat) => { const m = new THREE.InstancedMesh(cube, mat, list.length), d = new THREE.Object3D(); list.forEach((p, i) => { d.position.set(p[0], p[1] - 0.5, p[2]); d.updateMatrix(); m.setMatrixAt(i, d.matrix); }); g.add(m); return m; };
+    im(T, top); im(S, side);
+    const mats = {}, st = (k, x, y, z, H, o) => { o = o || {}; const m = mats[k] || (mats[k] = new THREE.MeshBasicMaterial({ map: bkTex59(k), transparent: true, alphaTest: 0.06, side: THREE.DoubleSide, toneMapped: false, fog: false }));
+      const sz = BKD59[k] || [512, 512], p = new THREE.Mesh(new THREE.PlaneGeometry(H * sz[0] / sz[1], H), m); p.geometry.translate(0, H / 2, 0); p.position.set(x, y, z); p.rotation.x = -0.25; if (o.flip) p.scale.x = -1; g.add(p); return p; };
+    // open book at the entry node
+    const bk = new THREE.Group(); bk.position.set(88, 0, -2.2); g.add(bk); const cov = new THREE.MeshLambertMaterial({ color: 0x8a3a4a }), pg = new THREE.MeshLambertMaterial({ map: bkTex59('page') });
+    [-1, 1].forEach(s => { const c = new THREE.Mesh(cube, cov); c.scale.set(1.5, 0.12, 2); c.position.set(s * 0.78, 0.3, 0); c.rotation.z = -s * 0.18; bk.add(c); const p = new THREE.Mesh(cube, pg); p.scale.set(1.4, 0.1, 1.85); p.position.set(s * 0.74, 0.4, 0); p.rotation.z = -s * 0.18; bk.add(p); });
+    const lf = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.7), new THREE.MeshLambertMaterial({ map: bkTex59('page'), side: THREE.DoubleSide })); lf.geometry.translate(0.65, 0, 0); lf.rotation.x = -Math.PI / 2; lf.position.set(0, 0.5, 0); bk.add(lf); MAP.leaf59 = lf;
+    st('hills1', 96, 0, -6.6, 3.0); st('sun', 91, 5.6, -7.6, 2.0); st('cloud', 100, 6.0, -7.8, 1.4); st('bird', 94, 4.8, -6.6, 0.8);
+    st('fl1', 90, 0, -3.0, 0.8); st('fl2', 92.6, 0, 2.6, 0.7); st('fl3', 89.4, 0, 2.8, 0.7); st('tuft', 94.2, 0, -3.2, 0.6); st('cottage', 93.4, 0, -3.4, 1.8);
+    st('pine', 97.6, 0, -3.2, 2.0); st('pine', 98.8, 0, 2.6, 1.6); st('mush', 95.4, 0, 2.8, 0.7); st('moon', 98.4, 5.2, -7.4, 1.4);
+    st('castle', 102.8, 0, -3.8, 3.4); st('cloudbank', 104.6, 0, 2.6, 1.0); st('balloon', 106.4, 3.4, -5.6, 1.6);
+    MAP.drag59 = st('scrib', 105.6, 0.6, -2.6, 1.8);
+  }
+  function refreshMapBook59() {
+    if (!MAP.pads) return;
+    MAP.pads.forEach((p, i) => { if (i < 19) return; const open = nodeOpen5(i), clr = nodeClear5(i);
+      p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : 0xf49ab8); p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : 0x4a1a2a) : 0); });
+    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (seg < 18) return; c.setHex(nodeOpen5(seg + 1) ? 0xd9a46a : 0x3a3040); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
+    if (MAP.drag59) { const b = save.best['5-4']; MAP.drag59.visible = !(b && b.clear); }
+    if (w5Open59() && !save.w5seen) { save.w5seen = 1; saveSave(); setTimeout(() => { if (state === 'map') banner('월드 5 · 그림책 나라가 열렸다!', '커다란 그림책 속으로!', 2200); }, 600); }
+  }
+  const PAPER59 = new THREE.Color(0xf4ead4);
+  function mapBook59(cx) {
+    const k = Math.max(0, Math.min(1, (cx - 83.5) / 3));
+    if (k > 0) { const bg = MAP.scene.background.clone().lerp(PAPER59, k); MAP.scene.background.copy(bg); MAP.scene.fog.color.copy(bg); MAP.sun.color.lerp(new THREE.Color(0xfff6e6), k); if (MAP.stars54) MAP.stars54.material.opacity *= 1 - k; }
+    const t = performance.now() / 1000;
+    if (MAP.leaf59) MAP.leaf59.rotation.z = -Math.abs(Math.sin(t * 0.8)) * 2.6;
+    if (MAP.drag59) MAP.drag59.position.y = 0.6 + Math.sin(t * 2) * 0.15;
+  }
+  function bookAuto59() {   // saves that already beat 4-3 get the World 5 opening once
+    if (!(save.best['4-3'] && save.best['4-3'].clear) || story5().book59 || STORY5.noFinale583) return;
+    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().book59) playCut5('book59', () => { save.node = 19; saveSave(); showMap5({ celebrate: 20 }); }); }, 700);
+  }
+  if (save && save.best && save.best['4-3'] && save.best['4-3'].clear && save.unlocked < 16) save.unlocked = 16;
+  // ---------- debug (only with window.__BA_DEBUG) ----------
+  function installDebug59() {
+    window.__ba.bk59 = () => ({ w5: STAGES.filter(s => s.world === 5).map(s => s.id), idx: STAGES.findIndex(s => s.id === '5-1'), theme: L && L.def ? L.def.theme : null, book: !!(W3 && W3.th && W3.th.book),
+      mats: Object.keys(BK59.mats).length, par: BK59.par.length, anim: BK59.anim.length, fl: BK59.fl.length, sky: !!BK59.sky, grain: !!(BK59.ov && BK59.ov.style.display !== 'none'), nodes: MAPN5.length, w5Open: w5Open59(),
+      save: { unlocked: save.unlocked, w5seen: save.w5seen, node: save.node, keys: Object.keys(save.best || {}) }, story: Object.assign({}, story5()), allClear: allClear583(), fin: finIdx583(),
+      enemies: enemies.filter(e => /59$/.test(e.kind)).map(e => ({ k: e.kind, alive: e.alive, x: +e.x.toFixed(1), y: +e.y.toFixed(1), ai: e.ai })),
+      boss: boss ? { kind: boss.kind, ai: boss.ai, hp: boss.hp, maxHp: boss.maxHp, alive: boss.alive, active: boss.active, x: boss.x, y: boss.y, ph2: !!boss.phase2 } : null, dragDown: G ? !!G.dragDown59 : null });
+    window.__ba.dragAi59 = ai => { if (boss && boss.kind === 'drag59') { boss.ai = ai; boss.aiT = 0; if (ai === 'dizzy') boss.y = 2; } };
+  }
+  // v5.9 portrait rule for boss bars (all bosses): on tall phone screens put the boss bar under the HUD panel instead of over it
+  function bossBar59() {
+    try {
+      BK59.bbT = (BK59.bbT || 0) + 1; if (BK59.bbT % 15) return;
+      const el = document.getElementById('baBoss'), h = document.getElementById('baHud'); if (!el || !h) return;
+      const por = window.innerHeight > window.innerWidth * 1.15 && window.innerWidth < 600;
+      const pr = el.offsetParent;
+      if (!por || !pr) { if (el.dataset.p59) { el.style.top = ''; el.dataset.p59 = ''; } return; }
+      const t = Math.round(h.getBoundingClientRect().bottom - pr.getBoundingClientRect().top + 8) + 'px';
+      if (el.style.top !== t) { el.style.top = t; el.dataset.p59 = '1'; }
+    } catch (e) { }
+  }
+  /* /W59 */
   return { ensure, setActive(v) { active = v; if (!v) { releaseKeys(); BGM.update(state, false); } else if (started && state === 'play') { /* resume input cleanly */ releaseKeys(); } } };
 })();
 
