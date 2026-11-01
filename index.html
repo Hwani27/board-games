@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.9.6">
+<meta name="ba-version" content="v5.9.7">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -6396,7 +6396,7 @@ const BlockAction = (() => {
     pants: '#3b3a9c', pantsD: '#272672', shoe: '#5b5b60', shoeD: '#3a3a40', iris: '#5a46c8', mouth: '#5a3220' };
   // ================= v5.7.2 Steve HD: high-res pixel skin, thick expressive brows, eye highlights, pixel stubble, bevel light + rim =================
   const ST572 = { skin: ['#c8936c', '#bf8a63', '#b88360', '#c5906a', '#cc9a73'], skinD: '#a06d4a', skinDD: '#87573a', hair: ['#3b2413', '#33200f', '#45291a', '#2c1b0d', '#4a2d1b'],
-    brow: '#24150b', stub: ['#6b4430', '#7a4f37', '#5e3b29'], mouth: '#4a2818', white: '#f6f6fa', iris: '#4f43c4', irisL: '#7d6cf0', irisD: '#2e2690',
+    brow: '#8a5a3e', stub: ['#6b4430', '#7a4f37', '#5e3b29'], mouth: '#6a3a26', white: '#f6f6fa', iris: '#4b3c9c', irisL: '#4b3c9c', irisD: '#4b3c9c', nose: '#a8695a', noseD: '#985a4c', beard: '#7a4a32',
     shirt: ['#1fa3a6', '#22aaac', '#1c9a9d', '#26b0b1'], shirtD: '#137a7d', pants: ['#3c3ba0', '#3a399a', '#4241a8', '#36358f'], pantsD: '#26256e', shoe: ['#5d5d63', '#55555b', '#646469'] };
   let SEED572 = 1; const R572 = () => { SEED572 = (SEED572 * 16807) % 2147483647; return (SEED572 - 1) / 2147483646; };
   const PK572 = a => a[Math.floor(R572() * a.length) % a.length];
@@ -6428,35 +6428,29 @@ const BlockAction = (() => {
       return sk();
     }, B);
     if (B) { g.fillStyle = '#6a6a6a'; g.fillRect(c * 5, c * 12, c * 6, c); return; }
-    // nose (two-tone block) + jaw shading
-    g.fillStyle = ST572.skinD; g.fillRect(c * 6.5, c * 9, c * 3, c); g.fillStyle = ST572.skinDD; g.fillRect(c * 6.5, c * 10, c * 3, c * 0.9);
-    g.fillStyle = 'rgba(255,230,200,.18)'; g.fillRect(c * 7, c * 8.2, c * 1.2, c * 1.6);
-    // mouth / beard band
-    const mouth = () => { g.fillStyle = ST572.mouth; g.fillRect(c * 5, c * 12, c * 6, c); g.fillStyle = PK572(ST572.stub); g.fillRect(c * 4, c * 12, c, c); g.fillRect(c * 11, c * 12, c, c); };
-    if (ex === 'hurt') { g.fillStyle = '#3a1610'; g.fillRect(c * 6, c * 11.6, c * 4, c * 2); g.fillStyle = '#b4463e'; g.fillRect(c * 6.5, c * 12.8, c * 3, c * 0.8); }
-    else if (ex === 'happy') { g.fillStyle = '#3a1610'; g.fillRect(c * 5, c * 11.8, c * 6, c * 1.4); g.fillStyle = '#ffffff'; g.fillRect(c * 5.4, c * 11.8, c * 5.2, c * 0.45); g.fillStyle = '#d0605a'; g.fillRect(c * 6.5, c * 12.7, c * 3, c * 0.5); }
+    // v5.9.7 classic face: nose = 2x1 px brown-pink (rows 10-11), mouth 6 cells + brown beard below (rows 12-15)
+    g.fillStyle = ST572.nose; g.fillRect(c * 6, c * 10, c * 4, c); g.fillStyle = ST572.noseD; g.fillRect(c * 6, c * 11, c * 4, c);
+    g.fillStyle = ST572.beard; g.fillRect(c * 4, c * 12, c, c * 2); g.fillRect(c * 11, c * 12, c, c * 2); g.fillRect(c * 4, c * 14, c * 8, c);
+    const mouth = () => { g.fillStyle = ST572.mouth; g.fillRect(c * 5, c * 12, c * 6, c * 2); };
+    if (ex === 'hurt') { g.fillStyle = ST572.mouth; g.fillRect(c * 5, c * 12, c * 6, c * 2); g.fillStyle = '#8a4a3a'; g.fillRect(c * 6, c * 13, c * 4, c); }
+    else if (ex === 'happy') { g.fillStyle = ST572.mouth; g.fillRect(c * 5, c * 12, c * 6, c * 2); g.fillStyle = '#e8e2d8'; g.fillRect(c * 6, c * 12, c * 4, c); }
     else mouth();
-    // eyes: white outer / violet iris inner + white highlight pixel (rows 7–8)
+    // eyes: each = 2 px (outer white + inner blue-violet iris), flat, straight on the skin — no pupil, no lid shadow, no catch-light
     const eye = (x0, irisX) => {
-      if (ex === 'blink') { g.fillStyle = ST572.skinD; g.fillRect(c * x0, c * 7.6, c * 4, c * 0.7); g.fillStyle = ST572.brow; g.fillRect(c * x0, c * 8.1, c * 4, c * 0.4); return; }
-      const top = ex === 'focus' ? 7.5 : ex === 'happy' ? 7.6 : 7, hh = ex === 'focus' ? 1.5 : ex === 'happy' ? 1.2 : 2;
-      g.fillStyle = ST572.white; g.fillRect(c * x0, c * top, c * 4, c * hh);
-      const ir = g.createLinearGradient(0, c * top, 0, c * (top + hh)); ir.addColorStop(0, ST572.irisL); ir.addColorStop(1, ST572.irisD); g.fillStyle = ir; g.fillRect(c * irisX, c * top, c * 2, c * hh);
-      g.fillStyle = '#16123a'; g.fillRect(c * (irisX + 0.5), c * (top + hh * 0.35), c, c * hh * 0.5);
-      g.fillStyle = 'rgba(255,255,255,.95)'; g.fillRect(c * (irisX + 0.15), c * (top + 0.15), c * 0.55, c * 0.55);   // catch-light
-      g.fillStyle = 'rgba(255,255,255,.5)'; g.fillRect(c * (irisX + 1.3), c * (top + hh - 0.55), c * 0.35, c * 0.35);
-      g.fillStyle = 'rgba(40,18,8,.35)'; g.fillRect(c * x0, c * top, c * 4, c * 0.22);   // upper lid shadow
-      if (ex === 'hurt') { g.fillStyle = ST572.skin[0]; g.fillRect(c * x0, c * top, c * 4, c * 0.6); }
+      const wx = irisX === x0 ? x0 + 2 : x0;
+      if (ex === 'blink') { g.fillStyle = ST572.skinD; g.fillRect(c * x0, c * 9, c * 4, c); return; }
+      const top = ex === 'focus' || ex === 'hurt' ? 8.5 : 8, hh = ex === 'focus' || ex === 'hurt' ? 1.5 : 2;
+      g.fillStyle = ST572.white; g.fillRect(c * wx, c * top, c * 2, c * hh);
+      g.fillStyle = ST572.iris; g.fillRect(c * irisX, c * top, c * 2, c * hh);
     };
     eye(2, 4); eye(10, 10);
-    // thick brows — angle per expression (drawn as stepped pixel blocks so they stay "Minecraft")
-    const brow = (x0, inner, dir) => {   // dir: +1 left brow (inner end at right), -1 right brow
-      const tilt = { open: 0.35, focus: 0.85, hurt: -0.75, happy: -0.25, blink: 0.2 }[ex] || 0.35, lift = ex === 'happy' ? -0.55 : ex === 'hurt' ? -0.2 : 0;
+    // brow: one 1-cell line of darker skin directly above each eye; expressions only step the inner/outer half by half a cell
+    const brow = (x0, inner) => {
+      const dIn = { focus: 0.5, hurt: -0.5 }[ex] || 0, lift = ex === 'happy' ? -0.5 : 0;
       g.fillStyle = ST572.brow;
-      for (let k = 0; k < 5; k++) { const t = dir > 0 ? k / 4 : 1 - k / 4; const y = 5.55 + lift + tilt * (t - 0.5); g.fillRect(c * (x0 + k), c * y, c + 0.5, c * 1.15); }
-      g.fillStyle = 'rgba(120,80,50,.35)'; for (let k = 0; k < 5; k++) { const t = dir > 0 ? k / 4 : 1 - k / 4; const y = 5.55 + lift + tilt * (t - 0.5); g.fillRect(c * (x0 + k) + 2, c * y + 2, c * 0.4, c * 0.22); }
+      for (let k = 0; k < 4; k++) { const isIn = inner > 0 ? k >= 2 : k < 2; g.fillRect(c * (x0 + k), c * (7 + lift + (isIn ? dIn : 0)), c + 0.5, c); }
     };
-    brow(1.6, 6.6, 1); brow(9.4, 9.4, -1);
+    brow(2, 1); brow(10, -1);
     if (ex === 'hurt') { g.fillStyle = 'rgba(140,200,255,.85)'; g.fillRect(c * 13.4, c * 9, c * 0.6, c * 1.1); }
     if (ex === 'happy') { g.fillStyle = 'rgba(230,110,100,.28)'; g.fillRect(c * 1.5, c * 9.6, c * 2.4, c * 1.2); g.fillRect(c * 12.1, c * 9.6, c * 2.4, c * 1.2); }
     bevel572(g, w, h, 1);
@@ -6471,7 +6465,7 @@ const BlockAction = (() => {
       }, B); if (!B) { g.fillStyle = 'rgba(60,30,15,.25)'; g.fillRect(w * 0.6, h * 0.5, w * 0.12, h * 0.14); bevel572(g, w, h, 1); }
     };
     switch (kind) {
-      case 'headF': return texPair(key, S, S, (g, w, h, B) => drawSteveFace572(g, w, h, 'open', B));
+      case 'headF': { const tp = texPair(key, S, S, (g, w, h, B) => drawSteveFace572(g, w, h, 'open', B)); try { (tp.map.userData || (tp.map.userData = {})).fvNoCarve = 1; } catch (e) {} return tp; }
       case 'headS': return texPair(key, S / 2, S / 2, (g, w, h, B) => side(g, w, h, B, 2, true));
       case 'headB': return texPair(key, S / 2, S / 2, (g, w, h, B) => { SEED572 = 5; grid572(g, w, h, 8, 8, (i, j) => B ? { b: '#a0a0a0' } : (j === 7 && R572() < 0.4 ? PK572(ST572.skin) : PK572(ST572.hair)), B); if (!B) bevel572(g, w, h, 1); });
       case 'headT': return texPair(key, S / 2, S / 2, (g, w, h, B) => { SEED572 = 3; grid572(g, w, h, 8, 8, () => B ? { b: '#a0a0a0' } : PK572(ST572.hair), B); if (!B) bevel572(g, w, h, 1); });
@@ -15273,13 +15267,7 @@ const BLOCK_DETAILS=(function(){
     ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.4,0.5,0.008,hair],['P','head','f',-0.5,-0.28,0.26,0.4,0.008,hair],['P','head','f',-0.12,0.1,0.31,0.4,0.007,hair],['P','head','f',0.32,0.5,0.28,0.4,0.008,hairD],
     ['P','head','l',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','r',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','l',0.28,0.5,-0.16,0.12,0.013,hairD],['P','head','r',0.28,0.5,-0.16,0.12,0.013,hairD],
     ['P','head','b',-0.5,0.5,-0.3,0.5,0.011,hair],['N','head','b',10,0.03,0.008,hairD,'c',4,[-0.5,0.5,-0.3,0.5]],['N','head','t',9,0.035,0.008,hairD,'c',5],
-    ['P','head','f',-0.34,-0.06,0.015,0.085,0.013,0x3a2414],['P','head','f',0.06,0.34,0.015,0.085,0.013,0x3a2414],
-    ['P','head','f',-0.31,-0.08,-0.125,-0.005,0.005,0xf4f4f0,'g'],['P','head','f',0.08,0.31,-0.125,-0.005,0.005,0xf4f4f0,'g'],
-    ['P','head','f',-0.19,-0.08,-0.125,-0.005,0.008,0x2e5bd0,'g'],['P','head','f',0.08,0.19,-0.125,-0.005,0.008,0x2e5bd0,'g'],
-    ['P','head','f',-0.16,-0.1,-0.1,-0.03,0.0105,0x0c1430,'g'],['P','head','f',0.1,0.16,-0.1,-0.03,0.0105,0x0c1430,'g'],
-    ['R','head','f',[[-0.17,-0.035],[0.11,-0.035]],0.012,0xffffff,'e'],
-    ['P','head','f',-0.075,0.075,-0.21,-0.12,0.032,skinD],['P','head','f',-0.05,0.05,-0.21,-0.18,0.036,0x8a5440],
-    ['P','head','f',-0.2,0.2,-0.3,-0.25,0.007,0x6b3222],
+    ['P','head','f',-0.125,0.125,-0.25,-0.125,0.02,0xa8695a,'s'],['P','head','f',-0.125,0.125,-0.25,-0.19,0.024,0x985a4c,'s'],
     ['P','torso','t',-0.28,0.28,-0.5,0.5,0.006,shD],['P','torso','f',-0.2,0.2,0.36,0.5,0.008,shD],['P','torso','f',-0.13,0.13,0.4,0.5,0.009,0xc69072],
     ['W','torso',-0.5,-0.4,0.008,shD],['S','torso','l',-0.04,0.04,-0.5,0.5,shD],['S','torso','r',-0.04,0.04,-0.5,0.5,shD],
     ['P','torso','f',0.12,0.38,0.0,0.24,0.007,0x2aa9a4],['P','torso','f',0.1,0.4,0.2,0.29,0.012,shD],['R','torso','f',[[0.25,0.245]],0.016,0xe8e8e8,'g'],
@@ -15613,7 +15601,7 @@ var BlockDetail=(function(){
     // chamfer: drop every cell that sits on two (or three) outer faces of a thick-enough axis pair
     for(let l=0;l<nz;l++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const d=[dd(i,0),dd(j,1),dd(l,2)];let e=0;for(let a=0;a<3;a++)if(d[a]===0&&n[a]>=4)e++;if(e>=2)occ[id(i,j,l)]=0;}
     // carve dark texels one voxel deep (eyes, mouths, seams, gaps) + drop transparent texels
-    if(o.carve!==false){for(let f=0;f<6;f++){const ax=f>>1;if(n[ax]<4)continue;const u=(ax+1)%3,w=(ax+2)%3;const L=[],cells=[];
+    if(o.carve!==false){for(let f=0;f<6;f++){const ax=f>>1;if(n[ax]<4)continue;if(F[f]&&F[f].mat&&F[f].mat.map&&F[f].mat.map.userData&&F[f].mat.map.userData.fvNoCarve)continue;const u=(ax+1)%3,w=(ax+2)%3;const L=[],cells=[];
       for(let q=0;q<n[w];q++)for(let p=0;p<n[u];p++){const c=[0,0,0];c[u]=p;c[w]=q;c[ax]=(f&1)?0:n[ax]-1;const k=id(c[0],c[1],c[2]);if(!occ[k])continue;const col=S[f](surfP(f,c[0],c[1],c[2]));const lu=0.2126*col[0]+0.7152*col[1]+0.0722*col[2];L.push(lu);cells.push([k,lu,col[3]]);}
       if(!L.length)continue;const so=L.slice().sort((a,b)=>a-b),med=so[so.length>>1];
       for(const [k,lu,al] of cells){if(al<0.4||(lu<med*0.42&&lu<0.09&&med>0.02))occ[k]=0;}}}
@@ -17849,25 +17837,9 @@ function buildKit(){
     if(k==='localStorage'||k==='sessionStorage')return fakeLS;if(k==='document')return doc;
     const v=t[k];return (typeof v==='function'&&!/^[A-Z]/.test(String(k)))?v.bind(t):v;},set(t,k,v){loc[k]=v;return true;}});
   const names='makeHero,makeVillager5,makeVillager56,makeBoss,makeIronGolem,makeZombie56,makeChief,makeWSkel,makeWither,makeCreeper,makeGhast,makeDragon,makeAxolotl,makeCybertruck,makeTNT,makeHouse5,makePillager,makeMooshroom,makePig56,makeBee56,makeBlaze,makeParrot56,makeSpider56,std,LIN,glowSprite,glowTex,canvasTex,texPair,mobMat,BGM,AFX,snd,bevelBox,vgrad,grain,edgeAO,setFace53,stoneTextures,brickTextures,RIG58,rigObj58,rigTip58'.split(',');
-  const exp='\n;(function(){const __st0=steveTex;steveTex=function(k){if(k!=="headF")return __st0(k);return texPair("bf_stF",256,256,function(g,w,h,B){'+
-    'if(B){grain(g,w,h,0.1);g.fillStyle="#9a9a9a";g.fillRect(0,0,w,h*0.25);g.fillStyle="#6a6a6a";g.fillRect(w*0.09,h*0.4,w*0.33,h*0.08);g.fillRect(w*0.58,h*0.4,w*0.33,h*0.08);g.fillStyle="#a8a8a8";g.fillRect(w*0.375,h*0.55,w*0.25,h*0.14);return;}'+
-    'vgrad(g,0,0,w,h,"#d6a37c","#bb8760");grain(g,w,h,0.035,0.5);'+
-    'vgrad(g,0,0,w,h*0.25,SC.hairL,SC.hair);for(let i=0;i<70;i++){g.fillStyle="rgba("+(Math.random()<0.5?"18,9,4":"105,66,38")+","+(0.25+Math.random()*0.3)+")";g.fillRect(Math.random()*w,Math.random()*h*0.25,3,8+Math.random()*14);}'+
-    'g.fillStyle=SC.hair;g.fillRect(0,h*0.25,w*0.125,h*0.14);g.fillRect(w*0.875,h*0.25,w*0.125,h*0.14);g.fillRect(0,h*0.25,w,h*0.03);'+
-    /* stubble */
-    'for(let i=0;i<900;i++){const x=Math.random()*w,y=h*(0.64+Math.random()*0.36);if(y>h*0.72&&y<h*0.8&&x>w*0.27&&x<w*0.73)continue;g.fillStyle="rgba(58,34,18,"+(0.18+Math.random()*0.32)+")";g.fillRect(x,y,2+Math.random()*2,2+Math.random()*2);}'+
-    'g.fillStyle="rgba(70,40,22,.22)";g.fillRect(w*0.06,h*0.66,w*0.88,h*0.34);'+
-    /* eyes */
-    '[[0.125,1],[0.625,-1]].forEach(function(a){const x=w*a[0],y=h*0.5,ew=w*0.25,eh=h*0.125,s=a[1];g.fillStyle="#2a1810";g.fillRect(x-3,y-3,ew+6,eh+6);g.fillStyle="#f6f4ee";g.fillRect(x,y,ew,eh);'+
-    'const ix=s>0?x+ew*0.42:x+ew*0.08,iw=ew*0.5;const ir=g.createLinearGradient(0,y,0,y+eh);ir.addColorStop(0,"#4a9cf0");ir.addColorStop(1,"#1d4fb8");g.fillStyle=ir;g.fillRect(ix,y,iw,eh);g.fillStyle="#0c1428";g.fillRect(ix+iw*0.3,y+eh*0.2,iw*0.4,eh*0.62);'+
-    'g.fillStyle="rgba(255,255,255,.9)";g.fillRect(ix+iw*0.12,y+eh*0.12,7,7);g.fillStyle="rgba(255,255,255,.5)";g.fillRect(ix+iw*0.62,y+eh*0.6,4,4);g.fillStyle="rgba(60,30,15,.4)";g.fillRect(x,y,ew,5);});'+
-    /* thick brows, slightly angled in (determined) */
-    'g.fillStyle="#2b170b";[[0.08,1],[0.92,-1]].forEach(function(a){const x0=w*a[0],s=a[1];g.beginPath();g.moveTo(x0,h*0.405);g.lineTo(x0+s*w*0.34,h*0.43);g.lineTo(x0+s*w*0.34,h*0.49);g.lineTo(x0,h*0.465);g.closePath();g.fill();});'+
-    'g.fillStyle="rgba(90,55,30,.5)";g.fillRect(w*0.1,h*0.405,w*0.3,4);g.fillRect(w*0.6,h*0.405,w*0.3,4);'+
-    /* nose + mouth */
-    'g.fillStyle="#9e6a48";g.fillRect(w*0.375,h*0.625,w*0.25,h*0.07);g.fillStyle="rgba(255,220,190,.35)";g.fillRect(w*0.42,h*0.56,w*0.16,h*0.06);'+
-    'g.fillStyle="#5a2e1c";g.fillRect(w*0.28,h*0.75,w*0.44,h*0.05);g.fillStyle="#7a3e2a";g.fillRect(w*0.62,h*0.735,w*0.1,h*0.03);'+
-    'edgeAO(g,w,h,0.22);});};})();\n'+
+  // v5.9.7: BF blocky Steve face = the classic face (2-px eyes white+#4B3C9C iris on skin, 1-px brow line, no outlines/pupils); fine voxels don't carve it
+  const exp='\n;(function(){const __st0=steveTex;steveTex=function(k){if(k!=="headF")return __st0(k);const tp=texPair("bf_stF597",256,256,function(g,w,h,B){drawSteveFace572(g,w,h,"open",B);});'+
+    'try{(tp.map.userData||(tp.map.userData={})).fvNoCarve=1;}catch(e){}return tp;};})();\n'+
     'const __o={};'+names.map(n=>'try{__o.'+n+'=(typeof '+n+'!=="undefined")?'+n+':null;}catch(e){__o.'+n+'=null;}').join('')+
     '__o.setEnv=function(e){envMap=e;};__o.setRenderer=function(r){renderer=r;};__o.skin=function(s){HERO_SKIN=s;};return __o;';
   const f=new Function('window','document','localStorage','sessionStorage','addEventListener','removeEventListener','setTimeout','requestAnimationFrame',src+exp);
@@ -19868,13 +19840,7 @@ const BLOCK_DETAILS=(function(){
     ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.4,0.5,0.008,hair],['P','head','f',-0.5,-0.28,0.26,0.4,0.008,hair],['P','head','f',-0.12,0.1,0.31,0.4,0.007,hair],['P','head','f',0.32,0.5,0.28,0.4,0.008,hairD],
     ['P','head','l',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','r',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','l',0.28,0.5,-0.16,0.12,0.013,hairD],['P','head','r',0.28,0.5,-0.16,0.12,0.013,hairD],
     ['P','head','b',-0.5,0.5,-0.3,0.5,0.011,hair],['N','head','b',10,0.03,0.008,hairD,'c',4,[-0.5,0.5,-0.3,0.5]],['N','head','t',9,0.035,0.008,hairD,'c',5],
-    ['P','head','f',-0.34,-0.06,0.015,0.085,0.013,0x3a2414],['P','head','f',0.06,0.34,0.015,0.085,0.013,0x3a2414],
-    ['P','head','f',-0.31,-0.08,-0.125,-0.005,0.005,0xf4f4f0,'g'],['P','head','f',0.08,0.31,-0.125,-0.005,0.005,0xf4f4f0,'g'],
-    ['P','head','f',-0.19,-0.08,-0.125,-0.005,0.008,0x2e5bd0,'g'],['P','head','f',0.08,0.19,-0.125,-0.005,0.008,0x2e5bd0,'g'],
-    ['P','head','f',-0.16,-0.1,-0.1,-0.03,0.0105,0x0c1430,'g'],['P','head','f',0.1,0.16,-0.1,-0.03,0.0105,0x0c1430,'g'],
-    ['R','head','f',[[-0.17,-0.035],[0.11,-0.035]],0.012,0xffffff,'e'],
-    ['P','head','f',-0.075,0.075,-0.21,-0.12,0.032,skinD],['P','head','f',-0.05,0.05,-0.21,-0.18,0.036,0x8a5440],
-    ['P','head','f',-0.2,0.2,-0.3,-0.25,0.007,0x6b3222],
+    ['P','head','f',-0.125,0.125,-0.25,-0.125,0.02,0xa8695a,'s'],['P','head','f',-0.125,0.125,-0.25,-0.19,0.024,0x985a4c,'s'],
     ['P','torso','t',-0.28,0.28,-0.5,0.5,0.006,shD],['P','torso','f',-0.2,0.2,0.36,0.5,0.008,shD],['P','torso','f',-0.13,0.13,0.4,0.5,0.009,0xc69072],
     ['W','torso',-0.5,-0.4,0.008,shD],['S','torso','l',-0.04,0.04,-0.5,0.5,shD],['S','torso','r',-0.04,0.04,-0.5,0.5,shD],
     ['P','torso','f',0.12,0.38,0.0,0.24,0.007,0x2aa9a4],['P','torso','f',0.1,0.4,0.2,0.29,0.012,shD],['R','torso','f',[[0.25,0.245]],0.016,0xe8e8e8,'g'],
@@ -20209,7 +20175,7 @@ var BlockDetail=(typeof window!=='undefined'&&window.BlockDetail)||(function(){
     // chamfer: drop every cell that sits on two (or three) outer faces of a thick-enough axis pair
     for(let l=0;l<nz;l++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const d=[dd(i,0),dd(j,1),dd(l,2)];let e=0;for(let a=0;a<3;a++)if(d[a]===0&&n[a]>=4)e++;if(e>=2)occ[id(i,j,l)]=0;}
     // carve dark texels one voxel deep (eyes, mouths, seams, gaps) + drop transparent texels
-    if(o.carve!==false){for(let f=0;f<6;f++){const ax=f>>1;if(n[ax]<4)continue;const u=(ax+1)%3,w=(ax+2)%3;const L=[],cells=[];
+    if(o.carve!==false){for(let f=0;f<6;f++){const ax=f>>1;if(n[ax]<4)continue;if(F[f]&&F[f].mat&&F[f].mat.map&&F[f].mat.map.userData&&F[f].mat.map.userData.fvNoCarve)continue;const u=(ax+1)%3,w=(ax+2)%3;const L=[],cells=[];
       for(let q=0;q<n[w];q++)for(let p=0;p<n[u];p++){const c=[0,0,0];c[u]=p;c[w]=q;c[ax]=(f&1)?0:n[ax]-1;const k=id(c[0],c[1],c[2]);if(!occ[k])continue;const col=S[f](surfP(f,c[0],c[1],c[2]));const lu=0.2126*col[0]+0.7152*col[1]+0.0722*col[2];L.push(lu);cells.push([k,lu,col[3]]);}
       if(!L.length)continue;const so=L.slice().sort((a,b)=>a-b),med=so[so.length>>1];
       for(const [k,lu,al] of cells){if(al<0.4||(lu<med*0.42&&lu<0.09&&med>0.02))occ[k]=0;}}}
@@ -21380,6 +21346,205 @@ const CAMF={on:null,p:null,l:null,
     const tr=G_.trauma*G_.trauma,t=performance.now()*0.05;cam.position.set(this.p.x+tr*0.3*Math.sin(t*1.7),this.p.y+tr*0.25*Math.sin(t*2.3+1),this.p.z);cam.lookAt(this.l);
     if(o.fov){if(!this._fov0)this._fov0=cam.fov;if(Math.abs(cam.fov-o.fov)>0.01){cam.fov=lerp(cam.fov,o.fov,0.15);cam.updateProjectionMatrix();}}
     if(typeof VF!=='undefined'){if(VF.ko)VF.ko=null;if(o.dof){VF.dofTo=1;VF.focus=this.p.distanceTo(this.l);}else VF.dofTo=0;}}};
+// v-patch27 arcade story data — per character: intro / rival / boss reply / ending / lose
+// who: 'p' player, 'o' opponent, 'n' narration, npc key (elder/toto/crobo) or roster id; [who,text,pose]
+const S27={
+steve:{m:'원조 주인공의 자존심',intro:[['n','우주 해적 UFO가 물러가고, 다섯 세계에 평화가 찾아왔다.'],['elder','스티브야! 우주 정거장에서 블록 파이터 대회가 열린단다. 우승하면 소원 별을 준대!'],['p','요즘 다들 꾸꾸가 주인공이래… 원조 주인공의 실력, 보여 주지!','win']],
+ rival:{id:'kkukku',arena:'plains',l:[['o','스티브 형! 주인공 자리는 양보 못 해요!','guard'],['p','후후, 원조의 맛을 보여 주마.'],['o','그럼 들판에서 정정당당하게!']]},
+ boss:[['p','골렘 왕님, 원조 주인공은 포기를 모르거든요!','guard']],
+ end:[['n','우주 챔피언이 된 스티브! 마을 광장에 「원조 주인공」 동상이 세워졌다.','win'],['kkukku','형, 다음 모험은 같이 가요!'],['p','좋아! 주인공이… 둘이어도 괜찮지.','win']],
+ lose:'괜찮아, 리스폰하면 돼! 한 번 더!'},
+kkukku:{m:'별빛 트로피를 마을 축제에',intro:[['n','UFO까지 물리친 꼬마 영웅, 꾸꾸.'],['elder','꾸꾸야, 우주 대회 초대장이 왔단다! 우승하면 소원 별을 준다는구나.'],['p','소원 별을 수확 축제에 가져갈래요! 뚜뚜도 깜짝 놀라겠지?','win']],
+ rival:{id:'ttuttu',arena:'plains',l:[['o','꾸꾸! 이번엔 나도 구해지기만 하는 역할은 싫어!','guard'],['p','좋아, 뚜뚜. 진짜 실력으로 붙자!'],['o','에메랄드 폭우, 각오해!','win']]},
+ boss:[['p','골렘 왕님, 이번엔 조종당한 게 아니죠? 그럼 정정당당하게!','guard']],
+ end:[['n','소원 별을 품에 안고 마을로 돌아온 꾸꾸.','win'],['ttuttu','꾸꾸! 소원 별 옆에 내 호박도 놔도 돼?'],['p','물론이지! 올해 축제 주인공은 호박이야!','win']],
+ lose:'으앗, 너무 빨리 달렸나? 다시 간다!'},
+ttuttu:{m:'이번엔 내가 지켜 줄 차례',intro:[['n','마을에서 제일 큰 호박을 키우는 뚜뚜.'],['p','맨날 꾸꾸가 날 구해 줬잖아. 이번엔 내가 모두를 지켜 줄 거야!','guard'],['p','에메랄드 활 준비 완료! 우주 대회로 출발!','win']],
+ rival:{id:'kkukku',arena:'plains',l:[['o','뚜뚜? 정말 대회에 나온 거야?'],['p','응! 나 혼자서도 강하다는 걸 보여 줄게.','guard'],['o','좋아, 봐주지 않을 거야!']]},
+ boss:[['p','골렘 왕님, 수확 축제 날 나를 데려갔던 거… 오늘 갚아 드릴게요!','guard']],
+ end:[['n','우주 챔피언 뚜뚜! 마을 전체가 들썩였다.','win'],['kkukku','뚜뚜, 이제는 내가 구해 달라고 할게!'],['p','후훗, 대신 호박 파이는 네가 사!','win']],
+ lose:'에메랄드는 아직 남았어. 한 번 더!'},
+golemk:{m:'지키는 힘을 증명',intro:[['n','다시 마을의 수호자가 된 골렘 왕.'],['p','보랏빛 목소리에 조종당했던 지난날… 부끄럽다.','lose'],['p','이번 대회에서 내 힘이 마을을 지키는 힘임을 증명하겠다!','win']],
+ rival:{id:'wskel',arena:'nether',l:[['o','크크… 위더 님의 그림자는 아직 사라지지 않았다.'],['p','그 목소리… 이제 나에겐 통하지 않는다!','guard'],['o','그렇다면 검으로 확인해 주지!']]},
+ boss:[['p','좋다, 나의 오랜 친구여. 전력으로 와라!','guard']],
+ end:[['n','승리한 골렘 왕은 소원 별을 높이 들었다.','win'],['p','소원은 하나다. 마을 아이들이 언제나 웃게 해 다오.'],['n','그날 밤, 마을엔 쿵쿵 즐거운 축제 북소리가 울렸다.','win']],
+ lose:'크르르… 아직 무릎 꿇지 않았다!'},
+iron:{m:'약탈자로부터 마을을 지키려고',intro:[['n','말수 적은 마을 경비대, 철골렘.'],['p','…약탈자들이 또 마을 근처를 서성인다.'],['p','더 강해져야 한다. 대회에서 단련하겠다.','guard']],
+ rival:{id:'pillager',arena:'raid',l:[['o','어이, 깡통! 이번엔 우리 약탈자 캠프가 이긴다!','win'],['p','…마을의 꽃은 한 송이도 못 가져간다.','guard']]},
+ boss:[['p','왕이시여. 오늘만은 제가 왕을 넘겠습니다.','guard']],
+ end:[['n','우주 챔피언 철골렘. 그는 소원 별 대신 꽃 한 송이를 받았다.','win'],['villager','흐음?! 철골렘이 웃었어! 방금 분명히 웃었다고!'],['p','…기분 탓이다.']],
+ lose:'…아직 녹슬지 않았다.'},
+zombie:{m:'낮에도 친구들과 놀고 싶어서',intro:[['n','햇빛만 보면 타 버리는 좀비.'],['p','으어어… 나도 낮에 친구들이랑 놀고 싶어…','lose'],['p','소원 별만 있으면… 햇빛 걱정 끝! 으어!','win']],
+ rival:{id:'iron',arena:'plains',l:[['o','좀비 발견. 마을 출입 금지.','guard'],['p','으어… 나 착한 좀비야! 문 안 부숴!'],['o','…그럼 증명해 봐라.']]},
+ boss:[['p','골렘 왕님… 제가 이기면… 낮에 놀아도 돼요?']],
+ end:[['n','소원 별이 반짝이자, 좀비 머리 위에 황금 모자가 생겼다.','win'],['p','으어어! 햇빛이 따뜻해!','win'],['n','그날 좀비는 처음으로 친구들과 낮 소풍을 갔다.']],
+ lose:'으어… 좀비는… 다시 일어난다…'},
+grak:{m:'족장의 금빛 자존심',intro:[['n','네더 보루의 족장, 그락.'],['p','꿀꿀! 위더가 사라진 뒤로 보루가 너무 조용하다.'],['p','금보다 반짝이는 소원 별이라니… 족장이 가져가야지!','win']],
+ rival:{id:'wskel',arena:'nether',l:[['o','피글린 따위가 보루의 주인이라고?'],['p','꿀꿀! 위더는 갔다. 이제 보루는 우리 거다!','guard']]},
+ boss:[['p','골렘 왕! 금 케이크를 걸고 한판이다, 꿀꿀!','guard']],
+ end:[['n','소원 별로 거대한 금 케이크를 만들려던 그락.','win'],['p','…너무 예뻐서 못 쓰겠다, 꿀꿀.'],['n','소원 별은 오늘도 네더 보루 한가운데서 반짝인다.']],
+ lose:'꿀꿀! 금이 부족했나? 다시!'},
+wskel:{m:'주인 없는 검의 이유를 찾아',intro:[['n','위더의 부하였던 위더 스켈레톤.'],['p','주인님은 떠났다. 이제 나는 무엇을 위해 검을 드는가…','lose'],['p','답을 찾겠다. 대회의 끝에서.','guard']],
+ rival:{id:'grak',arena:'portal',l:[['o','꿀꿀! 위더 부하가 아직도 어슬렁거리네?'],['p','…나는 더 이상 누구의 부하도 아니다.','guard'],['o','그럼 검으로 보여 줘라!']]},
+ boss:[['p','골렘 왕. 너도 조종당했었지. 이제 우리 둘 다 자유다.','guard']],
+ end:[['n','승리 후, 위더 스켈레톤은 조용히 검을 내려놓았다.'],['p','이제 알겠다. 나는… 지키고 싶은 것을 위해 싸운다.','win'],['n','그는 네더 보루의 첫 번째 검술 선생님이 되었다.']],
+ lose:'…검이 무뎌졌군. 다시 간다.'},
+creeper:{m:'하이파이브 한 번 해 보고 싶어서',intro:[['n','다가가기만 하면 모두 도망가는 크리퍼.'],['p','치익… 나도 하이파이브 한 번 해 보고 싶어…','lose'],['p','우승하면 다들 나랑 놀아 주겠지? 치익!','win']],
+ rival:{id:'steve',arena:'cliff',l:[['o','크, 크리퍼다! 다들 피해!','guard'],['p','도망가지 마! 오늘은 정정당당하게 싸우자, 치익!'],['o','…좋아. 대신 터지면 반칙이다?']]},
+ boss:[['p','골렘 왕님, 안 터질게요! …아마도요. 치익.']],
+ end:[['n','우주 챔피언 크리퍼! 그런데 이번엔 아무도 도망가지 않았다.','win'],['steve','축하해! 자, 하이파이브!'],['p','치익… 너무 기뻐서… 터질 것 같아!','win'],['n','펑! — 축하 폭죽이었다.']],
+ lose:'치익… 너무 긴장해서 불발이었어.'},
+moosh:{m:'우주 버섯 수프 가게',intro:[['n','버섯 수프 요리사, 무시룸.'],['p','음머~ 우주에서 버섯 수프를 끓이면 어떤 맛일까?'],['p','우승해서 우주 정거장에 수프 가게를 열 거야!','win']],
+ rival:{id:'armad',arena:'mushroom',l:[['o','돌진 대결이야! 누가 더 빠를까?'],['p','음머~ 뿔 달린 내가 이기지!','guard']]},
+ boss:[['p','골렘 왕님, 이기면 수프 한 그릇 드릴게요. 져도 드릴게요!']],
+ end:[['n','우주 정거장에 문을 연 「무시룸 수프」.','win'],['golemk','…맛있군. 한 그릇 더.'],['p','음머~ 우주 최고의 단골손님이야!','win']],
+ lose:'음머… 수프 먹고 힘내서 다시!'},
+dragon:{m:'하늘 다음은 우주',intro:[['n','엔드의 하늘을 지배하던 엔더드래곤.'],['p','크하하! 하늘은 원래 내 것. 이제 우주도 내 것으로 만들겠다!','win'],['p','…솔직히 엔드가 좀 심심하기도 했고.']],
+ rival:{id:'ghast',arena:'nether',l:[['o','끼잉… 하늘은 나도 날 수 있다고…'],['p','울보 가스트여, 하늘의 주인을 가리자!','guard']]},
+ boss:[['p','골렘 왕! 날개 없는 왕에게 우주는 너무 넓다!','guard']],
+ end:[['n','우주 챔피언이 된 엔더드래곤.','win'],['p','우주는… 엔드보다 별이 훨씬 많구나.'],['n','드래곤은 이제 밤마다 아이들을 태우고 별 구경을 간다.']],
+ lose:'크하하… 이번엔 날개만 풀었다!'},
+ghast:{m:'울보 말고 웃는 얼굴로',intro:[['n','네더 하늘을 떠도는 울보 가스트.'],['p','끼잉… 다들 내 울음소리가 무섭대…','lose'],['p','우승하면 웃는 얼굴이 될지도 몰라! 끼잉!']],
+ rival:{id:'dragon',arena:'portal',l:[['o','하늘을 나는 자는 나 하나면 충분하다!','win'],['p','끼잉! 나도 날 수 있어! 이번엔 안 울 거야!','guard']]},
+ boss:[['p','골렘 왕님… 울음 폭격, 진짜 세요. 각오하세요!']],
+ end:[['n','소원 별을 받은 가스트가 처음으로 활짝 웃었다.','win'],['byeol','와, 가스트가 웃으니까 엄청 귀엽다!'],['p','끼잉… 이건 기뻐서 우는 거야!','win']],
+ lose:'끼잉… 안 울어… 조금만 울게…'},
+byeol:{m:'신발명 물약 실험',intro:[['n','크레용 나라의 꼬마 물약 박사, 별별이.'],['p','새 물약을 개발했어! 이름하여… 쉬대포!','win'],['crobo','삐빅! 이름이 좀 이상한데?'],['p','우주 대회에서 시험해 볼 거야. 이것이 실험 정신!']],
+ rival:{id:'villager',arena:'crayon',l:[['o','흐음! 물약 장사는 우리 거래소가 원조라고!'],['p','흥! 내 물약은 크레용 맛이 난다고요!','guard']]},
+ boss:[['p','골렘 왕님, 마지막 실험 대상이 되어 주세요!','win']],
+ end:[['n','우승한 별별이는 크레용 나라에 「물약 연구소」를 열었다.','win'],['crobo','삐빅! 별별이 박사님, 무지개 물약 하나요!'],['p','실험은 계속된다! 다음 발명품도 기대해!','win']],
+ lose:'앗, 물약 배합 실수! 다시 섞어 볼게!'},
+axo:{m:'그림책 나라 연못을 다시 맑게',intro:[['n','그림책 나라 연못에 사는 아홀로틀.'],['p','뽀글! 잉크 드래곤 때문에 연못이 까맣게 물들었어.','lose'],['toto','부엉. 소원 별이라면 연못을 다시 맑게 할 수 있을 거란다.'],['p','좋아, 우주까지 헤엄쳐 갈 거야!','win']],
+ rival:{id:'ghast',arena:'seaside',l:[['o','끼잉… 너무 슬퍼서 눈물이 강물처럼 흘러…'],['p','뽀글! 그 눈물, 내 연못에 딱 좋겠다! 이기면 조금만 줘!']]},
+ boss:[['p','골렘 왕님, 물보라 러시로 우주를 적셔 줄게요!','guard']],
+ end:[['n','소원 별이 연못에 퐁당 떨어졌다.','win'],['toto','부엉. 그림책 나라에서 제일 맑은 연못이 되었구나.'],['p','뽀글뽀글! 다들 수영하러 와!','win']],
+ lose:'뽀글… 숨 한번 쉬고 다시!'},
+armad:{m:'겁쟁이 버릇 고치기',intro:[['n','겁은 많지만 단단한 아르마딜로.'],['p','무서우면 몸을 말아 버리는 버릇… 이제 고치고 싶어.','lose'],['p','끝까지 몸을 펴고 싸울 거야. …아마도!','guard']],
+ rival:{id:'moosh',arena:'pigfarm',l:[['o','음머~ 돌진이라면 내가 최고야!'],['p','구르기는 내가 최고야! …떨리지만!','guard']]},
+ boss:[['p','골렘 왕님 엄청 커… 아니, 안 말 거야! 간다!','guard']],
+ end:[['n','우승하는 순간, 아르마딜로는 몸을 활짝 폈다.','win'],['p','나… 끝까지 안 숨었어!','win'],['n','그리고 너무 기뻐서 데굴데굴 굴러다녔다.']],
+ lose:'으으, 또 말아 버렸네… 다시 펴 보자!'},
+villager:{m:'우주 최대의 장사 기회',intro:[['n','마을 최고의 상인, 주민.'],['p','흐음! 우주 대회 관객이 2만 명… 장사하기 딱 좋은 날이군!','win'],['p','소원 별은 에메랄드 몇 개짜리일까? 흐음!']],
+ rival:{id:'byeol',arena:'crayon',l:[['o','주민 아저씨, 내 물약 가격 따라 하지 마요!','guard'],['p','흐음! 장사는 원래 경쟁이 재밌는 거란다.']]},
+ boss:[['p','골렘 왕님, 거래합시다. 제가 이기면 소원 별, 지면… 재도전!']],
+ end:[['n','우승한 주민은 소원 별을 팔지 않았다.','win'],['p','흐음… 이건 값을 매길 수 없는 물건이지.'],['n','대신 소원 별 모양 쿠키를 팔아 대박이 났다.','win']],
+ lose:'흐음… 손해 본 장사군. 재도전!'},
+pillager:{m:'훔치지 않고 실력으로',intro:[['n','약탈자 캠프의 석궁 명수.'],['p','우리 약탈자들은 맨날 악당 취급이야.','lose'],['p','이번엔 훔치지 않고 정정당당하게 소원 별을 따겠어!','guard']],
+ rival:{id:'iron',arena:'raid',l:[['o','…약탈자. 또 무엇을 훔치러 왔나.','guard'],['p','이번엔 아니야! 실력으로 이길 거라고!']]},
+ boss:[['p','골렘 왕! 석궁은 정직하게 쏜다!','guard']],
+ end:[['n','정정당당하게 우승한 약탈자.','win'],['iron','…훌륭한 승부였다.'],['p','헤헤. 처음으로 박수를 받아 봤어.','win']],
+ lose:'쳇… 화살 한 통 더 가져올게!'},
+rsteve:{m:'[실험] 나만 너무 진짜 같아',x:1,intro:[['n','[실험 모드] 어딘가에서 나타난 「실사」 스티브.'],['p','여긴… 왜 다들 네모나지? 나만 너무 진짜 같은데.'],['p','일단 이기고 생각하자. 실험 시작!','guard']],
+ rival:{id:'steve',arena:'plains',l:[['o','잠깐, 너 나랑 똑같이 생겼는데… 덜 네모나잖아!'],['p','그러는 넌 너무 네모나!']]},
+ boss:[['p','골렘 왕님, 실험 결과를 확인해 봅시다!']],
+ end:[['n','실험 결과: 우승.','win'],['steve','어때, 네모난 세상도 나쁘지 않지?'],['p','…응. 다음 업데이트엔 나도 네모로 와 볼게.'],['n','— 실험 엔딩 (계속 개발 중!)']],
+ lose:'실험 실패! 버그 리포트 작성 중…'}
+};
+// ---- v-patch27 arcade story mode: per-character intro / rival / final-boss / ending / continue (skippable, endings gallery)
+const AST27={on:false,S:S27,q:null,i:0,cb:null,ctx:null,tw:null,auto:null,KEY:'bf_story27',
+  NPC:{elder:{n:'촌장',e:'🧓',c:'#b98b4e'},toto:{n:'토토',e:'🦉',c:'#8a6a3c'},crobo:{n:'크로보',e:'🤖',c:'#e2574c'}},
+  PIT:{steve:300,kkukku:520,ttuttu:640,golemk:110,iron:140,zombie:170,grak:200,wskel:230,creeper:390,moosh:260,dragon:120,ghast:720,byeol:680,axo:760,armad:450,villager:240,pillager:280,rsteve:330,elder:220,toto:430,crobo:900},
+  BOSS:{golemk:[['n','크레용 로켓이 달에 내려앉았다. 마지막 무대 — 우주!'],['o','여기는 우주 정거장. 다섯 세계의 마지막 무대다.'],['o','UFO가 다시 오지 않도록 나는 이 별을 지킨다. 실력을 보여라, 도전자여!','guard']],
+    iron:[['n','크레용 로켓이 달에 내려앉았다. 마지막 무대 — 우주!'],['o','왕이시여. 우주 수비대장 철골렘, 봐드리지 않겠습니다!','guard']]},
+  st(){try{return JSON.parse(localStorage.getItem(this.KEY)||'{}')||{};}catch(e){return {};}},
+  mark(k,id){try{const s=this.st();s[k]=s[k]||{};s[k][id]=1;localStorage.setItem(this.KEY,JSON.stringify(s));}catch(e){}},
+  css(){if(D.getElementById('ast27css'))return;const s=D.createElement('style');s.id='ast27css';s.textContent=
+`#blockfighter.ast-on #bfHud,#blockfighter.ast-on #bfBanner,#blockfighter.ast-on #bfCut,#blockfighter.ast-on #bfSong{opacity:0!important;transition:opacity .3s}
+#blockfighter.ast-on #bfTouch,#blockfighter.ast-on #bfTouch *{opacity:0!important;pointer-events:none!important}
+html.ast27-open #gqBtn{display:none!important}@media (max-height:520px){#bfRes .arc{margin-top:4px!important;font-size:13px!important}#bfRes h2{margin-bottom:2px}}#ast27{position:absolute;inset:0;z-index:60;pointer-events:auto;touch-action:manipulation;-webkit-user-select:none;user-select:none;font-family:'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',sans-serif}
+#ast27.gal{background:radial-gradient(circle at 50% 30%,rgba(40,50,90,.92),rgba(8,10,22,.97))}
+#ast27 .lb{position:absolute;left:0;right:0;height:7%;background:#000;transition:height .4s}#ast27 .lb.t{top:0}#ast27 .lb.b{bottom:0}
+#ast27 .tag{position:absolute;top:calc(9% + env(safe-area-inset-top));left:50%;transform:translateX(-50%);padding:5px 16px;border-radius:20px;background:linear-gradient(90deg,#ff5a5a,#ffb347);color:#fff;font-weight:900;font-size:14px;letter-spacing:2px;box-shadow:0 3px 12px rgba(0,0,0,.4);white-space:nowrap}
+#ast27 .tag:empty{display:none}
+#ast27 .box{position:absolute;left:calc(12px + env(safe-area-inset-left));right:calc(12px + env(safe-area-inset-right));bottom:calc(9% + 8px + env(safe-area-inset-bottom));max-width:860px;margin:0 auto;display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:16px;background:rgba(14,18,34,.86);border:2px solid var(--c,#fff);box-shadow:0 8px 28px rgba(0,0,0,.5);box-sizing:border-box;color:#fff}
+#ast27 .box.n{border-color:rgba(255,255,255,.35);background:rgba(0,0,0,.72)}
+#ast27 .pt{flex:none;width:72px;height:72px;border-radius:12px;background:var(--c,#333) center/cover no-repeat;border:2px solid rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center;font-size:44px;overflow:hidden}
+#ast27 .box.n .pt{display:none}
+#ast27 .tx{flex:1;min-width:0}
+#ast27 .nm{font-weight:900;font-size:15px;color:var(--c,#ffd34d);margin-bottom:3px;text-shadow:0 1px 2px #000;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#ast27 .box.n .nm{display:none}
+#ast27 .ln{font-size:19px;line-height:1.5;font-weight:700;word-break:keep-all;overflow-wrap:break-word;line-break:strict;max-height:4.6em;overflow:hidden}
+#ast27 .box.n .ln{font-style:italic;color:#e8ecff;text-align:center}
+#ast27 .nx{position:absolute;right:12px;bottom:6px;font-size:12px;opacity:.7;animation:astB 1s infinite}
+@keyframes astB{50%{transform:translateY(3px);opacity:.35}}
+#ast27 .sk{position:absolute;top:calc(8px + env(safe-area-inset-top));right:calc(10px + env(safe-area-inset-right));padding:8px 14px;border-radius:12px;border:2px solid rgba(255,255,255,.5);background:rgba(0,0,0,.55);color:#fff;font-weight:800;font-size:14px;z-index:2;touch-action:manipulation}
+#ast27 .gp{position:absolute;inset:calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left));overflow:auto;color:#fff;text-align:center;padding-top:44px;box-sizing:border-box}
+#ast27 .gp h3{margin:0 0 4px;font-size:21px}#ast27 .gp p{margin:0 0 12px;opacity:.8;font-size:13px;word-break:keep-all}
+#ast27 .gg{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;max-width:820px;margin:0 auto}
+#ast27 .gc{position:relative;padding:6px 4px 7px;border-radius:12px;border:2px solid rgba(255,255,255,.25);background:rgba(255,255,255,.07);color:#fff;font-weight:800;font-size:12px;word-break:keep-all;line-height:1.25}
+#ast27 .gc img{display:block;width:56px;height:56px;margin:0 auto 4px;border-radius:9px;object-fit:cover}
+#ast27 .gc.lk img{filter:brightness(0) opacity(.45)}#ast27 .gc.lk{opacity:.7}#ast27 .gc small{display:block;font-weight:600;opacity:.75;font-size:10.5px;margin-top:2px}
+#ast27 .gc i{position:absolute;top:3px;right:5px;font-style:normal}
+#bfMenu .bf-gal{display:block;margin:10px auto 0;padding:7px 16px;border-radius:12px;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.3);color:#fff;font-weight:800;font-size:14px}
+#bfRes .arc.ast{font-size:15px;font-weight:700;opacity:.95;word-break:keep-all}
+@media (max-width:640px) and (orientation:portrait){#ast27 .pt{width:54px;height:54px;font-size:32px}#ast27 .ln{font-size:16.5px}#ast27 .box{bottom:calc(7% + 10px + env(safe-area-inset-bottom));padding:10px 11px;gap:9px}#ast27 .tag{top:calc(8% + 44px)}}
+@media (max-height:520px){#ast27 .lb{height:5%}#ast27 .pt{width:52px;height:52px;font-size:30px}#ast27 .ln{font-size:16px;max-height:3.1em}#ast27 .box{bottom:calc(5% + 6px + env(safe-area-inset-bottom));padding:8px 12px}#ast27 .nm{font-size:13px;margin-bottom:1px}#ast27 .tag{top:calc(5% + 6px);font-size:12px}#ast27 .gp{padding-top:38px}}`;
+    D.head.appendChild(s);},
+  root(){return (UI.el&&UI.el.bfBanner&&UI.el.bfBanner.parentNode)||D.body;},
+  dom(){this.css();let d=D.getElementById('ast27');if(d&&d.isConnected)return d;d=D.createElement('div');d.id='ast27';
+    d.innerHTML='<div class="lb t"></div><div class="lb b"></div><div class="tag"></div><button class="sk">건너뛰기 ▶▶</button><div class="gp" style="display:none"></div><div class="box"><div class="pt"></div><div class="tx"><div class="nm"></div><div class="ln"></div></div><span class="nx">▼</span></div>';
+    this.root().appendChild(d);d.querySelector('.sk').addEventListener('click',e=>{e.stopPropagation();this.skip();});
+    d.addEventListener('pointerdown',e=>{if(e.target.closest('.sk')||e.target.closest('.gp'))return;e.preventDefault();this.adv();});
+    if(!this._k){this._k=1;window.addEventListener('keydown',e=>{if(!this.on||!this.q)return;if(e.key==='Escape'){this.skip();e.preventDefault();}else if(e.key==='Enter'||e.key===' '||e.key==='j'||e.key==='J'||e.key==='z'){this.adv();e.preventDefault();}else return;e.stopPropagation();},true);}
+    return d;},
+  // ladder: put the character's rival into slot 3 of 5 (no duplicates, never the final boss)
+  ladder(L,p){const s=this.S[p];if(!s||!s.rival||!L||L.length<4)return;const rv=s.rival.id,bi=L.length-1;if(!RBY[rv]||rv===L[bi].p2||rv===p)return;
+    const j=L.findIndex((e,k)=>k<bi&&e.p2===rv),k=Math.min(2,bi-1);if(j>=0&&j!==k)L[j].p2=L[k].p2;L[k].p2=rv;L[k].rival=1;if(s.rival.arena)L[k].arena=s.rival.arena;L.forEach(e=>{if(e!==L[k]&&e.arena===L[k].arena&&!e.boss)e.arena=L[k].arena==='plains'?'seaside':'plains';});L._ast={};},
+  // called right after BF.begin() for each arcade match
+  pre(li,L){if(M.mode!=='arcade'||!L)return;const p=M.p1,s=this.S[p];if(!s)return;const sh=M.ladder._ast||(M.ladder._ast={});const lines=[];let tag='';
+    if(li===0&&!sh.intro){sh.intro=1;lines.push(...s.intro);tag='STORY';this.mark('intro',p);}
+    if(L.rival&&s.rival&&!sh.rival){sh.rival=1;lines.push(...s.rival.l);tag='RIVAL!';}
+    if(L.boss&&!sh.boss){sh.boss=1;lines.push(...(this.BOSS[L.p2]||this.BOSS.golemk),...s.boss);tag='FINAL';}
+    if(!lines.length)return;this.play(lines,{tag,p,o:L.p2},()=>{});},
+  ending(done){const p=M.p1,s=this.S[p];if(!s||M.mode!=='arcade'){done();return;}if(typeof WL!=='undefined')WL.clear(G);
+    const B=G.f[1];if(B&&!B.koed&&B.st!=='down')B.setSt('lose');this.mark('end',p);this.play(s.end,{tag:'ENDING',p,o:M.p2,end:1},done);},
+  loseHtml(){const s=this.S[M.p1];return s?`<div class="arc ast">💬 ${RBY[M.p1].name}: “${s.lose}”</div>`:'';},
+  clearHtml(){const s=this.S[M.p1];if(!s)return '';const n=Object.keys(this.st().end||{}).length;return `<div class="arc ast">📖 엔딩 갤러리에 등록! (${n}/${Object.keys(this.S).length})</div>`;},
+  who(w){const c=this.ctx||{};if(w==='p')return c.p;if(w==='o')return c.o;return w;},
+  F(id){const c=this.ctx||{};if(c.nocam||!G.f||!G.f[0])return null;if(id===c.p||id==='p')return G.f[0];if(id===c.o||id==='o')return G.f[1];return null;},
+  shot(F,first,wide){const A=G.f[0],B=G.f[1];if(!A||!B)return;const o={cut:!!first,k:first?1:0.075};
+    if(!F||wide){const mx=(A.x+B.x)/2,sep=Math.abs(A.x-B.x),z=Math.max(7.6,sep*0.85+5.2),h=Math.max(A.H||1.8,B.H||1.8);CAMF.set(mx,1.4+h*0.45,z,mx,0.7+h*0.42,0,o);return;}
+    const h=F.H||1.8,d=2.5+h*1.3,f=F.face||1,sx=F.x+f*d*0.42;CAMF.set(sx,F.y+h*0.8,d,F.x+f*0.25,F.y+h*0.6,0,Object.assign(o,{dof:1}));},
+  play(lines,ctx,cb){this.q=lines;this.i=0;this.cb=cb;this.ctx=ctx||{};this.on=true;const d=this.dom();d.style.display='';D.documentElement.classList.add('ast27-open');d.classList.toggle('gal',!!this.ctx.nocam);
+    d.querySelector('.gp').style.display='none';d.querySelector('.box').style.display='';d.querySelector('.tag').textContent=this.ctx.tag||'';d.querySelector('.sk').textContent='건너뛰기 ▶▶';
+    try{UI.root.classList.add('ast-on');}catch(e){}this.show(true);},
+  show(first){const L=this.q[this.i];if(!L){this.finish();return;}const d=this.dom(),box=d.querySelector('.box'),pt=d.querySelector('.pt'),nm=d.querySelector('.nm'),ln=d.querySelector('.ln');
+    const w=L[0],id=this.who(w),nar=w==='n',np=this.NPC[id],def=RBY[id];box.className='box'+(nar?' n':'');
+    let col='#ffd34d';if(def){col='#'+def.col.toString(16).padStart(6,'0');pt.style.backgroundImage=`url("${UI.img(id)}")`;pt.textContent='';nm.textContent=def.name;}
+    else if(np){col=np.c;pt.style.backgroundImage='none';pt.textContent=np.e;nm.textContent=np.n;}
+    box.style.setProperty('--c',col);
+    // camera + pose
+    const Fs=this.F(id);if(!this.ctx.nocam&&G.f&&G.f[0]){const PF=Fs||G.f[0];this.shot(nar?null:PF,first,nar);
+      if(L[2]&&!PF.koed&&PF.st!=='down'){PF.setSt(L[2]);PF.mv=null;}
+      else if(!this.ctx.end&&M.phase==='intro'&&(PF.st==='win'||PF.st==='lose'||PF.st==='guard'))PF.setSt('idle');}
+    // typewriter
+    clearInterval(this.tw);clearTimeout(this.auto);const T=L[1];this.full=T;this.typing=true;let n=0;ln.textContent='';ln.style.fontSize='';
+    const pit=this.PIT[id]||(nar?0:360),vo=(()=>{try{return localStorage.getItem('ba_voice')||'blip';}catch(e){return 'blip';}})();
+    this.tw=setInterval(()=>{n=Math.min(T.length,n+1);ln.textContent=T.slice(0,n);if(pit&&vo!=='off'&&n%2===1&&/[^\s…!?.,~—]/.test(T[n-1]))this.blip(pit,id);
+      if(n>=T.length){this.done();}},34);
+    this.fit(ln,T);},
+  fit(ln,T){ln.textContent=T;let fs=parseFloat(getComputedStyle(ln).fontSize)||18,g=0;while(ln.scrollHeight>ln.clientHeight+1&&fs>11&&g++<12){fs-=1;ln.style.fontSize=fs+'px';}ln.textContent='';},
+  done(){clearInterval(this.tw);this.typing=false;const d=this.dom();d.querySelector('.ln').textContent=this.full;clearTimeout(this.auto);this.auto=setTimeout(()=>this.adv(),Math.max(2600,this.full.length*95));},
+  adv(){if(!this.on||!this.q)return;if(this.typing){this.done();return;}clearTimeout(this.auto);this.i++;if(this.i>=this.q.length)this.finish();else{try{AU.play('select');}catch(e){}this.show(false);}},
+  skip(){if(this._gal&&!this.on){this.closeGal();return;}if(!this.on)return;this.finish();},
+  blip(p,id){try{const c=AU.init&&AU.init();if(!c||!AU.sfx)return;const t=c.currentTime,o=c.createOscillator(),g=c.createGain();o.type=id==='crobo'||id==='golemk'||id==='iron'?'square':'triangle';
+    o.frequency.setValueAtTime(p*(0.92+Math.random()*0.16),t);o.frequency.exponentialRampToValueAtTime(p*0.82,t+0.06);g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(0.11,t+0.008);g.gain.exponentialRampToValueAtTime(0.0001,t+0.07);
+    o.connect(g);g.connect(AU.sfx);o.start(t);o.stop(t+0.08);}catch(e){}},
+  finish(){clearInterval(this.tw);clearTimeout(this.auto);const cb=this.cb,ctx=this.ctx||{};this.on=false;this.q=null;this.cb=null;
+    const d=D.getElementById('ast27');if(d)d.style.display='none';if(!this._gal)D.documentElement.classList.remove('ast27-open');try{UI.root.classList.remove('ast-on');}catch(e){}
+    if(!ctx.nocam){try{CAMF.off(G);}catch(e){}if(M.phase==='intro'&&G.f)G.f.forEach(F=>{if(F&&!F.koed&&(F.st==='win'||F.st==='lose'||F.st==='guard'))F.setSt('idle');});}
+    if(ctx.gal){this.gallery();return;}if(cb)cb();},
+  abort(){if(!this.on)return;this.cb=null;this.ctx=Object.assign({},this.ctx,{gal:0});this.finish();},
+  // endings gallery (menu)
+  gallery(){const d=this.dom(),s=this.st().end||{},ids=Object.keys(this.S),n=ids.filter(i=>s[i]).length;this.on=false;d.style.display='';D.documentElement.classList.add('ast27-open');d.classList.add('gal');d.querySelector('.box').style.display='none';d.querySelector('.tag').textContent='';
+    d.querySelector('.sk').textContent='닫기 ✕';const gp=d.querySelector('.gp');gp.style.display='';
+    gp.innerHTML=`<h3>📖 아케이드 엔딩 갤러리</h3><p>아케이드 모드를 클리어하면 캐릭터별 엔딩이 열려요 · ${n}/${ids.length}</p><div class="gg">${ids.map(i=>{const r=RBY[i];if(!r)return '';const o=!!s[i];return `<button class="gc${o?'':' lk'}" data-i="${i}"><img alt="" src="${UI.img(i)}">${o?r.name:'???'}<small>${o?this.S[i].m:'미해금'}</small>${o?'<i>🏆</i>':''}</button>`;}).join('')}</div>`;
+    gp.querySelectorAll('.gc').forEach(b=>b.onclick=e=>{e.stopPropagation();const i=b.dataset.i;if(!s[i]){try{AU.play('select');}catch(_){}return;}const bo=i==='golemk'?'iron':'golemk';
+      this.play(this.S[i].end,{tag:'ENDING · '+RBY[i].name,p:i,o:bo,nocam:1,gal:1},null);});
+    const sk=d.querySelector('.sk');sk.onclick=null;this._gal=1;},
+  closeGal(){this._gal=0;D.documentElement.classList.remove('ast27-open');const d=D.getElementById('ast27');if(d){d.style.display='none';d.classList.remove('gal');}}
+};
+
 // ---- round end: winner close-up (win pose), then loser close-up (frustrated pose + emote)
 const WL={on:null,LEN:204,
   dom(){if(this._d&&this._d.isConnected)return this._d;const host=(UI.el&&UI.el.bfBanner&&UI.el.bfBanner.parentNode)||D.body,d=D.createElement('div');d.id='bfWL';d.style.cssText='position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden';
@@ -21425,207 +21590,222 @@ const WL={on:null,LEN:204,
 
 // ---------------------------------------------------------------- v5.8.5 EXPERIMENTAL: 실사 스티브 (realistic humanoid Steve) ----------------------------------------------------------------
 // Procedural smooth figure from fight_work/real/real_steve.js (no external assets, no real person). Factory form: RealSteveLib.make(Q) with Q = mesh density (LOD).
-// It is the ONE explicitly requested exception to the blocky rule; it rides on Steve's blocky rig (hidden) so moves / hitboxes / supers / win-lose are identical.
+// It is the ONE explicitly requested exception to the blocky rule; it rides on Steve's blocky rig (hidden) so moves / hitboxes / supers / win-lose are identical.// v5.9.7 rework (patch26): separate meshes — body (skin), T-shirt (own layer over the torso, open hem + sleeves), pants+shoes, hair — sharing ONE skeleton;
+// 5-digit articulated hands (4 fingers x 3 phalanges + 3-bone thumb) that curl into fists / open; spring bones for shirt hem, sleeves and hair.
 const RealSteveLib = (function () {
 function make(Q) {
   const SG = (r, w, h, ...a) => new T.SphereGeometry(r, Math.max(8, Math.round(w * Q)), Math.max(6, Math.round(h * Q)), ...a);
   const T = THREE, V3 = (x, y, z) => new T.Vector3(x, y, z);
-  const COL = { skin: [0.80, 0.58, 0.45], skinD: [0.70, 0.48, 0.36], shirt: [0.05, 0.62, 0.66], shirtD: [0.03, 0.45, 0.50], pants: [0.24, 0.22, 0.62], pantsD: [0.17, 0.15, 0.46], shoe: [0.38, 0.38, 0.40], sole: [0.16, 0.16, 0.17], hair: [0.20, 0.12, 0.07], stub: [0.42, 0.28, 0.20] };
+  const COL = { skin: [0.80, 0.58, 0.45], skinD: [0.70, 0.48, 0.36], shirt: [0.05, 0.62, 0.66], shirtD: [0.03, 0.45, 0.50], pants: [0.24, 0.22, 0.62], pantsD: [0.17, 0.15, 0.46], shoe: [0.38, 0.38, 0.40], sole: [0.16, 0.16, 0.17], hair: [0.20, 0.12, 0.07], stub: [0.42, 0.28, 0.20], nail: [0.88, 0.7, 0.62] };
   const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
-  // ---------------- skeleton (bind = relaxed A-pose, metres, Y up, facing +Z)
+  // ---------------- skeleton (bind = relaxed A-pose, metres, Y up, facing +Z) — broader shoulders than v5.8.5 (V-taper)
   const BJ = {
     hips: [null, V3(0, 0.96, 0)], spine: ['hips', V3(0, 1.08, 0)], chest: ['spine', V3(0, 1.27, 0)], neck: ['chest', V3(0, 1.49, 0)], head: ['neck', V3(0, 1.585, 0.005)],
-    clavL: ['chest', V3(0.05, 1.43, 0)], armL: ['clavL', V3(0.185, 1.42, 0)], foreL: ['armL', V3(0.245, 1.155, -0.01)], handL: ['foreL', V3(0.28, 0.915, 0.01)],
-    clavR: ['chest', V3(-0.05, 1.43, 0)], armR: ['clavR', V3(-0.185, 1.42, 0)], foreR: ['armR', V3(-0.245, 1.155, -0.01)], handR: ['foreR', V3(-0.28, 0.915, 0.01)],
+    clavL: ['chest', V3(0.05, 1.43, 0)], armL: ['clavL', V3(0.205, 1.42, 0)], foreL: ['armL', V3(0.262, 1.155, -0.01)], handL: ['foreL', V3(0.295, 0.915, 0.01)],
+    clavR: ['chest', V3(-0.05, 1.43, 0)], armR: ['clavR', V3(-0.205, 1.42, 0)], foreR: ['armR', V3(-0.262, 1.155, -0.01)], handR: ['foreR', V3(-0.295, 0.915, 0.01)],
     thighL: ['hips', V3(0.098, 0.93, 0)], shinL: ['thighL', V3(0.108, 0.52, 0.005)], footL: ['shinL', V3(0.112, 0.095, -0.01)],
     thighR: ['hips', V3(-0.098, 0.93, 0)], shinR: ['thighR', V3(-0.108, 0.52, 0.005)], footR: ['shinR', V3(-0.112, 0.095, -0.01)],
   };
+  // ---- torso frame (shared by body / shirt / pants)
+  const y0 = 0.87, y1 = 1.515, TY = u => y0 + u * (y1 - y0), TU = y => (y - y0) / (y1 - y0);
+  const HEMY = 1.125, HEMN = 6;   // hem spring bones ring (on the spine), hem hangs to ~0.985
+  const TOR = [[0, 0.0], [0.03, 0.12], [0.1, 0.15], [0.2, 0.156], [0.3, 0.153], [0.4, 0.148], [0.5, 0.16], [0.62, 0.188], [0.74, 0.206], [0.83, 0.206], [0.91, 0.18], [0.96, 0.135], [1, 0.0]];
+  const TEZ = (u, th) => { const z = 0.66 - 0.06 * sm(0.4, 0.55, u) + 0.05 * sm(0.55, 0.75, u); return Math.sin(th) > 0 ? z * (1 + 0.07 * sm(0.6, 0.8, u)) : z * 0.95; };
+  for (let i = 0; i < HEMN; i++) { const th = 2 * Math.PI * i / HEMN; BJ['hem' + i] = ['spine', V3(0.153 * Math.cos(th), HEMY, 0.153 * 0.63 * Math.sin(th))]; }
+  // sleeve hem bones ride the upper arm at ~31% of the shoulder→wrist line
+  ['L', 'R'].forEach(S => { const a = BJ['arm' + S][1], e = BJ['fore' + S][1]; BJ['slv' + S] = ['arm' + S, a.clone().lerp(e, 0.62)]; });
+  // hair bones: 4 regions, pivot at the head centre (hair slides around the skull instead of through it)
+  const headC = V3(0, 1.73, 0.0);
+  ['hF', 'hB', 'hL', 'hR'].forEach(n => BJ[n] = ['head', headC.clone()]);
+  // ---- hand layout (fingers built straight; curl axis per bone)
+  const FINGERS = [[0.024, 0.0105, 1.0], [0.008, 0.0108, 1.06], [-0.009, 0.0103, 0.98], [-0.026, 0.009, 0.82]];   // [z offset, radius, length]  index → pinky
+  const PH = [0.040, 0.026, 0.021], HANDS = {};
+  ['L', 'R'].forEach(S => { const sd = S === 'L' ? 1 : -1, w = BJ['hand' + S][1], dir = w.clone().sub(BJ['fore' + S][1]).normalize();
+    const palmN = V3(-sd, 0, 0).sub(dir.clone().multiplyScalar(-sd * dir.x)).normalize();   // toward the palm (body side)
+    const H = HANDS[S] = { sd, w, dir, palmN, f: [] };
+    FINGERS.forEach(([dz, r, l], i) => { const k = w.clone().add(dir.clone().multiplyScalar(0.076)).add(V3(0.002 * sd, 0, dz)); let p = k.clone(), par = 'hand' + S;
+      const segs = PH.map(L => L * l); segs.forEach((L, j) => { const n = 'f' + S + i + j; BJ[n] = [par, p.clone()]; par = n; p = p.clone().add(dir.clone().multiplyScalar(L)); });
+      H.f.push({ k, r, segs, tip: p, axis: dir.clone().cross(palmN).normalize() }); });
+    const tb = w.clone().add(dir.clone().multiplyScalar(0.016)).add(V3(-0.014 * sd, 0, 0.03));
+    const td = dir.clone().multiplyScalar(0.72).add(V3(-0.22 * sd, 0, 0.58)).normalize(); const tl = [0.032, 0.027, 0.023]; let p = tb.clone(), par = 'hand' + S;
+    tl.forEach((L, j) => { const n = 't' + S + j; BJ[n] = [par, p.clone()]; par = n; p = p.clone().add(td.clone().multiplyScalar(L)); });
+    const tn = V3(-0.35 * sd, 0, -1).normalize(); tn.sub(td.clone().multiplyScalar(tn.dot(td))).normalize();
+    H.t = { tb, td, tl, tip: p, axis: td.clone().cross(tn).normalize() }; });
   const NAMES = Object.keys(BJ), IDX = {}; NAMES.forEach((n, i) => IDX[n] = i);
-  // ---------------- loft builder
-  const P = [], N = [], C = [], SI = [], SW = [], IX = [];
-  function catmull(pts, s) { // pts [[s,r],...] sorted
+  // ---------------- loft builder (per-layer buffers)
+  const LAY = {}; const LB = n => LAY[n] || (LAY[n] = { P: [], C: [], SI: [], SW: [], IX: [] });
+  function catmull(pts, s) {
     if (s <= pts[0][0]) return pts[0][1]; if (s >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
     let i = 0; while (pts[i + 1][0] < s) i++;
     const p0 = pts[Math.max(0, i - 1)][1], p1 = pts[i][1], p2 = pts[i + 1][1], p3 = pts[Math.min(pts.length - 1, i + 2)][1];
     const t = (s - pts[i][0]) / (pts[i + 1][0] - pts[i][0]), t2 = t * t, t3 = t2 * t;
     return Math.max(0, 0.5 * (2 * p1 + (-p0 + p2) * t + (2 * p0 - 5 * p1 + 4 * p2 - p3) * t2 + (-p0 + 3 * p1 - 3 * p2 + p3) * t3));
   }
-  // part: a = start point, b = end point, prof [[u(0..1), r]], ex/ez ellipse scales, up hint, col(u,ang,pos), w(u,pos)->[[bone,w]...], disp(u,ang)
+  // o: a,b, prof [[u,r]], ex/ez, side, col(u,th,p), w(u,p,th)->[[bone,w]..], disp(u,th), grow(u,th,r)->r, warp(p,u,th), L layer, u0/u1 range, pole0/pole1 closed ends
   function loft(o) {
-    const a = o.a, b = o.b, ax = b.clone().sub(a), L = ax.length(); ax.normalize();
+    const D = LB(o.L || 'body'), a = o.a, b = o.b, ax = b.clone().sub(a), L = ax.length(); ax.normalize();
     const hint = o.side || (Math.abs(ax.y) > 0.9 ? V3(1, 0, 0) : V3(0, 1, 0));
-    const u1 = hint.clone().sub(ax.clone().multiplyScalar(hint.dot(ax))).normalize(), v1 = u1.clone().cross(ax).normalize();
-    const NS = Math.max(6, Math.round((o.ns || 40) * Q)), NA = Math.max(8, Math.round((o.na || 36) * Q)), base = P.length / 3;
+    const u1v = hint.clone().sub(ax.clone().multiplyScalar(hint.dot(ax))).normalize(), v1 = u1v.clone().cross(ax).normalize();
+    const U0 = o.u0 || 0, U1 = o.u1 === undefined ? 1 : o.u1, p0 = o.pole0 !== false && U0 === 0, p1 = o.pole1 !== false && U1 === 1;
+    const NS = Math.max(4, Math.round((o.ns || 40) * Q)), NA = Math.max(8, Math.round((o.na || 36) * Q)), base = D.P.length / 3;
     for (let i = 0; i <= NS; i++) {
-      // cosine spacing → denser rows near the rounded ends
-      const u = 0.5 - 0.5 * Math.cos(Math.PI * i / NS);
-      const r = i === 0 || i === NS ? 0 : catmull(o.prof, u);
+      const q = i / NS, s = p0 && p1 ? 0.5 - 0.5 * Math.cos(Math.PI * q) : p0 ? 1 - Math.cos(Math.PI * q / 2) : p1 ? Math.sin(Math.PI * q / 2) : q;
+      const u = U0 + (U1 - U0) * s;
+      const r = (i === 0 && p0) || (i === NS && p1) ? 0 : catmull(o.prof, u);
       const c0 = a.clone().add(ax.clone().multiplyScalar(u * L));
       for (let j = 0; j <= NA; j++) {
         const th = 2 * Math.PI * j / NA, ct = Math.cos(th), st = Math.sin(th);
-        let ex = typeof o.ex === 'function' ? o.ex(u, th) : (o.ex || 1), ez = typeof o.ez === 'function' ? o.ez(u, th) : (o.ez || 1);
-        let rr = r * (o.disp ? 1 + o.disp(u, th) : 1);
-        const p = c0.clone().add(u1.clone().multiplyScalar(ct * rr * ex)).add(v1.clone().multiplyScalar(st * rr * ez));
+        const ex = typeof o.ex === 'function' ? o.ex(u, th) : (o.ex || 1), ez = typeof o.ez === 'function' ? o.ez(u, th) : (o.ez || 1);
+        let rr = r * (o.disp ? 1 + o.disp(u, th) : 1); if (o.grow) rr = o.grow(u, th, rr);
+        const p = c0.clone().add(u1v.clone().multiplyScalar(ct * rr * ex)).add(v1.clone().multiplyScalar(st * rr * ez));
         if (o.warp) o.warp(p, u, th);
-        P.push(p.x, p.y, p.z); N.push(0, 0, 0);
-        const col = o.col(u, th, p); C.push(Math.pow(col[0], 2.2), Math.pow(col[1], 2.2), Math.pow(col[2], 2.2));
-        const w = o.w(u, p); const ii = [0, 0, 0, 0], ww = [0, 0, 0, 0]; let s = 0;
-        w.slice(0, 4).forEach((q, k) => { ii[k] = IDX[q[0]]; ww[k] = q[1]; s += q[1]; });
-        SI.push(...ii); SW.push(...ww.map(x => x / (s || 1)));
+        D.P.push(p.x, p.y, p.z);
+        const col = o.col(u, th, p); D.C.push(Math.pow(col[0], 2.2), Math.pow(col[1], 2.2), Math.pow(col[2], 2.2));
+        const w = o.w(u, p, th).filter(q => q[1] > 1e-4).sort((x, y) => y[1] - x[1]); const ii = [0, 0, 0, 0], ww = [0, 0, 0, 0]; let s2 = 0;
+        w.slice(0, 4).forEach((q, k) => { ii[k] = IDX[q[0]]; ww[k] = q[1]; s2 += q[1]; }); if (!s2) { ii[0] = IDX.hips; ww[0] = 1; s2 = 1; }
+        D.SI.push(...ii); D.SW.push(...ww.map(x => x / s2));
       }
     }
-    for (let i = 0; i < NS; i++) for (let j = 0; j < NA; j++) {
-      const q = base + i * (NA + 1) + j, r2 = q + NA + 1;
-      IX.push(q, r2, q + 1, q + 1, r2, r2 + 1);
-    }
-    return { base, NS, NA };
+    for (let i = 0; i < NS; i++) for (let j = 0; j < NA; j++) { const q = base + i * (NA + 1) + j, r2 = q + NA + 1; D.IX.push(q, r2, q + 1, q + 1, r2, r2 + 1); }
   }
-  const blend2 = (A, B, at, half) => (u, p) => { const t = sm(at - half, at + half, u); return [[A, 1 - t], [B, t]]; };
   const J = n => BJ[n][1];
-  // ---- torso: elliptical rings by height
-  const TOR = [[0, 0.0], [0.03, 0.12], [0.1, 0.155], [0.2, 0.166], [0.3, 0.165], [0.4, 0.152], [0.5, 0.157], [0.62, 0.178], [0.74, 0.193], [0.83, 0.192], [0.91, 0.172], [0.96, 0.13], [1, 0.0]];
-  const y0 = 0.87, y1 = 1.515;
-  loft({ a: V3(0, y0, 0.0), b: V3(0, y1, 0.0), prof: TOR, ns: 64, na: 48, side: V3(1, 0, 0),
-    ex: 1, ez: (u, th) => { const z = 0.66 - 0.06 * sm(0.4, 0.55, u) + 0.04 * sm(0.55, 0.75, u); return Math.sin(th) > 0 ? z * (1 + 0.06 * sm(0.6, 0.8, u)) : z * 0.95; },
-    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th); // pecs, shoulder blades, shirt folds, glutes
-      return 0.025 * sm(0.62, 0.72, u) * (1 - sm(0.8, 0.9, u)) * Math.max(0, s) * Math.pow(Math.abs(c) + 0.2, 0.6)
-        + 0.004 * Math.sin(th * 9 + u * 30) * sm(0.35, 0.45, u) + 0.05 * sm(0.04, 0.12, u) * (1 - sm(0.18, 0.28, u)) * Math.max(0, -s)
-        + 0.006 * Math.sin(u * 160 + Math.sin(th * 3) * 2) * sm(0.3, 0.34, u) * (1 - sm(0.4, 0.46, u)) + 0.005 * Math.max(0, Math.sin(th * 13 + u * 18)) * sm(0.66, 0.76, u) * (1 - sm(0.84, 0.88, u)) * Math.pow(Math.abs(c), 3)
-        + 0.012 * Math.exp(-Math.pow((u - 0.905) / 0.012, 2)); },   // v5.9.3 waist tuck wrinkles, armpit drag folds, collar ridge
-    col: (u, th, p) => { if (p.y < 1.005) return COL.pants; if (p.y < 1.02) return mix(COL.pants, COL.pantsD, 0.6); // belt line
-      const fold = 0.12 * (0.5 + 0.5 * Math.sin(th * 9 + u * 30)) * sm(0.35, 0.45, u); return p.y > 1.49 ? COL.skin : mix(COL.shirt, COL.shirtD, fold + (p.y > 1.47 ? 0.4 : 0)); },
-    w: (u, p) => { const y = p.y; if (y < 1.0) return [['hips', 1]]; if (y < 1.16) { const t = sm(1.0, 1.16, y); return [['hips', 1 - t], ['spine', t]]; }
-      if (y < 1.33) { const t = sm(1.16, 1.33, y); return [['spine', 1 - t], ['chest', t]]; } const sh = sm(0.13, 0.19, Math.abs(p.x)) * sm(1.32, 1.42, y); const t = sm(1.47, 1.52, y);
-      return [['chest', (1 - sh) * (1 - t)], [p.x > 0 ? 'armL' : 'armR', sh * 0.5], ['neck', t]]; } });
-  // ---- neck
-  loft({ a: V3(0, 1.43, -0.008), b: V3(0, 1.66, 0.0), prof: [[0, 0.085], [0.2, 0.072], [0.5, 0.064], [0.8, 0.06], [1, 0.058]], ns: 16, na: 32,
+  // ---------------- torso: body (skin, smooth muscle), shirt (offset shell with folds, open collar + hem), pants (pelvis shell)
+  const torsoW = (u, p) => { const y = p.y; if (y < 1.0) return [['hips', 1]]; if (y < 1.16) { const t = sm(1.0, 1.16, y); return [['hips', 1 - t], ['spine', t]]; }
+    if (y < 1.33) { const t = sm(1.16, 1.33, y); return [['spine', 1 - t], ['chest', t]]; } const sh = sm(0.14, 0.2, Math.abs(p.x)) * sm(1.32, 1.42, y); const t = sm(1.47, 1.52, y);
+    return [['chest', (1 - sh) * (1 - t)], [p.x > 0 ? 'armL' : 'armR', sh * 0.5], ['neck', t]]; };
+  const muscle = (u, th) => { const s = Math.sin(th), c = Math.cos(th);   // pecs, lats, glutes
+    return 0.03 * sm(0.62, 0.72, u) * (1 - sm(0.8, 0.9, u)) * Math.max(0, s) * Math.pow(Math.abs(c) + 0.2, 0.6) + 0.05 * sm(0.04, 0.12, u) * (1 - sm(0.18, 0.28, u)) * Math.max(0, -s)
+      + 0.02 * sm(0.55, 0.7, u) * (1 - sm(0.82, 0.9, u)) * Math.pow(Math.abs(c), 4); };
+  const TBASE = { a: V3(0, y0, 0.0), b: V3(0, y1, 0.0), prof: TOR, side: V3(1, 0, 0), ex: 1, ez: TEZ };
+  loft(Object.assign({}, TBASE, { L: 'body', ns: 44, na: 40, disp: muscle, col: (u, th, p) => mix(COL.skin, COL.skinD, 0.12 * (1 - Math.sin(th))), w: torsoW }));
+  const hemW = (u, p, th) => { const wh = sm(HEMY + 0.005, 1.0, p.y) * 0.95; if (wh <= 0) return null; let f = ((th / (2 * Math.PI)) * HEMN) % HEMN; if (f < 0) f += HEMN; const i0 = Math.floor(f) % HEMN, t = f - Math.floor(f);
+    return { wh, l: [['hem' + i0, wh * (1 - t)], ['hem' + ((i0 + 1) % HEMN), wh * t]] }; };
+  loft(Object.assign({}, TBASE, { L: 'shirt', ns: 56, na: 48, u0: TU(0.985), u1: TU(1.505), pole0: false, pole1: false,
+    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th); return muscle(u, th) + 0.004 * Math.sin(th * 9 + u * 30) * sm(0.35, 0.45, u)
+      + 0.006 * Math.sin(u * 160 + Math.sin(th * 3) * 2) * sm(0.3, 0.34, u) * (1 - sm(0.4, 0.46, u)) + 0.005 * Math.max(0, Math.sin(th * 13 + u * 18)) * sm(0.66, 0.76, u) * (1 - sm(0.84, 0.88, u)) * Math.pow(Math.abs(c), 3); },
+    grow: (u, th, r) => { const y = TY(u); return r * 1.035 + 0.009 + 0.012 * sm(1.06, 0.985, y) + 0.008 * Math.exp(-Math.pow((y - 1.495) / 0.008, 2)); },   // hem flare, collar rib
+    col: (u, th, p) => { const fold = 0.12 * (0.5 + 0.5 * Math.sin(th * 9 + u * 30)) * sm(0.35, 0.45, u); return mix(COL.shirt, COL.shirtD, fold + (p.y > 1.48 ? 0.35 : 0) + (p.y < 1.0 ? 0.3 : 0)); },
+    w: (u, p, th) => { const b = torsoW(u, p), h = hemW(u, p, th); if (!h) return b; return b.map(q => [q[0], q[1] * (1 - h.wh)]).concat(h.l); } }));
+  loft(Object.assign({}, TBASE, { L: 'pants', ns: 24, na: 40, u1: TU(1.09), pole1: false,
+    grow: (u, th, r) => r * 1.012 + 0.004,
+    col: (u, th, p) => (p.y > 1.022 && p.y < 1.047) ? mix(COL.pants, COL.pantsD, 0.65) : mix(COL.pants, COL.pantsD, 0.15 * Math.max(0, Math.sin(th * 7 + u * 20))), w: torsoW }));
+  // ---- neck (thicker)
+  loft({ a: V3(0, 1.43, -0.008), b: V3(0, 1.66, 0.0), prof: [[0, 0.096], [0.2, 0.082], [0.5, 0.073], [0.8, 0.066], [1, 0.062]], ns: 16, na: 32,
     col: () => COL.skin, w: (u, p) => { const t = sm(1.47, 1.53, p.y), h = sm(1.6, 1.65, p.y); return [['chest', 1 - t], ['neck', t * (1 - h)], ['head', h]]; } });
-  // ---- head (chin → crown), slight jaw; stubble around mouth/chin
-  const headC = V3(0, 1.73, 0.012);
-  const HPROF = [[0, 0], [0.04, 0.042], [0.12, 0.074], [0.25, 0.094], [0.42, 0.105], [0.58, 0.11], [0.72, 0.108], [0.85, 0.094], [0.94, 0.062], [1, 0]], HA = V3(0, 1.565, 0.025), HB = V3(0, 1.875, 0.0);
+  // ---- head (chin → crown): squarer jaw, heavier brow ridge
+  const HPROF = [[0, 0], [0.04, 0.048], [0.12, 0.082], [0.25, 0.099], [0.42, 0.106], [0.58, 0.11], [0.72, 0.108], [0.85, 0.094], [0.94, 0.062], [1, 0]], HA = V3(0, 1.565, 0.025), HB = V3(0, 1.875, 0.0);
   const HEZ = (u, th) => (Math.sin(th) > 0 ? 1.1 + 0.05 * sm(0.0, 0.25, u) * (1 - sm(0.3, 0.45, u)) : 1.08 + 0.05 * sm(0.6, 0.9, u));
-  loft({ a: HA, b: HB, prof: HPROF, ns: 60, na: 72,
-    ex: 1, ez: HEZ,
-    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th); // cheekbones, eye sockets, brow ridge
+  const HEX = (u, th) => 1 + 0.06 * sm(0.02, 0.14, u) * (1 - sm(0.22, 0.36, u)) * Math.pow(Math.abs(Math.cos(th)), 2);
+  loft({ a: HA, b: HB, prof: HPROF, ns: 60, na: 72, ex: HEX, ez: HEZ,
+    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th);
       return 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.5) / 0.08, 2)) * Math.pow(Math.abs(c), 2) - 0.035 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.56) / 0.04, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.36) / 0.16, 2))
-        + 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.63) / 0.03, 2)) * (1 - Math.abs(c) * 0.5); },
+        + 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.635) / 0.03, 2)) * (1 - Math.abs(c) * 0.5) + 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.06) / 0.05, 2)); },
     col: (u, th, p) => { const s = Math.sin(th); const st = s > 0.15 ? sm(0.3, 0.12, u) * (1 - sm(0.55, 0.85, Math.abs(Math.cos(th)))) : 0;
       const mus = s > 0.6 ? Math.exp(-Math.pow((u - 0.335) / 0.025, 2)) * (1 - sm(0.2, 0.5, Math.abs(Math.cos(th)))) * 0.8 : 0;
       return mix(mix(COL.skin, COL.skinD, 0.15 * (1 - s)), COL.stub, Math.min(0.85, st + mus)); },
     w: () => [['head', 1]] });
-  // ---- hair: a second loft over the head profile; pushed out where there is hair, tucked inside elsewhere; sculpted clumps
-  loft({ a: HA.clone().add(V3(0, 0.0, 0)), b: HB.clone().add(V3(0, 0.012, -0.004)), prof: HPROF, ns: 64, na: 104, ex: 1, ez: HEZ,
-    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th), y = 1.565 + u * 0.31;
-      const hl = s > 0.35 ? 1.79 - 0.012 * Math.abs(c) : s > -0.3 ? 1.745 + (Math.abs(c) > 0.85 ? 0.012 : 0.03) * (s > -0.1 ? 1 : 0.4) : 1.66 + 0.06 * (s + 0.3);
-      const has = sm(hl - 0.004, hl + 0.008, y), clump = 0.05 * Math.sin(th * 14 + u * 20) * Math.sin(u * 40 + th * 3) + 0.03 * Math.sin(th * 31 + u * 57) + 0.014 * Math.sin(th * 61 + u * 23) + 0.008 * Math.sin(th * 97 - u * 41);
+  // ---- hair: its own mesh; region weights onto 4 sway bones, scalp-side stays on the head
+  const hairHas = (u, th) => { const s = Math.sin(th), c = Math.cos(th), y = 1.565 + u * 0.31;
+    const hl = s > 0.35 ? 1.79 - 0.012 * Math.abs(c) : s > -0.3 ? 1.745 + (Math.abs(c) > 0.85 ? 0.012 : 0.03) * (s > -0.1 ? 1 : 0.4) : 1.66 + 0.06 * (s + 0.3); return sm(hl - 0.004, hl + 0.008, y); };
+  loft({ L: 'hair', a: HA.clone(), b: HB.clone().add(V3(0, 0.012, -0.004)), prof: HPROF, ns: 64, na: 104, ex: HEX, ez: HEZ,
+    disp: (u, th) => { const has = hairHas(u, th), clump = 0.05 * Math.sin(th * 14 + u * 20) * Math.sin(u * 40 + th * 3) + 0.03 * Math.sin(th * 31 + u * 57) + 0.014 * Math.sin(th * 61 + u * 23) + 0.008 * Math.sin(th * 97 - u * 41);
       return has * (0.09 + clump * 0.5 + 0.04 * sm(0.75, 0.9, u)) - (1 - has) * 0.05; },
-    col: (u, th) => { const sh = 0.7 + 0.42 * (0.5 + 0.5 * Math.sin(th * 14 + u * 20)) + 0.14 * Math.sin(th * 61 + u * 23); return [COL.hair[0] * sh, COL.hair[1] * sh, COL.hair[2] * sh]; }, w: () => [['head', 1]] });
-  // ---- arms: shoulder → wrist, short cyan sleeve, smooth elbow
+    col: (u, th) => { const sh = 0.7 + 0.42 * (0.5 + 0.5 * Math.sin(th * 14 + u * 20)) + 0.14 * Math.sin(th * 61 + u * 23); return [COL.hair[0] * sh, COL.hair[1] * sh, COL.hair[2] * sh]; },
+    w: (u, p, th) => { const s = Math.sin(th), c = Math.cos(th), ws = hairHas(u, th) * (0.3 + 0.7 * sm(0.62, 0.95, u)); return [['head', 1 - ws], [s > 0 ? 'hF' : 'hB', ws * s * s], [c > 0 ? 'hL' : 'hR', ws * c * c]]; } });
+  // ---- arms: body = bare skin arm (thicker upper arm); shirt = open sleeve tube
   function arm(sd) { const S = sd > 0 ? 'L' : 'R', a = J('arm' + S).clone().add(V3(-0.03 * sd, 0.0, 0)), e = J('fore' + S), w = J('hand' + S);
-    const Lu = a.distanceTo(e), Lf = e.distanceTo(w), L = Lu + Lf, ue = Lu / L;
-    loft({ a, b: w.clone().add(w.clone().sub(e).normalize().multiplyScalar(0.012)), side: V3(0, 0, 1), ns: 56, na: 32,
-      prof: [[0, 0.05], [0.06, 0.064], [0.2, 0.058], [0.33, 0.053], [ue - 0.04, 0.042], [ue, 0.040], [ue + 0.06, 0.045], [ue + 0.2, 0.041], [0.92, 0.031], [1, 0.028]],
-      ex: 1, ez: u => 0.9 + 0.1 * sm(0.5, 0.9, u),
-      disp: (u, th) => u < 0.33 ? 0.07 * sm(0.25, 0.3, u) * (1 - sm(0.31, 0.33, u)) : 0,   // sleeve hem lip
-      col: (u, th) => u < 0.31 ? mix(COL.shirt, COL.shirtD, 0.15 + 0.1 * Math.sin(th * 5)) : u < 0.33 ? COL.shirtD : COL.skin,
-      w: (u, p) => { const sh = 1 - sm(0.0, 0.12, u), t = sm(ue - 0.05, ue + 0.05, u), h = sm(0.95, 1.0, u); return [['chest', sh * 0.45], ['arm' + S, (1 - sh * 0.45) * (1 - t)], ['fore' + S, t * (1 - h)], ['hand' + S, h]]; } }); }
+    const Lu = a.distanceTo(e), Lf = e.distanceTo(w), L = Lu + Lf, ue = Lu / L, b = w.clone().add(w.clone().sub(e).normalize().multiplyScalar(0.012));
+    const prof = [[0, 0.056], [0.06, 0.072], [0.2, 0.067], [0.33, 0.06], [ue - 0.04, 0.046], [ue, 0.043], [ue + 0.06, 0.049], [ue + 0.2, 0.045], [0.92, 0.033], [1, 0.03]];
+    const armW = (u, p) => { const sh = 1 - sm(0.0, 0.12, u), t = sm(ue - 0.05, ue + 0.05, u), h = sm(0.95, 1.0, u); return [['chest', sh * 0.45], ['arm' + S, (1 - sh * 0.45) * (1 - t)], ['fore' + S, t * (1 - h)], ['hand' + S, h]]; };
+    loft({ a, b, side: V3(0, 0, 1), ns: 48, na: 32, prof, ex: 1, ez: u => 0.9 + 0.1 * sm(0.5, 0.9, u),
+      col: (u, th) => mix(COL.skin, COL.skinD, 0.12 * Math.max(0, Math.sin(th))), w: armW });
+    loft({ L: 'shirt', a, b, side: V3(0, 0, 1), ns: 16, na: 32, prof, ex: 1, ez: u => 0.92, u0: 0.0, u1: 0.33, pole0: false, pole1: false,
+      grow: (u, th, r) => r * 1.06 + 0.011 + 0.007 * sm(0.22, 0.33, u), disp: (u, th) => 0.012 * Math.sin(th * 5 + u * 20) * sm(0.1, 0.25, u),
+      col: (u, th) => mix(COL.shirt, COL.shirtD, 0.15 + 0.1 * Math.sin(th * 5) + (u > 0.31 ? 0.3 : 0)),
+      w: (u, p) => { const sh = 1 - sm(0.0, 0.12, u), sl = sm(0.16, 0.3, u) * 0.85; return [['chest', sh * 0.45], ['arm' + S, (1 - sh * 0.45) * (1 - sl)], ['slv' + S, (1 - sh * 0.45) * sl]]; } }); }
   arm(1); arm(-1);
-  // ---- hands: a soft fist (palm block + knuckle roll + thumb)
-  function hand(sd) { const S = sd > 0 ? 'L' : 'R', w = J('hand' + S), dir = w.clone().sub(J('fore' + S)).normalize(), end = w.clone().add(dir.clone().multiplyScalar(0.082));
-    loft({ a: w.clone().sub(dir.clone().multiplyScalar(0.012)), b: end, side: V3(sd, 0, 0), ns: 24, na: 28, prof: [[0, 0.028], [0.3, 0.042], [0.65, 0.047], [0.85, 0.04], [1, 0.02]],
-      ex: 0.75, ez: 1.08, disp: (u, th) => 0.06 * sm(0.55, 0.8, u) * Math.max(0, Math.cos(th * 4 + 0.6)) * Math.max(0, Math.sin(th)) * 0.5,
-      col: (u, th) => mix(COL.skin, COL.skinD, 0.2 * sm(0.6, 0.95, u)), w: () => [['hand' + S, 1]] });
-    const tb = w.clone().add(dir.clone().multiplyScalar(0.035)).add(V3(0, 0, 0.035));
-    const t1 = tb.clone().add(dir.clone().multiplyScalar(0.03)).add(V3(-0.014 * sd, 0, 0.014));
-    loft({ a: tb, b: t1, ns: 12, na: 16, prof: [[0, 0.016], [0.5, 0.0155], [1, 0.0135]], col: () => COL.skin, w: () => [['hand' + S, 1]] });
-    loft({ a: t1, b: t1.clone().add(dir.clone().multiplyScalar(0.012)).add(V3(-0.02 * sd, 0, -0.004)), ns: 10, na: 14, prof: [[0, 0.0135], [0.6, 0.012], [1, 0.006]], col: (u) => mix(COL.skin, [0.86, 0.66, 0.58], sm(0.6, 1, u) * 0.5), w: () => [['hand' + S, 1]] });
-    // v5.9.3 fingers: four curled fingers (proximal + distal phalanx), knuckle ridge, nail tint on the tips
-    const inw = V3(-sd, 0, 0);
-    [[-0.026, 0.0092, 0.9], [-0.009, 0.0102, 1], [0.008, 0.0104, 1.04], [0.024, 0.0098, 0.96]].forEach(([dz, r, l]) => {
-      const k = w.clone().add(dir.clone().multiplyScalar(0.07)).add(V3(0.006 * sd, 0, dz)), m = k.clone().add(dir.clone().multiplyScalar(0.03 * l)).add(inw.clone().multiplyScalar(0.012));
-      const tip = m.clone().add(inw.clone().multiplyScalar(0.028 * l)).add(dir.clone().multiplyScalar(-0.012));
-      loft({ a: k, b: m, ns: 10, na: 14, prof: [[0, r * 1.08], [0.3, r * 1.15], [0.7, r], [1, r * 0.95]], col: (u) => mix(COL.skin, COL.skinD, 0.25 * Math.exp(-Math.pow((u - 0.12) / 0.1, 2))), w: () => [['hand' + S, 1]] });
-      loft({ a: m.clone().add(dir.clone().multiplyScalar(-0.002)), b: tip, ns: 10, na: 14, prof: [[0, r * 0.98], [0.5, r * 0.92], [0.85, r * 0.8], [1, r * 0.4]], col: (u, th) => u > 0.62 && Math.cos(th) * sd < -0.3 ? [0.88, 0.7, 0.62] : mix(COL.skin, COL.skinD, 0.2 * Math.exp(-Math.pow(u / 0.12, 2))), w: () => [['hand' + S, 1]] }); }); }
-  hand(1); hand(-1);
-  // ---- legs: hip → ankle, pants, knee, slight hem
+  // ---- hands: palm + 4 three-segment fingers + thumb, built straight (open); the pose curls them
+  function hand(S) { const H = HANDS[S], sd = H.sd, w = H.w, dir = H.dir;
+    loft({ a: w.clone().sub(dir.clone().multiplyScalar(0.014)), b: w.clone().add(dir.clone().multiplyScalar(0.088)), side: V3(sd, 0, 0), ns: 18, na: 28,
+      prof: [[0, 0.03], [0.25, 0.04], [0.55, 0.046], [0.82, 0.045], [0.94, 0.036], [1, 0.02]], ex: 0.56, ez: 1.12,
+      disp: (u, th) => 0.05 * sm(0.75, 0.92, u) * Math.max(0, Math.cos(th * 4 + 0.6)) * Math.max(0, Math.cos(th)) * 0.6 - 0.06 * Math.max(0, -Math.cos(th)) * sm(0.3, 0.6, u) * (1 - sm(0.75, 0.95, u)),
+      col: (u, th) => mix(COL.skin, COL.skinD, 0.2 * sm(0.6, 0.95, u) + (Math.cos(th) < -0.5 ? 0.1 : 0)), w: () => [['hand' + S, 1]] });
+    const digit = (a, segs, names, r0, d, nailOK) => { const Lt = segs.reduce((x, y) => x + y, 0), b = a.clone().add(d.clone().multiplyScalar(Lt));
+      const st = a.clone().sub(d.clone().multiplyScalar(0.006)), Ltot = Lt + 0.006, j1 = segs[0], j2 = segs[0] + segs[1];
+      loft({ a: st, b, side: V3(sd, 0, 0), ns: 20, na: 14, prof: [[0, r0 * 1.1], [0.25, r0 * 1.12], [0.45, r0], [0.6, r0 * 1.02], [0.75, r0 * 0.92], [0.92, r0 * 0.82], [1, r0 * 0.4]], ex: 0.92, ez: 1,
+        col: (u, th) => { const t = u * Ltot - 0.006; if (nailOK && t > Lt - segs[2] * 0.7 && Math.cos(th) > 0.45) return COL.nail; const kn = Math.exp(-Math.pow((t - j1) / 0.004, 2)) + Math.exp(-Math.pow((t - j2) / 0.004, 2)) + Math.exp(-Math.pow(t / 0.005, 2)); return mix(COL.skin, COL.skinD, 0.25 * kn * Math.max(0, Math.cos(th))); },
+        w: (u) => { const t = u * Ltot - 0.006, a0 = sm(-0.006, 0.004, t), a1 = sm(j1 - 0.004, j1 + 0.004, t), a2 = sm(j2 - 0.004, j2 + 0.004, t); return [['hand' + S, 1 - a0], [names[0], a0 - a1], [names[1], a1 - a2], [names[2], a2]]; } }); };
+    H.f.forEach((f, i) => digit(f.k, f.segs, [0, 1, 2].map(j => 'f' + S + i + j), f.r, dir, true));
+    digit(H.t.tb, H.t.tl, [0, 1, 2].map(j => 't' + S + j), 0.0165, H.t.td, true); }
+  hand('L'); hand('R');
+  // ---- legs (pants layer): hip → ankle; shoes ride the pants mesh
   function leg(sd) { const S = sd > 0 ? 'L' : 'R', a = J('thigh' + S).clone().add(V3(-0.004 * sd, 0.04, 0)), k = J('shin' + S), f = J('foot' + S);
     const Lt = a.distanceTo(k), Ls = k.distanceTo(f), L = Lt + Ls, uk = Lt / L;
-    loft({ a, b: f.clone().add(V3(0, -0.02, 0)), side: V3(1, 0, 0), ns: 64, na: 36,
-      prof: [[0, 0.075], [0.08, 0.09], [0.2, 0.086], [0.35, 0.075], [uk - 0.03, 0.062], [uk, 0.061], [uk + 0.05, 0.062], [uk + 0.15, 0.066], [0.85, 0.052], [0.95, 0.054], [1, 0.05]],
+    loft({ L: 'pants', a, b: f.clone().add(V3(0, -0.02, 0)), side: V3(1, 0, 0), ns: 64, na: 36,
+      prof: [[0, 0.078], [0.08, 0.094], [0.2, 0.09], [0.35, 0.079], [uk - 0.03, 0.065], [uk, 0.064], [uk + 0.05, 0.065], [uk + 0.15, 0.069], [0.85, 0.054], [0.95, 0.056], [1, 0.052]],
       ez: (u, th) => (Math.sin(th) < 0 && u > uk && u < 0.85 ? 1.08 : 0.95),
       disp: (u, th) => 0.012 * Math.sin(th * 7 + u * 22) * sm(uk - 0.04, uk, u) * (1 - sm(uk + 0.02, uk + 0.06, u)) + 0.006 * Math.sin(th * 3 + u * 12) + 0.004 * Math.sin(u * 140 + th * 2) * sm(0.86, 0.9, u) + (Math.abs(Math.cos(th)) > 0.985 ? 0.012 : 0),
       col: (u, th) => mix(COL.pants, COL.pantsD, (Math.abs(Math.cos(th)) > 0.985 ? 0.55 : 0) + (u < 0.14 && Math.sin(th) > 0.4 && Math.abs(Math.abs(Math.cos(th)) - 0.55 + u * 1.2) < 0.03 ? 0.6 : 0) + 0.25 * (0.5 + 0.5 * Math.sin(th * 7 + u * 22)) * sm(uk - 0.06, uk, u) * (1 - sm(uk + 0.02, uk + 0.08, u)) + (u > 0.95 ? 0.3 : 0)),
       w: (u, p) => { const hp = 1 - sm(0.0, 0.14, u), t = sm(uk - 0.05, uk + 0.05, u); return [['hips', hp * 0.6], ['thigh' + S, (1 - hp * 0.6) * (1 - t)], ['shin' + S, t]]; } });
-    // shoe: heel → toe
     const hb = f.clone().add(V3(0, -0.035, -0.06)), toe = V3(f.x + 0.008 * sd, 0.035, 0.17);
-    loft({ a: hb, b: toe, side: V3(0, 1, 0), ns: 28, na: 32, prof: [[0, 0.045], [0.12, 0.058], [0.45, 0.056], [0.75, 0.054], [0.92, 0.043], [1, 0.02]], ex: 0.78, ez: 1.15,
+    loft({ L: 'pants', a: hb, b: toe, side: V3(0, 1, 0), ns: 28, na: 32, prof: [[0, 0.045], [0.12, 0.058], [0.45, 0.056], [0.75, 0.054], [0.92, 0.043], [1, 0.02]], ex: 0.78, ez: 1.15,
       warp: (p, u) => { if (p.y < 0.008) p.y = 0.008 + (p.y - 0.008) * 0.15; },
-      col: (u, th, p) => p.y < 0.03 ? COL.sole : (Math.sin(th) * sd > -2 && Math.cos(th) > 0.72 && u > 0.35 && u < 0.72 && Math.sin(u * 70) > 0.4) ? [0.82, 0.82, 0.8] : (Math.abs(u - 0.78) < 0.012 ? COL.sole : mix(COL.shoe, COL.sole, 0.15 * Math.max(0, Math.sin(th * 2)))), w: (u) => { const t = sm(0.0, 0.25, u); return [['shin' + S, (1 - t) * 0.4], ['foot' + S, 1 - (1 - t) * 0.4]]; } }); }
+      col: (u, th, p) => p.y < 0.03 ? COL.sole : (Math.cos(th) > 0.72 && u > 0.35 && u < 0.72 && Math.sin(u * 70) > 0.4) ? [0.82, 0.82, 0.8] : (Math.abs(u - 0.78) < 0.012 ? COL.sole : mix(COL.shoe, COL.sole, 0.15 * Math.max(0, Math.sin(th * 2)))), w: (u) => { const t = sm(0.0, 0.25, u); return [['shin' + S, (1 - t) * 0.4], ['foot' + S, 1 - (1 - t) * 0.4]]; } }); }
   leg(1); leg(-1);
-  // ---------------- assemble
-  function build() {
-    const g = new T.BufferGeometry();
-    g.setAttribute('position', new T.Float32BufferAttribute(P, 3)); g.setAttribute('color', new T.Float32BufferAttribute(C, 3));
-    g.setAttribute('skinIndex', new T.Uint16BufferAttribute(SI, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(SW, 4)); g.setIndex(IX);
+  // ---------------- assemble: one Skeleton, four SkinnedMeshes (body is the parent; layers are children bound to the same bones)
+  function geo(D) { const g = new T.BufferGeometry();
+    g.setAttribute('position', new T.Float32BufferAttribute(D.P, 3)); g.setAttribute('color', new T.Float32BufferAttribute(D.C, 3));
+    g.setAttribute('skinIndex', new T.Uint16BufferAttribute(D.SI, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(D.SW, 4)); g.setIndex(D.IX);
     g.computeVertexNormals();
-    // weld seam / pole normals by position so lofts read smooth
     const pos = g.attributes.position, nor = g.attributes.normal, map = new Map();
     for (let i = 0; i < pos.count; i++) { const k = Math.round(pos.getX(i) * 2e4) + ',' + Math.round(pos.getY(i) * 2e4) + ',' + Math.round(pos.getZ(i) * 2e4); (map.get(k) || map.set(k, []).get(k)).push(i); }
     map.forEach(l => { if (l.length < 2) return; let x = 0, y = 0, z = 0; l.forEach(i => { x += nor.getX(i); y += nor.getY(i); z += nor.getZ(i); }); const n = Math.hypot(x, y, z) || 1; l.forEach(i => nor.setXYZ(i, x / n, y / n, z / n)); });
-    const mat = Q >= 0.75 ? new T.MeshPhysicalMaterial({ vertexColors: true, roughness: 0.62, metalness: 0, clearcoat: 0.06, clearcoatRoughness: 0.6, skinning: true }) : new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.66, metalness: 0, skinning: true });
-    if ('sheen' in mat && mat.sheen && mat.sheen.setRGB) mat.sheen.setRGB(0.08, 0.06, 0.05);
-    const mesh = new T.SkinnedMesh(g, mat); mesh.castShadow = mesh.receiveShadow = true; mesh.frustumCulled = false;
+    return g; }
+  const HI = Q >= 0.75;
+  const lm = (o) => { const m = HI && o.phys ? new T.MeshPhysicalMaterial(Object.assign({ vertexColors: true, metalness: 0, skinning: true }, o.p)) : new T.MeshStandardMaterial(Object.assign({ vertexColors: true, metalness: 0, skinning: true }, o.s || o.p)); if (o.side) m.side = o.side; return m; };
+  const MATS = { body: () => lm({ phys: 1, p: { roughness: 0.6, clearcoat: 0.06, clearcoatRoughness: 0.6 }, s: { roughness: 0.64 } }), shirt: () => lm({ p: { roughness: 0.86 }, side: T.DoubleSide }),
+    pants: () => lm({ p: { roughness: 0.8 } }), hair: () => lm({ phys: 1, p: { roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.5 }, s: { roughness: 0.6 } }) };
+  function build() {
     const bones = NAMES.map(n => { const b = new T.Bone(); b.name = n; return b; });
     NAMES.forEach((n, i) => { const [par, wp] = BJ[n]; if (par) { bones[IDX[par]].add(bones[i]); bones[i].position.copy(wp).sub(BJ[par][1]); } else bones[i].position.copy(wp); });
-    mesh.add(bones[0]); mesh.bind(new T.Skeleton(bones));
+    const mesh = new T.SkinnedMesh(geo(LAY.body), MATS.body()); mesh.name = 'rsBody'; mesh.castShadow = mesh.receiveShadow = true; mesh.frustumCulled = false;
+    mesh.add(bones[0]); mesh.updateMatrixWorld(true); const skel = new T.Skeleton(bones); mesh.bind(skel);
+    const layers = { body: mesh };
+    ['shirt', 'pants', 'hair'].forEach(n => { const m = new T.SkinnedMesh(geo(LAY[n]), MATS[n]()); m.name = 'rs' + n[0].toUpperCase() + n.slice(1); m.castShadow = m.receiveShadow = true; m.frustumCulled = false;
+      mesh.add(m); m.updateMatrixWorld(true); m.bind(skel, mesh.matrixWorld.clone()); layers[n] = m; });
     const B = {}; bones.forEach(b => B[b.name] = b);
-    // ---- face & hair on head bone (local coords relative to head joint)
-    const head = B.head, hj = J('head'), add = (m, x, y, z) => { m.position.set(x - hj.x, y - hj.y, z - hj.z); m.castShadow = Q >= 0.75; head.add(m); return m; };
-    const phys = (c, r, cc) => new (Q >= 0.75 ? T.MeshPhysicalMaterial : T.MeshStandardMaterial)({ color: new T.Color(Math.pow(c[0], 2.2), Math.pow(c[1], 2.2), Math.pow(c[2], 2.2)), roughness: r, ...(Q >= 0.75 ? { clearcoat: cc || 0, clearcoatRoughness: 0.1 } : {}) });
+    // finger rigs: per bone curl axis + fist/open angles
+    const FR = [];
+    ['L', 'R'].forEach(S => { const H = HANDS[S];
+      H.f.forEach((f, i) => [[0.12, 1.5], [0.16, 1.62], [0.1, 1.12]].forEach(([op, fi], j) => FR.push({ b: B['f' + S + i + j], S, ax: f.axis, op: op + i * 0.03, fi: fi + (i === 3 ? 0.08 : 0) })));
+      [[0.05, 0.42], [0.06, 0.55], [0.05, 0.62]].forEach(([op, fi], j) => FR.push({ b: B['t' + S + j], S, ax: H.t.axis, op, fi })); });
+    // ---- face on head bone (local coords relative to head joint)
+    const head = B.head, hj = J('head'), add = (m, x, y, z) => { m.position.set(x - hj.x, y - hj.y, z - hj.z); m.castShadow = HI; head.add(m); return m; };
+    const phys = (c, r, cc) => new (HI ? T.MeshPhysicalMaterial : T.MeshStandardMaterial)({ color: new T.Color(Math.pow(c[0], 2.2), Math.pow(c[1], 2.2), Math.pow(c[2], 2.2)), roughness: r, ...(HI ? { clearcoat: cc || 0, clearcoatRoughness: 0.1 } : {}) });
     const sclera = phys([0.93, 0.92, 0.9], 0.3, 1), iris = phys([0.16, 0.26, 0.78], 0.25, 1), pupil = phys([0.02, 0.02, 0.03], 0.2, 1), brow = phys(COL.hair, 0.9), lip = phys([0.7, 0.42, 0.38], 0.45), skinM = phys(COL.skin, 0.6);
     [1, -1].forEach(sd => {
       const ex = 0.039 * sd, ey = 1.735, ez = 0.106;
       add(new T.Mesh(SG(0.019, 32, 24), sclera), ex, ey, ez);
       const ir = add(new T.Mesh(SG(0.0115, 24, 16), iris), ex, ey, ez + 0.0152); ir.scale.z = 0.45;
       const pu = add(new T.Mesh(SG(0.0055, 16, 12), pupil), ex, ey, ez + 0.0196); pu.scale.z = 0.4;
-      // eyelid (upper) — skin coloured half-shell
-      const lid = add(new T.Mesh(SG(0.0202, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5), skinM), ex, ey, ez); lid.rotation.x = -0.62;
-      // brow: tapered loft
-      const bg = new T.CylinderGeometry(0.006, 0.0085, 0.046, 12, 1); bg.rotateZ(Math.PI / 2);
-      const br = add(new T.Mesh(bg, brow), ex, 1.766, 0.121); br.rotation.set(0.2, -0.25 * sd, 0.12 * sd); br.scale.set(1, 1, 0.7);
-      // ear
+      const lid = add(new T.Mesh(SG(0.0202, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5), skinM), ex, ey, ez); lid.rotation.x = -0.5;   // a touch heavier lid
+      // brow: thick, flat, slightly lowered toward the nose (determined, not surprised)
+      const bg = new T.CylinderGeometry(0.0075, 0.0095, 0.05, 12, 1); bg.rotateZ(Math.PI / 2);
+      const br = add(new T.Mesh(bg, brow), ex, 1.762, 0.122); br.rotation.set(0.2, -0.25 * sd, -0.06 * sd); br.scale.set(1, 1, 0.7);
       const ear = add(new T.Mesh(SG(0.026, 24, 16), skinM), 0.108 * sd, 1.72, -0.005); ear.scale.set(0.35, 1.05, 0.7);
-      // v5.9.3 lower lid, lash line, inner ear bowl
       const lo = add(new T.Mesh(SG(0.0198, 24, 8, 0, Math.PI * 2, Math.PI * 0.62, Math.PI * 0.3), skinM), ex, ey, ez); lo.rotation.x = 0.35;
-      const lash = add(new T.Mesh(new T.TorusGeometry(0.0196, 0.0016, 6, 24, Math.PI), brow), ex, ey + 0.0015, ez + 0.002); lash.rotation.set(-0.62 + Math.PI / 2 - 0.25, 0, 0); lash.rotation.order = 'YXZ'; lash.scale.set(1, 1, 0.85);
+      const lash = add(new T.Mesh(new T.TorusGeometry(0.0196, 0.0016, 6, 24, Math.PI), brow), ex, ey + 0.0015, ez + 0.002); lash.rotation.set(-0.5 + Math.PI / 2 - 0.25, 0, 0); lash.rotation.order = 'YXZ'; lash.scale.set(1, 1, 0.85);
       const ie = add(new T.Mesh(SG(0.014, 16, 10), phys([0.62, 0.42, 0.33], 0.7)), 0.111 * sd, 1.72, -0.002); ie.scale.set(0.2, 0.75, 0.45);
       add(new T.Mesh(SG(0.0042, 10, 8), phys([0.2, 0.1, 0.08], 0.9)), 0.0075 * sd, 1.687, 0.128).scale.set(1.2, 0.7, 0.8);
     });
-    // nose: small loft-ish (sphere + bridge)
-    const nb = add(new T.Mesh(new T.CylinderGeometry(0.008, 0.012, 0.045, 16), skinM), 0, 1.714, 0.12); nb.rotation.x = -0.35;
-    add(new T.Mesh(SG(0.0135, 24, 16), skinM), 0, 1.695, 0.124).scale.set(1.1, 0.8, 0.85);
-    // mouth: soft upper / lower lip
-    const ul = add(new T.Mesh(new T.TorusGeometry(0.026, 0.0055, 10, 32, Math.PI), lip), 0, 1.652, 0.123); ul.rotation.set(0.15, 0, Math.PI); ul.scale.set(1, 0.32, 1);
-    const ll = add(new T.Mesh(new T.TorusGeometry(0.022, 0.007, 10, 32, Math.PI), lip), 0, 1.648, 0.122); ll.rotation.set(-0.15, 0, Math.PI); ll.scale.set(1, 0.4, 1);
-    return { mesh, B, NAMES };
+    const nb = add(new T.Mesh(new T.CylinderGeometry(0.009, 0.013, 0.045, 16), skinM), 0, 1.714, 0.12); nb.rotation.x = -0.35;
+    add(new T.Mesh(SG(0.0135, 24, 16), skinM), 0, 1.695, 0.124).scale.set(1.15, 0.8, 0.85);
+    const ul = add(new T.Mesh(new T.TorusGeometry(0.026, 0.005, 10, 32, Math.PI), lip), 0, 1.652, 0.123); ul.rotation.set(0.15, 0, Math.PI); ul.scale.set(1, 0.22, 1);   // firmer, flatter mouth
+    const ll = add(new T.Mesh(new T.TorusGeometry(0.022, 0.006, 10, 32, Math.PI), lip), 0, 1.648, 0.122); ll.rotation.set(-0.15, 0, Math.PI); ll.scale.set(1, 0.3, 1);
+    return { mesh, B, NAMES, layers, FR, HEMN, hemAng: [...Array(HEMN)].map((_, i) => 2 * Math.PI * i / HEMN), HEMH: HEMY - 0.99 };
   }
-  // ---------------- poses (local euler deltas, radians)
-  const POSES = {
-    idle: { spine: [0.02, 0, 0], chest: [0.03, 0, 0], head: [-0.03, 0, 0], armL: [0.05, 0, 0.08], armR: [0.05, 0, -0.08], foreL: [-0.25, 0, 0], foreR: [-0.25, 0, 0], thighL: [0, 0, 0.03], thighR: [0, 0, -0.03] },
-    stance: { hips: [0, 0.5, 0], spine: [0.12, -0.18, 0], chest: [0.1, -0.22, 0], head: [-0.15, -0.1, 0], armL: [-0.75, 0.5, 0.12], foreL: [-1.95, 0.3, 0], handL: [0.2, 0, 0], armR: [-0.55, -0.4, -0.08], foreR: [-2.1, -0.3, 0], handR: [0.2, 0, 0],
-      thighL: [-0.42, 0, 0.12], shinL: [0.55, 0, 0], footL: [-0.12, 0, 0], thighR: [0.15, 0, -0.14], shinR: [0.42, 0, 0], footR: [-0.3, 0, 0], root: [0, 0, -0.09] },
-    punch: { hips: [0, 0.2, 0], spine: [0.08, -0.25, 0], chest: [0.05, -0.45, 0], head: [-0.06, 0.35, 0], armR: [-1.52, 0.25, 0.05], foreR: [-0.08, 0, 0], armL: [-0.75, 0.5, 0.12], foreL: [-2.0, 0.3, 0], thighL: [-0.55, 0, 0.1], shinL: [0.45, 0, 0], footL: [0.05, 0, 0], thighR: [0.35, 0, -0.1], shinR: [0.15, 0, 0], footR: [-0.3, 0, 0], root: [0, 0, -0.06] },
-    kick: { hips: [0, -0.3, 0], spine: [-0.18, 0.1, 0], chest: [-0.05, 0.1, 0], head: [0.15, 0, 0], armL: [-0.6, 0, 0.9], foreL: [-1.3, 0, 0], armR: [0.4, 0, -0.9], foreR: [-1.0, 0, 0], thighR: [-1.55, 0, -0.1], shinR: [0.15, 0, 0], footR: [0.5, 0, 0], thighL: [0.12, 0, 0.05], shinL: [0.2, 0, 0], footL: [-0.1, 0, 0], root: [0, 0, -0.03] },
-    crouch: { spine: [0.35, 0, 0], chest: [0.2, 0, 0], head: [-0.4, 0, 0], armL: [-0.9, 0.4, 0.12], foreL: [-1.9, 0.3, 0], armR: [-0.7, -0.4, -0.1], foreR: [-2.0, -0.3, 0], thighL: [-1.7, 0, 0.35], shinL: [2.0, 0, 0], footL: [-0.3, 0, 0], thighR: [-0.9, 0, -0.35], shinR: [2.1, 0, 0], footR: [0.8, 0, 0], root: [0, 0, -0.36] },
-  };
-  function pose(R, name) { const p = POSES[name] || {}; R.NAMES.forEach(n => R.B[n].rotation.set(0, 0, 0)); R.mesh.position.y = 0;
-    Object.keys(p).forEach(n => { if (n === 'root') return; const b = R.B[n]; if (b) b.rotation.set(p[n][0], p[n][1], p[n][2]); });
-    /* auto-ground: keep the lowest ankle at its rest height */
-    const v = new THREE.Vector3(); const fy = () => { R.mesh.updateMatrixWorld(true); return Math.min(R.B.footL.getWorldPosition(v).y, R.B.footR.getWorldPosition(v).y); };
-    if (R.footY0 === undefined) { const keep = R.NAMES.map(n => R.B[n].rotation.clone()); R.NAMES.forEach(n => R.B[n].rotation.set(0, 0, 0)); R.footY0 = fy(); R.NAMES.forEach((n, i) => R.B[n].rotation.copy(keep[i])); }
-    R.mesh.position.y += R.footY0 - fy(); }
-  return { build, pose, POSES };
+  return { build, NAMES };
 }
   const cache = {};
   return { make: Q => cache[Q] || (cache[Q] = make(Q)) };
@@ -21638,40 +21818,110 @@ function make(Q) {
   // every per-character table falls back to Steve's entry (same moveset, strings, personality, win/lose lists)
   [typeof XP!=='undefined'&&XP.ID,typeof XP!=='undefined'&&XP.WINS,typeof LEGO_CHARS!=='undefined'&&LEGO_CHARS,typeof DP_STR!=='undefined'&&DP_STR,typeof SD!=='undefined'&&SD].forEach(T_=>{if(T_&&T_.steve&&!T_.rsteve)T_.rsteve=T_.steve;});
 })();
-const RSQ=()=>{const l=(typeof GQ!=='undefined'&&GQ.level)||'high';return l==='ultra'?1.5:l==='high'?1.15:l==='mid'?0.7:0.45;};  // v5.9.3 finer mesh LOD (was 1/0.75/0.5/0.4)
-// retarget map: blocky rig joint → real bone, matched by side (world x sign at rest) so L/R never swap
+const RSQ=()=>{const l=(typeof GQ!=='undefined'&&GQ.level)||'high';return l==='ultra'?1.5:l==='high'?1.15:l==='mid'?0.7:0.45;};  // v5.9.3 finer mesh LOD (was 1/0.75/0.5/0.4)// retarget map: blocky rig joint → real bone, matched by side (world x sign at rest) so L/R never swap
 function rsAttach(V,def){
   const R=RealSteveLib.make(RSQ()).build(),mesh=R.mesh;
-  // hide the blocky Steve meshes; keep its groups (rig, LEGO hands, secondary motion) as the animation proxy
   V.obj.traverse(o=>{if(o.isMesh||o.isSprite||o.isLine)o.visible=false;});
   const k=def.H/1.88;mesh.scale.setScalar(k);mesh.position.y=-def.H*0.5;V.ball.add(mesh);
   mesh.traverse(o=>{if(o.material){const ms=Array.isArray(o.material)?o.material:[o.material];ms.forEach(m=>{if(m.emissive&&!m.userData.e0){m.userData.e0=m.emissive.clone();m.userData.ei0=m.emissiveIntensity;if(V.mats.indexOf(m)<0)V.mats.push(m);}});}});
   const r=V.rig,J=r.J||{},v=new THREE.Vector3();V.root.updateMatrixWorld(true);
   const side=o=>{if(!o)return 0;o.getWorldPosition(v);V.root.worldToLocal(v);return v.x>=0?1:-1;};
-  // blocky model faces +z like the real one, so +x is the figure's left
   const S=s=>s>0?'L':'R';
   const map={};
   [['armL','arm'],['armR','arm'],['legL','thigh'],['legR','thigh']].forEach(([n,b])=>{if(r[n])map[n]=b+S(side(r[n]));});
   [['eL','fore','armL'],['eR','fore','armR'],['kL','shin','legL'],['kR','shin','legR'],['fL','foot','legL'],['fR','foot','legR']].forEach(([n,b,p])=>{if(J[n])map[n]=b+S(side(J[n]));});
-  V.real={R,mesh,map,k,rest0:{}};
+  // v5.9.7 secondary-motion state: 2D springs (x = lateral, z = fore/aft, figure-local) per hem panel, sleeve, hair region
+  const sp=n=>[...Array(n)].map((_,i)=>({x:0,z:0,vx:0,vz:0,ph:i*2.17+Math.random()*6}));
+  V.real={R,mesh,map,k,rest0:{},y0:-def.H*0.5,g:{L:1,R:1},fl:{hem:sp(R.HEMN),slv:sp(2),hair:sp(4),src:{}},t:0,st:''};
 }
-function rsPose(V){const X=V.real;if(!X)return;const B=X.R.B,r=V.rig,R0=V.rest,J=r.J||{},c=V.pose,m=X.map;
-  X.R.NAMES.forEach(n=>B[n].rotation.set(0,0,0));
+let RS_INFO=null;   // pose-intent from the rsteve poseFor override → consumed by the next applyPose (same fighter, same frame)
+const RS_GRIP={idle:1,walk:1,dash:1,guard:1,gstun:1,atk:1,win:1,lose:1,jsq:1,land:1,getup:0.8,grabbed:0.7,air:0.6,hurt:0.1,tumble:0.1,down:0.25,dodge:0.5};
+// masculine pose layer: rewrites the shared Steve pose targets for the realistic body only (blocky Steve is untouched)
+function rsMasc(F,t,P){
+  const st=F.st,mv=F.mv,fr=F.fr,br=Math.sin(t*2.6+F.side)*0.02,I={st,act:0,arm:'R',grip:RS_GRIP[st]===undefined?1:RS_GRIP[st],walk:0};
+  const guard=(lead)=>{P.aL=-0.72+br;P.aR=-0.6-br;P.eL=-1.98;P.eR=-2.08;P.aLz=-0.24;P.aRz=0.24;P.wfL=P.wfR=0;if(lead!=='L'){}};
+  if(st==='idle'){guard();P.kL=0.5;P.kR=0.56;P.lL=-0.24;P.lR=0.2;P.hd=0.16;P.lean=0.12;P.ch=0.1+br;P.cy=0.12;P.fpL=P.fpR=0;P.sx=1;P.sy=1+br*0.3;P.y=0;}
+  else if(st==='walk'||st==='dash'){const ph=F.walkPh,s=Math.sin(ph),d=st==='dash';guard();P.aL+=-s*0.16;P.aR+=s*0.16;if(d){P.eL=P.eR=-1.75;}
+    P.kL+=0.18;P.kR+=0.18;P.fpL*=0.35;P.fpR*=0.35;P.wfL=P.wfR=0;P.lean=d?0.36:0.2;P.y=Math.abs(s)*0.012;P.hd=0.14;P.ch=(P.ch||0)+0.06;I.walk=s;}
+  else if(st==='guard'||st==='gstun'){P.hd=0.24;P.kL=Math.max(P.kL||0,0.62);P.kR=Math.max(P.kR||0,0.66);P.fpL=P.fpR=0;}
+  else if(st==='win'){const pu=Math.max(0,Math.sin(t*5.5));   // fist pump: right fist driven up, left fist locked at the chest; flat-footed
+    P.aR=-2.8-pu*0.25;P.aRz=-0.22;P.eR=-1.25+pu*0.85;P.aL=-0.5;P.eL=-1.75;P.aLz=-0.42;P.wfL=P.wfR=0;
+    P.lean=-0.05;P.hd=0.02;P.hy=0;P.ch=-0.16;P.cy=0.12+Math.sin(t*1.7)*0.06;P.y=0;P.fpL=P.fpR=0;P.kL=P.kR=0.3;P.lL=-0.12;P.lR=0.12;P.sx=1;P.sy=1;}
+  else if(st==='lose'){const sl=Math.pow(Math.max(0,Math.sin(t*1.6)),6);   // slumped, head shaking, fists clenched at the sides, a frustrated thigh slap
+    P.lean=0.3;P.hd=0.48;P.hy=Math.sin(t*2.4)*0.28;P.aL=0.08;P.aR=0.12-sl*0.25;P.aLz=0.06;P.aRz=-0.06;P.eL=-0.4;P.eR=-0.35-sl*0.7;P.kL=P.kR=0.42;P.ch=0.3;P.cy=Math.sin(t*2.4)*0.08;P.sx=1;P.sy=1;P.fpL=P.fpR=0;}
+  else if(st==='atk'&&mv){const ph=fr<mv.s?0:fr<mv.s+mv.a?1:2,u=ph===0?fr/mv.s:ph===1?(fr-mv.s)/mv.a:(fr-mv.s-mv.a)/Math.max(1,mv.r),pz=mv.pose||'jab';
+    const W={jab:['R',1],jab2:['L',1],hook:['R',1.4],smash:['R',1.2],upper:['R',0.7],cast:['R',0.9],rush:['R',1.1],throw:['R',0.8]}[pz];
+    if(pz==='grab'&&ph<=1)I.grip=0.15;
+    if(W){I.arm=W[0];I.act=W[1]*(ph===0?-0.55*u:ph===1?1:Math.max(0,1-u));
+      if(pz==='jab'||pz==='hook'){P.aL=-0.72;P.eL=-1.98;P.aLz=-0.24;}else if(pz==='jab2'){P.aR=-0.6;P.eR=-2.08;P.aRz=0.24;}
+      P.kL=Math.max(P.kL||0,0.5);P.kR=Math.max(P.kR||0,0.45);P.hd=Math.max(P.hd,0.14);}
+  }
+  return I;
+}
+const RS_V=new THREE.Vector3(),RS_V2=new THREE.Vector3();
+function rsFootY(X){const B=X.R.B;B.hips.updateMatrixWorld(true);const mi=X.mi||(X.mi=new THREE.Matrix4());mi.copy(X.mesh.matrixWorld).invert();
+  const a=RS_V.setFromMatrixPosition(B.footL.matrixWorld).applyMatrix4(mi).y,b=RS_V.setFromMatrixPosition(B.footR.matrixWorld).applyMatrix4(mi).y;return Math.min(a,b);}
+function rsPose(V,I){const X=V.real;if(!X)return;const B=X.R.B,r=V.rig,R0=V.rest,J=r.J||{},c=V.pose,m=X.map;I=I||{st:'idle',act:0,arm:'R',grip:1,walk:0};
+  X.R.NAMES.forEach(n=>{const b=B[n];b.rotation.set(0,0,0);if(b.scale.x!==1||b.scale.z!==1)b.scale.set(1,1,1);});
   const dl=(o,n)=>{const b=B[m[n]];if(!o||!b)return;const r0=R0[n]||{x:0,y:0,z:0};b.rotation.x+=o.rotation.x-r0.x;b.rotation.z+=(o.rotation.z-r0.z);b.rotation.y+=(o.rotation.y-(r0.y||0))*0.5;};
   ['armL','armR','legL','legR'].forEach(n=>dl(r[n],n));
-  // arms rest in an A-pose on the real figure: pull them in a bit so the blocky "arms down" reads the same
-  ['armL','armR'].forEach(n=>{const b=B[m[n]];if(b)b.rotation.z+=(m[n]==='armL'?-0.12:0.12);});
+  ['armL','armR'].forEach(n=>{const b=B[m[n]];if(b)b.rotation.z+=(m[n]==='armL'?-0.14:0.14);});
   const jx=(n,mul)=>{const o=J[n],b=B[m[n]];if(o&&b)b.rotation.x+=o.rotation.x*(mul||1);};
   jx('eL');jx('eR');jx('kL');jx('kR');jx('fL',0.7);jx('fR',0.7);
   if(J.ch){B.chest.rotation.x+=J.ch.rotation.x*0.7;B.spine.rotation.x+=J.ch.rotation.x*0.3;B.chest.rotation.y+=J.ch.rotation.y*0.6;B.spine.rotation.y+=J.ch.rotation.y*0.4;}
   if(r.head&&R0.head){B.head.rotation.x+=(r.head.rotation.x-R0.head.x)*0.75;B.neck.rotation.x+=(r.head.rotation.x-R0.head.x)*0.25;B.head.rotation.y+=(r.head.rotation.y-(R0.head.y||0));}
-  // fists: grip channel curls the wrist a touch
-  B.handL.rotation.x+=-0.15*(c.gL||0);B.handR.rotation.x+=-0.15*(c.gR||0);
-  // a real body should not squash like a toy: undo ~70% of the lean-group scale
   const sx=V.lean.scale.x||1,sy=V.lean.scale.y||1;X.mesh.scale.set(X.k*(1+(1/sx-1)*0.7),X.k*(1+(1/sy-1)*0.7),X.k*(1+(1/sx-1)*0.7));
+  // ---- v5.9.7 masculine layer (bone offsets on top of the retargeted pose), then re-ground the feet
+  const st=I.st,gr=!(st==='air'||st==='hurt'||st==='tumble'||st==='down'||st==='dodge'||st==='grabbed');
+  const y0=gr?rsFootY(X):0;
+  if(gr){const wd=st==='win'||st==='lose'?0.75:1;
+    B.thighL.rotation.z+=0.09*wd;B.thighR.rotation.z-=0.09*wd;B.footL.rotation.z-=0.09*wd;B.footR.rotation.z+=0.09*wd;   // wide base
+    B.thighL.rotation.x-=0.12;B.thighR.rotation.x-=0.12;B.shinL.rotation.x+=0.24;B.shinR.rotation.x+=0.24;B.footL.rotation.x-=0.12;B.footR.rotation.x-=0.12;   // knees soft
+    if(st!=='lose'){B.chest.rotation.x-=0.05;B.head.rotation.x+=0.1;B.neck.rotation.x+=0.02;}   // chest up, chin down
+    B.clavL.rotation.z-=0.04;B.clavR.rotation.z+=0.04;}   // shoulders set down/back (squared)
+  if(I.act){const real=m['arm'+I.arm]||('arm'+I.arm),sg=real==='armR'?1:-1,a=I.act*sg;   // punch from the hips: hips → spine → chest uncoil, eyes stay on target
+    B.hips.rotation.y+=0.26*a;B.spine.rotation.y+=0.14*a;B.chest.rotation.y+=0.2*a;B.head.rotation.y-=0.34*a;B[real].rotation.y+=0.1*a;
+    const bk=sg>0?'R':'L';B['foot'+bk].rotation.y+=0.3*Math.max(0,a*sg);}
+  if(I.walk){B.chest.rotation.y+=0.09*I.walk;B.hips.rotation.y-=0.07*I.walk;B.spine.rotation.x+=0.04;}
+  if(gr){const y1=rsFootY(X);X.mesh.position.y=X.y0+(y0-y1)*X.mesh.scale.y;}else X.mesh.position.y=X.y0;
+  // ---- fingers: spring toward fist / open per hand (blocky grip channel can only add)
+  const now=performance.now()*0.001,dt=Math.min(0.05,Math.max(0.001,now-(X.t||now-0.016)));X.t=now;
+  const gt=Math.max(window.__rsGripOv!=null?+window.__rsGripOv:I.grip,0);['L','R'].forEach(S=>{X.g[S]+=(gt-X.g[S])*Math.min(1,dt*16);});
+  for(const f of X.R.FR){const g=X.g[f.S];f.b.quaternion.setFromAxisAngle(f.ax,f.op+(f.fi-f.op)*g);}
+  rsFlutter(V,X,I,now,dt);
+}
+// ---- secondary motion: cheap 2D spring bones (no cloth sim). Each channel chases a target built from the body's own velocity / acceleration
+// (inertia + drag), a slow wind and a hit impulse; result → small bone rotations (hem panels, sleeves) / scalp-pivot rotations (hair).
+function rsFlutter(V,X,I,t,dt){const R=X.R,B=R.B,FL=X.fl;
+  const on=!(typeof GQ!=='undefined'&&GQ.level==='low')&&window.__rsFlutter!==0;
+  if(!on){X.st=I.st;return;}
+  const yaw=V.pivot.rotation.y,cy=Math.cos(yaw),sy=Math.sin(yaw);
+  const src=(key,obj)=>{const s=FL.src[key]||(FL.src[key]={p:null,vx:0,vy:0,vz:0,ax:0,az:0});obj.updateMatrixWorld?0:0;RS_V2.setFromMatrixPosition(obj.matrixWorld);
+    if(s.p){const wx=(RS_V2.x-s.p.x)/dt,wy=(RS_V2.y-s.p.y)/dt,wz=(RS_V2.z-s.p.z)/dt,lx=wx*cy-wz*sy,lz=wx*sy+wz*cy;
+      const k=Math.min(1,dt*12);const cA=v=>Math.max(-8,Math.min(8,v));s.ax+=(cA((lx-s.vx)/dt)-s.ax)*k;s.az+=(cA((lz-s.vz)/dt)-s.az)*k;s.vx+=(lx-s.vx)*Math.min(1,dt*20);s.vz+=(lz-s.vz)*Math.min(1,dt*20);s.vy+=(wy-s.vy)*Math.min(1,dt*20);}
+    else s.p=new THREE.Vector3();s.p.copy(RS_V2);return s;};
+  const hit=(I.st==='hurt'||I.st==='tumble')&&X.st!=='hurt'&&X.st!=='tumble';X.st=I.st;
+  const wind=[0.010*Math.sin(t*1.1)+0.005*Math.sin(t*2.9+1),0.006*Math.sin(t*0.8+2)+0.004*Math.sin(t*3.3)];
+  const step=(c,tx,tz,k,d,CL=0.04)=>{if(hit){c.vx+=(Math.random()-0.5)*0.6;c.vz-=0.5+Math.random()*0.4;}
+    c.vx+=(k*(tx-c.x)-d*c.vx)*dt;c.vz+=(k*(tz-c.z)-d*c.vz)*dt;c.x+=c.vx*dt;c.z+=c.vz*dt;
+    const L=Math.hypot(c.x,c.z);if(L>CL){c.x*=CL/L;c.z*=CL/L;}};
+  const drive=(s,gv,ga)=>[-(s.vx*gv+s.ax*ga),-(s.vz*gv+s.az*ga)];
+  // hem: hips motion; each panel has its own noise phase so the edge ripples instead of swinging as one plate
+  const hs=src('hips',B.hips),hd=drive(hs,0.018,0.002),flare=Math.min(0.03,Math.abs(hs.vy)*0.012),spd=Math.min(1,Math.hypot(hs.vx,hs.vz)*0.4),H=R.HEMH;
+  FL.hem.forEach((c,i)=>{const a=R.hemAng[i],nx=Math.cos(a),nz=Math.sin(a),nz2=0.006*(0.4+spd)*Math.sin(t*(7+i*0.9)+c.ph);
+    step(c,hd[0]+wind[0]+nx*(flare+nz2),hd[1]+wind[1]+nz*(flare+nz2),90,9);
+    let dx=c.x,dz=c.z;const rad=dx*nx+dz*nz;if(rad<0.004){dx+=nx*(0.004-rad);dz+=nz*(0.004-rad);}   // never fold inward through the pants
+    const b=B['hem'+i];b.rotation.x=Math.max(-0.26,Math.min(0.26,-dz/H));b.rotation.z=Math.max(-0.26,Math.min(0.26,dx/H));});
+  // sleeves: each follows its own upper-arm velocity (punches whip them)
+  ['L','R'].forEach((S,i)=>{const s=src('slv'+S,B['slv'+S]),d=drive(s,0.02,0.002),c=FL.slv[i];step(c,d[0]+wind[0]*0.6,d[1]+wind[1]*0.6,110,10);
+    const b=B['slv'+S],m=Math.hypot(c.x,c.z);b.rotation.x=Math.max(-0.3,Math.min(0.3,-c.z*3));b.rotation.z=Math.max(-0.3,Math.min(0.3,c.x*3));const fl=1+Math.min(0.12,m*1.6);b.scale.set(fl,1,fl);});
+  // hair: head velocity, stiffer (short hair), ±0.12 rad
+  const hh=src('head',B.head),dh=drive(hh,0.02,0.0025);['hF','hB','hL','hR'].forEach((n,i)=>{const c=FL.hair[i];step(c,dh[0]+wind[0]*0.4,dh[1]+wind[1]*0.4,160,10);
+    const b=B[n];b.rotation.x=Math.max(-0.12,Math.min(0.12,-c.z*2.2));b.rotation.z=Math.max(-0.12,Math.min(0.12,c.x*2.2));});
 }
 {const mk0=makeFighterView;makeFighterView=function(def,big){const V=mk0(def,big);if(def&&def.real){try{rsAttach(V,def);}catch(e){console.warn('[rsteve] attach',e);}}return V;};
- const ap0=applyPose;applyPose=function(V,P,face){ap0(V,P,face);if(V.real){try{rsPose(V);}catch(e){}}};}
+ const pf0=poseFor;poseFor=function(F,t){const P=pf0(F,t);RS_INFO=null;if(F&&F.def&&F.def.real){try{RS_INFO=rsMasc(F,t,P);}catch(e){console.warn('[rsteve] pose',e);}}return P;};
+ const ap0=applyPose;applyPose=function(V,P,face){ap0(V,P,face);if(V.real){const I=RS_INFO;RS_INFO=null;try{rsPose(V,I);}catch(e){if(!V.real.err){V.real.err=1;console.warn('[rsteve] pose',e);}}}};}
 
 // ---------------------------------------------------------------- game / match ----------------------------------------------------------------
 const AI_LV={easy:{react:26,guard:0.06,aggro:0.35,combo:0.25,special:0.08,dmgOut:0.75,dmgIn:1.15,jump:0.05,dodge:0},
@@ -21880,13 +22130,13 @@ function afterRound(){
 function matchOver(w){
   if(M.mode==='demo'){M.phase='over';G.locked=true;clearTimeout(M._dt);M._dt=setTimeout(()=>{if(M.mode==='demo'&&M.phase==='over')BF.attract();},1600);return;}
   M.phase='over';M.winner=w;M.running=true;G.locked=true;AU.duck(0.15,1.2);
-  clearTimeout(M._dt);M._dt=setTimeout(()=>{if(M.phase!=='over')return;MUS24.over(w);const cer=!(M.mode==='arcade'&&!(w===0&&M.li>=M.ladder.length-1));if(cer)BFCeremony.run(G.f[w],()=>UI.results(w));else UI.results(w);},900);
+  clearTimeout(M._dt);M._dt=setTimeout(()=>{if(M.phase!=='over')return;MUS24.over(w);const cer=!(M.mode==='arcade'&&!(w===0&&M.li>=M.ladder.length-1));const fin=()=>BFCeremony.run(G.f[w],()=>UI.results(w));if(cer&&M.mode==='arcade'&&w===0)AST27.ending(fin);else if(cer)fin();else UI.results(w);},900);
 }
-function stopMatch(){CINE.abort();if(typeof WL!=='undefined')WL.clear(G);if(typeof DP!=='undefined')DP.abort();clearTimeout(M._dt);M.running=false;M.paused=false;try{UI.el.bfPause.classList.add('bf-hide');}catch(e){}M.phase='idle';cancelAnimationFrame(M.raf);if(!MUS24.keepMenu())AU.stopMusic(0.4);AU.truck(false);BFCeremony.abort();G.locked=true;}
+function stopMatch(){AST27.abort();CINE.abort();if(typeof WL!=='undefined')WL.clear(G);if(typeof DP!=='undefined')DP.abort();clearTimeout(M._dt);M.running=false;M.paused=false;try{UI.el.bfPause.classList.add('bf-hide');}catch(e){}M.phase='idle';cancelAnimationFrame(M.raf);if(!MUS24.keepMenu())AU.stopMusic(0.4);AU.truck(false);BFCeremony.abort();G.locked=true;}
 // ---- per-frame
 function simFrame(){
   G.frame++;const [a,b]=G.f;
-  if(M.phase==='intro'){M.pf++;const IF=M.introF||92;if(IF>92&&M.pf===IF-64)UI.banner('라운드 '+G.round,'round');if(M.pf===IF-22){UI.banner('파이트!','fight');AU.play('super');G.shake(0.05);}if(M.pf>=IF){G.locked=false;M.phase='fight';if(typeof VF!=='undefined')VF.introEnd();}}
+  if(M.phase==='intro'&&!AST27.on){M.pf++;const IF=M.introF||92;if(IF>92&&M.pf===IF-64)UI.banner('라운드 '+G.round,'round');if(M.pf===IF-22){UI.banner('파이트!','fight');AU.play('super');G.shake(0.05);}if(M.pf>=IF){G.locked=false;M.phase='fight';if(typeof VF!=='undefined')VF.introEnd();}}
   // input
   const I0=a.cpu?(readInput(0),cpuThink(a,b)):readInput(0),I1=M.mode==='2p'?readInput(1):M.mode==='training'&&!b.cpu?DP.dummyInput(readInput(1)):(readInput(1),cpuThink(b,a));
   a.input(I0);b.input(I1);
@@ -21953,7 +22203,7 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
 <div id="bfTouch" class="bf-hide"><div id="bfJoyZ"><div id="bfPad"><span class="u"></span><span class="l"></span><span class="r"></span><span class="d"></span><i></i></div></div>
 <div id="bfBtns"><button data-k="atk" class="b-atk" aria-label="공격"><svg viewBox="0 0 24 24"><path fill="#fff" d="M6 9.5a2 2 0 0 1 2-2h1.2V6.6a1.6 1.6 0 0 1 3.2 0v.9h.4V6.9a1.6 1.6 0 0 1 3.2 0v.9a1.6 1.6 0 0 1 3 .8V14a6 6 0 0 1-6 6h-1.4A5.6 5.6 0 0 1 6 14.4z"/><path d="M9.2 7.5v4M12.8 7.5v4M16 8.3v3.2" stroke="rgba(0,0,0,.35)" stroke-width="1.2" stroke-linecap="round"/></svg><small>공격</small></button><button data-k="sp" class="b-sp" aria-label="필살"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 2.5l2.3 6.2 6.6.3-5.2 4.1 1.8 6.4L12 15.8l-5.5 3.7 1.8-6.4-5.2-4.1 6.6-.3z"/><circle cx="12" cy="12" r="2.2" fill="rgba(0,0,0,.25)"/></svg><small>필살</small></button><button data-k="jump" class="b-jump" aria-label="점프"><svg viewBox="0 0 24 24"><path fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" d="M5 13l7-7 7 7M7.5 19.5l4.5-4.5 4.5 4.5"/></svg><small>점프</small></button><button data-k="g" class="b-g" aria-label="가드"><svg viewBox="0 0 24 24"><path fill="#fff" d="M12 2.5l8 3v6c0 5-3.4 8.6-8 10-4.6-1.4-8-5-8-10v-6z"/><path fill="rgba(0,0,0,.22)" d="M12 5.2v14.3c3.2-1.3 5.4-4.1 5.4-7.9V7.2z"/></svg><small>가드</small></button><button data-k="su" class="b-su" aria-label="슈퍼"><svg viewBox="0 0 24 24"><path fill="#fff" d="M13.5 2L5 13.5h6L9.8 22 19 10h-6.2z"/></svg><small>슈퍼</small><b class="rg"></b><i class="bd">MAX</i></button></div></div>
 <div id="bfMenu" class="bfpanel"><div class="bf-logo">마인크래프트 파이터<small>MINECRAFT FIGHTER</small></div>
-<div class="bf-modes"><button data-m="cpu">🤖 1P vs CPU</button><button data-m="2p">🎮 2P 대전</button><button data-m="arcade">🏆 아케이드</button><button data-m="training">🥋 트레이닝</button></div>
+<div class="bf-modes"><button data-m="cpu">🤖 1P vs CPU</button><button data-m="2p">🎮 2P 대전</button><button data-m="arcade">🏆 아케이드</button><button data-m="training">🥋 트레이닝</button></div><button id="bfGal" class="bf-gal">📖 엔딩 갤러리</button>
 <div class="bf-opt"><span>난이도</span><span class="chips" id="bfDiff"><button data-d="easy">쉬움</button><button data-d="normal">보통</button><button data-d="hard">어려움</button></span></div>
 <div class="bf-opt"><span>음악</span><button id="bfMus" class="tg"></button><input id="bfVol" type="range" min="0" max="1" step="0.05"></div>
 <div class="bf-keys" id="bfKeys"></div></div>
@@ -21963,7 +22213,7 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
 <div id="bfPause" class="bfpanel small bf-hide"><h3>일시정지</h3><button data-a="resume" class="go">계속하기</button><button data-a="moves">📜 기술표</button><button data-a="restart">다시 시작</button><div class="bf-ml"></div><button data-a="menu" class="sec">메뉴로</button></div>
 <div id="bfRes" class="bfpanel bf-hide"></div>
 <div id="bfCer" class="bf-hide"><div class="cer-title"><span>♪</span> 1억5천만원만 준비해</div><div class="cer-win"></div><button id="bfSkip">건너뛰기 ▶▶</button><div id="bfConf"></div></div>`;
-    const q=s=>root.querySelector(s);this.root=root;
+    const q=s=>root.querySelector(s);this.root=root;try{AST27.css();q('#bfGal').onclick=()=>{try{AU.play('select');}catch(e){}AST27.gallery();};}catch(e){console.warn(e);}
     ['bfHud','bfTimer','bfBanner','bfNums','bfFlash','bfCut','bfSong','bfTouch','bfMenu','bfSel','bfPause','bfRes','bfCer','bfCombo0','bfCombo1','bfGrid','bfArenas','bfSelHint'].forEach(k=>this.el[k]=q('#'+k));
     this.hp=[0,1].map(i=>{const p=q('#bfP'+i);return{p,img:p.querySelector('.pt'),nm:p.querySelector('.nm'),fill:p.querySelector('.fill'),lag:p.querySelector('.lag'),pips:p.querySelector('.pips'),mt:p.querySelector('.mt i'),mtw:p.querySelector('.mt'),lagv:1};});
     if(this.touch)root.classList.add('bf-touch');
@@ -22045,7 +22295,7 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
     if(restart&&M.last0){BF.begin(M.last0);return;}
     if(this.selMode==='arcade'){const pool=ROSTER.filter(r=>!r.exp&&r.id!==S.p[0]&&r.id!=='golemk'&&r.id!=='iron').map(r=>r.id).sort(()=>Math.random()-0.5).slice(0,4);
       const ar=['plains','nether','seaside','crayon','mushroom','portal','cliff','pigfarm','raid'].sort(()=>Math.random()-0.5);const boss=S.p[0]==='golemk'?'iron':'golemk';
-      M.ladder=pool.map((id,i)=>({p2:id,arena:ar[i]})).concat([{p2:boss,arena:'space',boss:1}]);M.li=0;BF.arcadeNext();return;}
+      M.ladder=pool.map((id,i)=>({p2:id,arena:ar[i]})).concat([{p2:boss,arena:'space',boss:1}]);try{AST27.ladder(M.ladder,S.p[0]);}catch(e){console.warn(e);}M.li=0;BF.arcadeNext();return;}
     const arena=S.arena==='random'?ARENAS[Math.floor(Math.random()*ARENAS.length)].id:S.arena;
     BF.begin({mode:this.selMode,diff,p1:S.p[0],p2:S.p[1]||'zombie',arena,boss:0});},
   // ---- HUD
@@ -22068,9 +22318,9 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
   togglePause(v){if(M.phase==='ceremony'||M.mode==='demo'||!M.running)return;M.paused=v===undefined?!M.paused:v;this.el.bfPause.classList.toggle('bf-hide',!M.paused);if(M.paused){AU.hold(0.3);}else{AU.applyVol();M.last=performance.now();}},
   results(w){M.phase='results';const E=this.el.bfRes,W=G.f[w],L=G.f[1-w],st=M.stats,arc=M.mode==='arcade';
     const youWin=M.mode==='2p'||w===0;let title=M.mode==='2p'?`P${w+1} 승리!`:(w===0?'승리!':'패배…');let extra='';
-    if(arc){if(w===0&&M.li>=M.ladder.length-1){title='아케이드 클리어!';extra='<div class="arc">🏆 5연승! 우주의 챔피언!</div>';}
+    if(arc){if(w===0&&M.li>=M.ladder.length-1){title='아케이드 클리어!';extra='<div class="arc">🏆 5연승! 우주의 챔피언!</div>'+AST27.clearHtml();}
       else if(w===0){const n=M.ladder[M.li+1];extra=`<div class="arc">다음 상대 (${M.li+2}/${M.ladder.length}): <b>${RBY[n.p2].name}</b>${n.boss?' 👑 보스':''}</div>`;}
-      else extra=`<div class="arc">${M.li+1}번째 상대에서 패배</div>`;}
+      else extra=`<div class="arc">${M.li+1}번째 상대에서 패배</div>`+AST27.loseHtml();}
     const btns=arc?(w===0&&M.li<M.ladder.length-1?'<button data-r="next" class="go">다음 상대 ▶</button>':'<button data-r="retry" class="go">'+(w===0?'다시 도전':'이어하기')+'</button>')+'<button data-r="sel">캐릭터 선택</button><button data-r="menu" class="sec">메뉴로</button>'
       :'<button data-r="again" class="go">다시 하기</button><button data-r="sel">캐릭터 선택</button><button data-r="menu" class="sec">메뉴로</button>';
     E.innerHTML=`<h2 class="${youWin?'w':'l'}">${title}</h2><div class="res-row"><div class="res-p win"><img src="${this.img(W.def.id)}"><b>${W.def.name}</b><small>WIN · ${G.wins[w]}승</small></div><div class="res-stats">
@@ -22189,7 +22439,7 @@ const BF={built:false,on:false,
     if(on){this.ensure();M.active=true;UI.show('menu');setTimeout(()=>{if(this.on){UI.portraits();this.attract();}},60);}
     else{M.active=false;try{document.documentElement.classList.remove('bf-fight','bf-sel');}catch(_){}try{stopMatch();}catch(e){}AU.stopMusic(0.2);AU.truck(false);[0,1].forEach(p=>{VK[p]={};VP[p]={};});}},
   begin(o){if(!this.on)return;stopMatch();M.last0=Object.assign({},o);M.active=true;startMatch(Object.assign({},o));},
-  arcadeNext(){const L=M.ladder&&M.ladder[M.li];if(!L)return;this.begin({mode:'arcade',diff:LS.get('diff','normal'),p1:UI.sel.p[0]||'steve',p2:L.p2,arena:L.arena,boss:L.boss?1:0});},
+  arcadeNext(){const L=M.ladder&&M.ladder[M.li];if(!L)return;this.begin({mode:'arcade',diff:LS.get('diff','normal'),p1:UI.sel.p[0]||'steve',p2:L.p2,arena:L.arena,boss:L.boss?1:0});try{AST27.pre(M.li,L);}catch(e){console.warn(e);}},
   attract(){if(!this.on)return;if(UI.cur==='hud')return;stopMatch();
     const ids=ROSTER.filter(r=>!r.exp).map(r=>r.id),a=ids[Math.floor(Math.random()*ids.length)];let b=a;while(b===a)b=ids[Math.floor(Math.random()*ids.length)];
     const ar=ARENAS[Math.floor(Math.random()*ARENAS.length)].id;M.active=true;try{startMatch({mode:'demo',diff:'hard',p1:a,p2:b,arena:ar,boss:0});}catch(e){console.warn('[BF] demo',e);}}
