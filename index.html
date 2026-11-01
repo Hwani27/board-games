@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.9.8">
+<meta name="ba-version" content="v5.9.9">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -21596,14 +21596,14 @@ const RealSteveLib = (function () {
 function make(Q) {
   const SG = (r, w, h, ...a) => new T.SphereGeometry(r, Math.max(8, Math.round(w * Q)), Math.max(6, Math.round(h * Q)), ...a);
   const T = THREE, V3 = (x, y, z) => new T.Vector3(x, y, z);
-  const COL = { skin: [0.80, 0.58, 0.45], skinD: [0.70, 0.48, 0.36], shirt: [0.05, 0.62, 0.66], shirtD: [0.03, 0.45, 0.50], pants: [0.24, 0.22, 0.62], pantsD: [0.17, 0.15, 0.46], shoe: [0.38, 0.38, 0.40], sole: [0.16, 0.16, 0.17], hair: [0.20, 0.12, 0.07], stub: [0.42, 0.28, 0.20], nail: [0.88, 0.7, 0.62] };
+  const COL = { skin: [0.80, 0.58, 0.45], skinD: [0.70, 0.48, 0.36], shirt: [0.05, 0.62, 0.66], shirtD: [0.03, 0.45, 0.50], pants: [0.24, 0.22, 0.62], pantsD: [0.17, 0.15, 0.46], shoe: [0.38, 0.38, 0.40], sole: [0.16, 0.16, 0.17], hair: [0.20, 0.12, 0.07], stub: [0.42, 0.28, 0.20], nail: [0.88, 0.7, 0.62], lip: [0.64, 0.42, 0.37], lipD: [0.53, 0.34, 0.3] };
   const sm = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
   const mix = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t, a[2] + (b[2] - a[2]) * t];
   // ---------------- skeleton (bind = relaxed A-pose, metres, Y up, facing +Z) — broader shoulders than v5.8.5 (V-taper)
   const BJ = {
-    hips: [null, V3(0, 0.96, 0)], spine: ['hips', V3(0, 1.08, 0)], chest: ['spine', V3(0, 1.27, 0)], neck: ['chest', V3(0, 1.49, 0)], head: ['neck', V3(0, 1.585, 0.005)],
-    clavL: ['chest', V3(0.05, 1.43, 0)], armL: ['clavL', V3(0.205, 1.42, 0)], foreL: ['armL', V3(0.262, 1.155, -0.01)], handL: ['foreL', V3(0.295, 0.915, 0.01)],
-    clavR: ['chest', V3(-0.05, 1.43, 0)], armR: ['clavR', V3(-0.205, 1.42, 0)], foreR: ['armR', V3(-0.262, 1.155, -0.01)], handR: ['foreR', V3(-0.295, 0.915, 0.01)],
+    hips: [null, V3(0, 0.96, 0)], spine: ['hips', V3(0, 1.08, 0)], chest: ['spine', V3(0, 1.27, 0)], neck: ['chest', V3(0, 1.49, 0)], head: ['neck', V3(0, 1.585, 0.005)], jaw: ['head', V3(0, 1.695, -0.005)],
+    clavL: ['chest', V3(0.05, 1.43, 0)], armL: ['clavL', V3(0.205, 1.42, 0)], foreL: ['armL', V3(0.255, 1.178, -0.01)], handL: ['foreL', V3(0.284, 0.957, 0.01)],
+    clavR: ['chest', V3(-0.05, 1.43, 0)], armR: ['clavR', V3(-0.205, 1.42, 0)], foreR: ['armR', V3(-0.255, 1.178, -0.01)], handR: ['foreR', V3(-0.284, 0.957, 0.01)],
     thighL: ['hips', V3(0.098, 0.93, 0)], shinL: ['thighL', V3(0.108, 0.52, 0.005)], footL: ['shinL', V3(0.112, 0.095, -0.01)],
     thighR: ['hips', V3(-0.098, 0.93, 0)], shinR: ['thighR', V3(-0.108, 0.52, 0.005)], footR: ['shinR', V3(-0.112, 0.095, -0.01)],
   };
@@ -21634,7 +21634,7 @@ function make(Q) {
     H.t = { tb, td, tl, tip: p, axis: td.clone().cross(tn).normalize() }; });
   const NAMES = Object.keys(BJ), IDX = {}; NAMES.forEach((n, i) => IDX[n] = i);
   // ---------------- loft builder (per-layer buffers)
-  const LAY = {}; const LB = n => LAY[n] || (LAY[n] = { P: [], C: [], SI: [], SW: [], IX: [], UV: [] });
+  const LAY = {}; const LB = n => LAY[n] || (LAY[n] = { P: [], C: [], SI: [], SW: [], IX: [], UV: [], K: [], MO: null });
   function catmull(pts, s) {
     if (s <= pts[0][0]) return pts[0][1]; if (s >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
     let i = 0; while (pts[i + 1][0] < s) i++;
@@ -21649,10 +21649,13 @@ function make(Q) {
     const u1v = hint.clone().sub(ax.clone().multiplyScalar(hint.dot(ax))).normalize(), v1 = u1v.clone().cross(ax).normalize();
     const U0 = o.u0 || 0, U1 = o.u1 === undefined ? 1 : o.u1, p0 = o.pole0 !== false && U0 === 0, p1 = o.pole1 !== false && U1 === 1;
     const NS = Math.max(4, Math.round((o.ns || 40) * Q)), NA = Math.max(8, Math.round((o.na || 36) * Q)), base = D.P.length / 3, CIRC = 2 * Math.PI * o.prof.reduce((x, q) => x + q[1], 0) / o.prof.length;
-    for (let i = 0; i <= NS; i++) {
-      const q = i / NS, s = p0 && p1 ? 0.5 - 0.5 * Math.cos(Math.PI * q) : p0 ? 1 - Math.cos(Math.PI * q / 2) : p1 ? Math.sin(Math.PI * q / 2) : q;
-      const u = U0 + (U1 - U0) * s;
-      const r = (i === 0 && p0) || (i === NS && p1) ? 0 : catmull(o.prof, u);
+    const UL = []; for (let i = 0; i <= NS; i++) { const q = i / NS, s = p0 && p1 ? 0.5 - 0.5 * Math.cos(Math.PI * q) : p0 ? 1 - Math.cos(Math.PI * q / 2) : p1 ? Math.sin(Math.PI * q / 2) : q; UL.push(U0 + (U1 - U0) * s); }
+    if (o.us) { o.us.forEach(x => { if (x > U0 + 1e-3 && x < U1 - 1e-3) UL.push(x); }); UL.sort((x, y) => x - y);
+      for (let i = UL.length - 2; i > 0; i--) if (UL[i] - UL[i - 1] < 8e-4 && o.us.indexOf(UL[i]) < 0) UL.splice(i, 1); else if (UL[i + 1] - UL[i] < 8e-4 && o.us.indexOf(UL[i]) < 0) UL.splice(i, 1); }
+    const NR = UL.length - 1;
+    for (let i = 0; i <= NR; i++) {
+      const u = UL[i];
+      const r = (i === 0 && p0) || (i === NR && p1) ? 0 : catmull(o.prof, u);
       const c0 = a.clone().add(ax.clone().multiplyScalar(u * L));
       for (let j = 0; j <= NA; j++) {
         const th = 2 * Math.PI * j / NA, ct = Math.cos(th), st = Math.sin(th);
@@ -21665,9 +21668,11 @@ function make(Q) {
         const w = o.w(u, p, th).filter(q => q[1] > 1e-4).sort((x, y) => y[1] - x[1]); const ii = [0, 0, 0, 0], ww = [0, 0, 0, 0]; let s2 = 0;
         w.slice(0, 4).forEach((q, k) => { ii[k] = IDX[q[0]]; ww[k] = q[1]; s2 += q[1]; }); if (!s2) { ii[0] = IDX.hips; ww[0] = 1; s2 = 1; }
         D.SI.push(...ii); D.SW.push(...ww.map(x => x / s2));
+        if (o.k) D.K.push(...o.k(u, th, p));
+        if (o.mo) { const mo = o.mo(u, th, p); if (!D.MO) D.MO = mo.map(() => []); mo.forEach((d, k) => D.MO[k].push(d[0], d[1], d[2])); }
       }
     }
-    for (let i = 0; i < NS; i++) for (let j = 0; j < NA; j++) { const q = base + i * (NA + 1) + j, r2 = q + NA + 1; D.IX.push(q, r2, q + 1, q + 1, r2, r2 + 1); }
+    for (let i = 0; i < NR; i++) for (let j = 0; j < NA; j++) { const q = base + i * (NA + 1) + j, r2 = q + NA + 1; D.IX.push(q, r2, q + 1, q + 1, r2, r2 + 1); }
   }
   const J = n => BJ[n][1];
   // ---------------- torso: body (skin, smooth muscle), shirt (offset shell with folds, open collar + hem), pants (pelvis shell)
@@ -21690,21 +21695,78 @@ function make(Q) {
   loft(Object.assign({}, TBASE, { L: 'pants', ns: 24, na: 40, u1: TU(1.09), pole1: false,
     grow: (u, th, r) => r * 1.012 + 0.004,
     col: (u, th, p) => (p.y > 1.022 && p.y < 1.047) ? mix(COL.pants, COL.pantsD, 0.65) : mix(COL.pants, COL.pantsD, 0.15 * Math.max(0, Math.sin(th * 7 + u * 20))), w: torsoW }));
-  // ---- neck (thicker)
-  loft({ a: V3(0, 1.43, -0.008), b: V3(0, 1.66, 0.0), prof: [[0, 0.096], [0.2, 0.082], [0.5, 0.073], [0.8, 0.066], [1, 0.062]], ns: 16, na: 32,
+  const g_ = (x, m, w) => Math.exp(-Math.pow((x - m) / w, 2));
+  // ---- neck (v5.9.9: thicker top, sternocleidomastoid ridges, larynx, trapezius slope)
+  loft({ a: V3(0, 1.43, -0.008), b: V3(0, 1.665, 0.0), prof: [[0, 0.1], [0.2, 0.087], [0.5, 0.078], [0.8, 0.071], [1, 0.066]], ns: 22, na: 36,
+    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th); let d = 0.045 * g_(u, 0.5, 0.1) * g_(c, 0, 0.18) * Math.max(0, s);
+      [1, -1].forEach(sd => { const t0 = Math.PI / 2 - sd * (0.25 + 1.6 * u); d += 0.07 * Math.exp(-Math.pow(Math.atan2(Math.sin(th - t0), Math.cos(th - t0)) / 0.3, 2)) * sm(0.05, 0.25, u) * (1 - sm(0.75, 0.95, u)); });
+      return d + 0.04 * g_(u, 0.08, 0.1) * Math.max(0, -s); },
     col: () => COL.skin, w: (u, p) => { const t = sm(1.47, 1.53, p.y), h = sm(1.6, 1.65, p.y); return [['chest', 1 - t], ['neck', t * (1 - h)], ['head', h]]; } });
-  // ---- head (chin → crown): squarer jaw, heavier brow ridge
-  const HPROF = [[0, 0], [0.04, 0.048], [0.12, 0.082], [0.25, 0.099], [0.42, 0.106], [0.58, 0.11], [0.72, 0.108], [0.85, 0.094], [0.94, 0.062], [1, 0]], HA = V3(0, 1.565, 0.025), HB = V3(0, 1.875, 0.0);
+  // ---- v5.9.9 head (chin → crown): sculpted skull / brow ridge / cheekbones / square jaw + chin; own 'head' layer with a real mouth
+  // (jaw bone, sculpted lips with cupid's bow, slit opening that is discarded in the shader, morph targets for expressions, shader stubble)
+  const HPROF = [[0, 0], [0.04, 0.046], [0.12, 0.079], [0.25, 0.097], [0.42, 0.106], [0.58, 0.11], [0.72, 0.108], [0.85, 0.094], [0.94, 0.062], [1, 0]], HA = V3(0, 1.565, 0.025), HB = V3(0, 1.875, 0.0);
   const HEZ = (u, th) => (Math.sin(th) > 0 ? 1.1 + 0.05 * sm(0.0, 0.25, u) * (1 - sm(0.3, 0.45, u)) : 1.08 + 0.05 * sm(0.6, 0.9, u));
-  const HEX = (u, th) => 1 + 0.06 * sm(0.02, 0.14, u) * (1 - sm(0.22, 0.36, u)) * Math.pow(Math.abs(Math.cos(th)), 2);
-  loft({ a: HA, b: HB, prof: HPROF, ns: 60, na: 72, ex: HEX, ez: HEZ,
-    disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th);
-      return 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.5) / 0.08, 2)) * Math.pow(Math.abs(c), 2) - 0.035 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.56) / 0.04, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.36) / 0.16, 2))
-        + 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.635) / 0.03, 2)) * (1 - Math.abs(c) * 0.5) + 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.06) / 0.05, 2)) + 0.022 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.47) / 0.05, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.62) / 0.15, 2)) + 0.025 * Math.exp(-Math.pow((u - 0.15) / 0.06, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.82) / 0.15, 2)) - 0.012 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.33) / 0.05, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.5) / 0.12, 2)) - 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.545) / 0.035, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.36) / 0.13, 2)) + 0.012 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.6) / 0.06, 2)) * Math.exp(-Math.pow(c / 0.1, 2)); },
-    col: (u, th, p) => { const s = Math.sin(th); const st = s > 0.15 ? sm(0.3, 0.12, u) * (1 - sm(0.55, 0.85, Math.abs(Math.cos(th)))) : 0;
-      const mus = s > 0.6 ? Math.exp(-Math.pow((u - 0.335) / 0.025, 2)) * (1 - sm(0.2, 0.5, Math.abs(Math.cos(th)))) * 0.8 : 0;
-      return mix(mix(COL.skin, COL.skinD, 0.15 * (1 - s)), COL.stub, Math.min(0.85, st + mus)); },
-    w: () => [['head', 1]] });
+  const HEX = (u, th) => 1 + 0.03 * sm(0.02, 0.14, u) * (1 - sm(0.22, 0.36, u)) * Math.pow(Math.abs(Math.cos(th)), 2);
+  const UM = 0.274, UD = 0.0016, HW = 0.235;   // mouth line (loft u), half slit, lateral half-width (|cos th|)
+  const HDISP = (u, th) => { const s = Math.sin(th), c = Math.cos(th), f = Math.max(0, s), ac = Math.abs(c);
+    return 0.03 * f * g_(u, 0.5, 0.08) * c * c   // cheek mass
+      - 0.026 * f * g_(u, 0.56, 0.04) * g_(ac, 0.36, 0.16) - 0.014 * f * g_(u, 0.545, 0.035) * g_(ac, 0.36, 0.13)   // eye sockets (shallower: no dark holes)
+      + 0.05 * f * g_(u, 0.638, 0.028) * (1 - ac * 0.45) * (1 - sm(0.75, 0.95, ac))   // brow ridge
+      + 0.01 * f * g_(u, 0.6, 0.035) * g_(c, 0, 0.12) - 0.012 * f * g_(u, 0.665, 0.03) * g_(ac, 0.86, 0.1)   // glabella, temples
+      + 0.042 * f * g_(u, 0.475, 0.045) * g_(ac, 0.6, 0.14) - 0.022 * f * g_(u, 0.37, 0.05) * g_(ac, 0.66, 0.13)   // cheekbones + hollow under them
+      + 0.022 * g_(u, 0.15, 0.05) * g_(ac, 0.86, 0.12) + 0.022 * f * g_(u, 0.12, 0.055) * g_(ac, 0.62, 0.2)   // jaw angle + jaw line
+      + 0.03 * f * g_(u, 0.075, 0.05) * g_(c, 0, 0.36) - 0.012 * f * g_(u, 0.215, 0.022) * g_(c, 0, 0.22)   // square chin, groove under the lower lip
+      + 0.016 * f * g_(u, 0.28, 0.05) * g_(c, 0, 0.3) - 0.011 * f * g_(u, 0.33, 0.045) * g_(ac, 0.42, 0.1)   // mouth barrel, nasolabial fold
+      + 0.012 * f * g_(u, 0.6, 0.06) * g_(c, 0, 0.1); };   // nose bridge
+  const HAX = HB.clone().sub(HA), HL = HAX.length(); HAX.normalize(); const HU = V3(1, 0, 0), HV = HU.clone().cross(HAX).normalize();
+  const HP = (u, th) => { const r = catmull(HPROF, u) * (1 + HDISP(u, th)); return HA.clone().add(HAX.clone().multiplyScalar(u * HL)).add(HU.clone().multiplyScalar(Math.cos(th) * r * HEX(u, th))).add(HV.clone().multiplyScalar(Math.sin(th) * r * HEZ(u, th))); };
+  const HTH = (u, x) => { let th = Math.PI / 2; for (let k = 0; k < 8; k++) { const R = catmull(HPROF, u) * (1 + HDISP(u, th)) * HEX(u, th); th = Math.acos(Math.max(-1, Math.min(1, x / R))); } return th; };
+  const PM = HP(UM, Math.PI / 2);   // mouth centre on the skin (bind space)
+  // jaw weights: smooth mandible field + a sharp split at the mouth line inside the oval mouth zone (upper lip stays on the skull)
+  const JAWW = (u, c, s, p) => { const fz = sm(0.035, 0.085, p.z), base = sm(UM + 0.05, UM - 0.14, u) * sm(-0.35, 0.25, s) * fz, sh = s > 0 ? Math.pow(Math.max(0, 1 - (c / HW) * (c / HW)), 0.5) * fz : 0;
+    return u < UM ? base + (1 - base) * sh : base * (1 - sh); };
+  const BEARD = (u, c, s) => { if (s < -0.35) return 0; const ac = Math.abs(c), top = 0.345 + 0.17 * sm(0.45, 0.92, ac);
+    let d = sm(top + 0.025, top - 0.03, u) * sm(-0.35, 0.05, s) * sm(0.0, 0.05, u);
+    d *= 1 - 0.5 * sm(0.42, 0.75, ac) * (1 - sm(0.85, 0.97, ac));   // sparser on the cheek flats
+    d *= 1 - Math.exp(-Math.pow((u - UM) / 0.02, 2)) * (1 - sm(HW - 0.02, HW + 0.06, ac)) * (s > 0 ? 1 : 0);   // not on the lips
+    return Math.min(1, d * (0.72 + 0.28 * g_(c, 0, 0.35))); };   // a bit denser around mouth + chin (short boxed beard)
+  const NMO = 5;   // morph targets: 0 smile, 1 frown, 2 wide (grimace / kiai stretch), 3 upper-lip raise, 4 lower-lip drop
+  const FMO = (p, lipT) => { const x = p.x - PM.x, dy = p.y - PM.y, ax = Math.abs(x), sx = Math.sign(x), out = [...Array(NMO)].map(() => [0, 0, 0]);
+    if (p.z < 0.05) return out;
+    const gc = Math.exp(-Math.pow((ax - 0.026) / 0.013, 2) - Math.pow(dy / 0.014, 2)), ch = Math.exp(-Math.pow((ax - 0.04) / 0.015, 2) - Math.pow((dy - 0.024) / 0.016, 2));
+    const lat = 1 - sm(0.022, 0.038, ax), vz = Math.exp(-Math.pow(dy / 0.012, 2)) * lat, up = lipT ? (lipT.up ? vz : 0) : (dy >= 0 ? vz : 0), dn = lipT ? (lipT.up ? 0 : vz) : (dy < 0 ? vz : 0);
+    out[0] = [sx * 0.0022 * gc, 0.0042 * gc + 0.0026 * ch, -0.0018 * gc + 0.0016 * ch];
+    out[1] = [sx * 0.0005 * gc, -0.0045 * gc, -0.0008 * gc];
+    out[2] = [sx * 0.0062 * gc + (lipT ? x * 0.1 : 0), -0.0008 * gc, -0.0035 * gc - (lipT ? lipT.h * 0.45 : 0)];
+    out[3] = [0, 0.0036 * up, 0.0008 * up];
+    out[4] = [0, -0.0036 * dn, 0.0012 * dn];
+    return out; };
+  loft({ L: 'head', a: HA, b: HB, prof: HPROF, ns: 60, na: 84, ex: HEX, ez: HEZ, disp: HDISP,
+    us: [UM - UD, UM + UD, UM - 0.007, UM + 0.007, UM - 0.016, UM + 0.016, UM - 0.028, UM + 0.028],
+    col: (u, th) => { const s = Math.sin(th), c = Math.cos(th), lp = s > 0 ? Math.exp(-Math.pow((u - UM) / 0.012, 2)) * (1 - sm(HW - 0.04, HW + 0.02, Math.abs(c))) : 0;
+      return mix(mix(COL.skin, COL.skinD, 0.15 * (1 - s)), COL.lipD, 0.85 * lp); },
+    k: (u, th) => { const s = Math.sin(th), c = Math.cos(th); return [u, s > 0 ? c : 9, BEARD(u, c, s)]; },
+    mo: (u, th, p) => FMO(p, null),
+    w: (u, p, th) => { const jw = JAWW(u, Math.cos(th), Math.sin(th), p); return [['jaw', jw], ['head', 1 - jw]]; } });
+  // lips: two pillow sheets laid on the skin, edges tucked under it; inner edges roll into the slit
+  { const D = LB('head'), NAl = Math.max(10, Math.round(26 * Q)), NBl = Math.max(4, Math.round(9 * Q));
+    const lipS = (up) => { const base = D.P.length / 3, W = up ? 0.0255 : 0.0225, T0 = up ? 0.0048 : 0.0062;
+      for (let i = 0; i <= NBl; i++) { const b = i / NBl;
+        for (let j = 0; j <= NAl; j++) { const a = -1 + 2 * j / NAl, x = PM.x + a * W, wa = Math.pow(Math.max(0, 1 - a * a), 0.55);
+          const bow = up ? 1 + 0.28 * g_(Math.abs(a), 0.28, 0.16) - 0.12 * g_(a, 0, 0.1) : 1;   // cupid's bow
+          const hgt = (up ? 0.0085 : 0.0095) * Math.pow(Math.max(0, 1 - a * a), 0.7) * bow + 0.0006;
+          const u = UM + (up ? b : -(1 - b)) * hgt / HL, th = HTH(u, x), S = HP(u, th);
+          const bb = up ? Math.pow(b, 0.8) : Math.pow(b, 1.35), pr = Math.pow(Math.sin(Math.PI * bb), 0.7);
+          const curl = up ? (b < 0.2 ? 0.003 * (1 - b / 0.2) : 0) : (b > 0.8 ? 0.003 * (b - 0.8) / 0.2 : 0), h = T0 * wa * pr - 0.0013 - curl * wa;
+          const n = S.clone().sub(HA.clone().add(HAX.clone().multiplyScalar(u * HL))); n.y *= 0.3; n.normalize();
+          const p = S.clone().add(n.multiplyScalar(h));
+          D.P.push(p.x, p.y, p.z); D.UV.push(a * 0.05, u * HL);
+          const cl = mix(COL.lip, COL.lipD, (up ? 0.22 : 0) + 0.4 * (1 - wa)); D.C.push(Math.pow(cl[0], 2.2), Math.pow(cl[1], 2.2), Math.pow(cl[2], 2.2));
+          const uw = up ? Math.max(u, UM + UD) : Math.min(u, UM - UD), jw = JAWW(uw, Math.cos(th), Math.sin(th), p);
+          D.SI.push(IDX.jaw, IDX.head, 0, 0); D.SW.push(jw, 1 - jw, 0, 0); D.K.push(-1, 9, 0);
+          const m = FMO(p, { up, h: Math.max(0, h) }); if (!D.MO) D.MO = m.map(() => []); m.forEach((d, k) => D.MO[k].push(d[0], d[1], d[2])); } }
+      for (let i = 0; i < NBl; i++) for (let j = 0; j < NAl; j++) { const q = base + i * (NAl + 1) + j, r2 = q + NAl + 1; D.IX.push(q, q + 1, r2, q + 1, r2 + 1, r2); } };
+    lipS(true); lipS(false); }
   // ---- hair: its own mesh; region weights onto 4 sway bones, scalp-side stays on the head
   const hairHas = (u, th) => { const s = Math.sin(th), c = Math.cos(th), y = 1.565 + u * 0.31;
     const hl = s > 0.35 ? 1.79 - 0.012 * Math.abs(c) : s > -0.3 ? 1.745 + (Math.abs(c) > 0.85 ? 0.012 : 0.03) * (s > -0.1 ? 1 : 0.4) : 1.66 + 0.06 * (s + 0.3); return sm(hl - 0.004, hl + 0.008, y); };
@@ -21775,7 +21837,8 @@ function make(Q) {
   // ---------------- assemble: one Skeleton, four SkinnedMeshes (body is the parent; layers are children bound to the same bones)
   function geo(D) { const g = new T.BufferGeometry();
     g.setAttribute('position', new T.Float32BufferAttribute(D.P, 3)); g.setAttribute('color', new T.Float32BufferAttribute(D.C, 3));
-    g.setAttribute('uv', new T.Float32BufferAttribute(D.UV, 2)); g.setAttribute('skinIndex', new T.Uint16BufferAttribute(D.SI, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(D.SW, 4)); g.setIndex(D.IX);
+    g.setAttribute('uv', new T.Float32BufferAttribute(D.UV, 2)); if (D.K && D.K.length) g.setAttribute('rsM', new T.Float32BufferAttribute(D.K, 3));
+    if (D.MO) { g.morphAttributes.position = D.MO.map(a => new T.Float32BufferAttribute(a, 3)); g.morphTargetsRelative = true; } g.setAttribute('skinIndex', new T.Uint16BufferAttribute(D.SI, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(D.SW, 4)); g.setIndex(D.IX);
     g.computeVertexNormals();
     const pos = g.attributes.position, nor = g.attributes.normal, map = new Map();
     for (let i = 0; i < pos.count; i++) { const k = Math.round(pos.getX(i) * 2e4) + ',' + Math.round(pos.getY(i) * 2e4) + ',' + Math.round(pos.getZ(i) * 2e4); (map.get(k) || map.set(k, []).get(k)).push(i); }
@@ -21813,7 +21876,30 @@ function make(Q) {
     m.customProgramCacheKey = () => 'rsvf' + rim.join() + sss.join() + rp; return m; };
   const lm = (o) => { const m = HI && o.phys ? new T.MeshPhysicalMaterial(Object.assign({ vertexColors: true, metalness: 0, skinning: true }, o.p)) : new T.MeshStandardMaterial(Object.assign({ vertexColors: true, metalness: 0, skinning: true }, o.s || o.p)); if (o.side) m.side = o.side; return m; };
   const FT = (k, rep, ns) => { if (Q < 0.6) return {}; const t = fabTex(k), n = t.n.clone(), c = t.c.clone(); n.needsUpdate = c.needsUpdate = true; n.repeat.set(rep, rep); c.repeat.set(rep, rep); return { normalMap: n, normalScale: new T.Vector2(ns, ns), map: c }; };
-  const MATS = { body: () => rsShade(lm({ phys: 1, p: { roughness: 0.52, clearcoat: 0.1, clearcoatRoughness: 0.45 }, s: { roughness: 0.58 } }), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0),
+  const MATS = {
+    head: () => { const m = rsShade(lm({ phys: 1, p: { roughness: 0.5, clearcoat: 0.1, clearcoatRoughness: 0.45, morphTargets: true }, s: { roughness: 0.56, morphTargets: true } }), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0);
+      m.side = T.DoubleSide; m.shadowSide = T.BackSide; const ob = m.onBeforeCompile, sc = mix(COL.hair, COL.stub, 0.3).map(v => Math.pow(v, 2.2)), DOT = Q >= 0.6 ? 1 : 0;
+      const STUB = `{ float bd = vRsM.z; if ( bd > 0.002 ) { diffuseColor.rgb *= 1.0 - 0.22 * bd;
+  #if ${DOT}
+        vec3 q = vRsP * 1100.0; vec3 fp = fract( q ) - 0.5; float h = fract( sin( dot( floor( q ), vec3( 12.9898, 78.233, 37.719 ) ) ) * 43758.5453 );
+        float pt = 0.5 + 0.5 * sin( vRsP.x * 310.0 + sin( vRsP.y * 270.0 ) * 1.7 ) * sin( vRsP.y * 290.0 + vRsP.z * 230.0 ), dn = bd * ( 0.75 + 0.5 * pt );
+        float dm = step( 1.0 - 0.75 * dn, h ) * ( 1.0 - smoothstep( 0.22, 0.48, length( fp ) ) ), aa = 1.0;
+  #if __VERSION__ >= 300
+        aa = smoothstep( 0.5, 1.4, length( fwidth( q ) ) );
+  #endif
+        diffuseColor.rgb = mix( diffuseColor.rgb, rsStub, clamp( 0.18 * dn + mix( dm * 0.7, 0.24 * dn, aa ), 0.0, 1.0 ) );
+  #else
+        diffuseColor.rgb = mix( diffuseColor.rgb, rsStub, 0.38 * bd );
+  #endif
+      } }`;
+      m.onBeforeCompile = sh => { ob(sh); sh.uniforms.rsStub = { value: new T.Vector3(sc[0], sc[1], sc[2]) };
+        sh.vertexShader = 'attribute vec3 rsM;\nvarying vec3 vRsM;\nvarying vec3 vRsP;\n' + sh.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\n  vRsM = rsM; vRsP = position;');
+        sh.fragmentShader = 'uniform vec3 rsStub;\nvarying vec3 vRsM;\nvarying vec3 vRsP;\n' + sh.fragmentShader
+          .replace('#include <clipping_planes_fragment>', '#include <clipping_planes_fragment>\n  if ( vRsM.x > ' + (UM - UD - 2e-5).toFixed(6) + ' && vRsM.x < ' + (UM + UD + 2e-5).toFixed(6) + ' && abs( vRsM.y ) < ' + HW.toFixed(3) + ' ) discard;')
+          .replace('#include <color_fragment>', '#include <color_fragment>\n' + STUB)
+          .replace('gl_FragColor = vec4( outgoingLight, diffuseColor.a );', 'if ( !gl_FrontFacing ) outgoingLight = vec3( 0.02, 0.006, 0.005 );\n  gl_FragColor = vec4( outgoingLight, diffuseColor.a );'); };
+      m.customProgramCacheKey = () => 'rshead' + DOT; return m; },
+    body: () => rsShade(lm({ phys: 1, p: { roughness: 0.52, clearcoat: 0.1, clearcoatRoughness: 0.45 }, s: { roughness: 0.58 } }), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0),
     shirt: () => rsShade(lm({ phys: 1, p: Object.assign({ roughness: 0.9, sheen: new T.Color(0.12, 0.2, 0.2) }, FT('knit', 11, 0.55)), s: Object.assign({ roughness: 0.88 }, FT('knit', 11, 0.5)), side: T.DoubleSide }), [0.12, 0.14, 0.15], [0, 0, 0], 3.5),
     pants: () => rsShade(lm({ phys: 1, p: Object.assign({ roughness: 0.84, sheen: new T.Color(0.08, 0.08, 0.16) }, FT('denim', 13, 0.7)), s: Object.assign({ roughness: 0.82 }, FT('denim', 13, 0.6)) }), [0.1, 0.1, 0.14], [0, 0, 0], 3.5),
     hair: () => rsShade(lm({ phys: 1, p: Object.assign({ roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.35, sheen: new T.Color(0.3, 0.22, 0.15) }, FT('hair', 5, 0.3)), s: { roughness: 0.55 } }), [0.16, 0.13, 0.1], [0, 0, 0], 2.5) };
@@ -21823,7 +21909,7 @@ function make(Q) {
     const mesh = new T.SkinnedMesh(geo(LAY.body), MATS.body()); mesh.name = 'rsBody'; mesh.castShadow = mesh.receiveShadow = true; mesh.frustumCulled = false;
     mesh.add(bones[0]); mesh.updateMatrixWorld(true); const skel = new T.Skeleton(bones); mesh.bind(skel);
     const layers = { body: mesh };
-    ['shirt', 'pants', 'hair'].forEach(n => { const m = new T.SkinnedMesh(geo(LAY[n]), MATS[n]()); m.name = 'rs' + n[0].toUpperCase() + n.slice(1); m.castShadow = m.receiveShadow = true; m.frustumCulled = false;
+    ['head', 'shirt', 'pants', 'hair'].forEach(n => { const m = new T.SkinnedMesh(geo(LAY[n]), MATS[n]()); m.name = 'rs' + n[0].toUpperCase() + n.slice(1); m.castShadow = m.receiveShadow = true; m.frustumCulled = false;
       mesh.add(m); m.updateMatrixWorld(true); m.bind(skel, mesh.matrixWorld.clone()); layers[n] = m; });
     const B = {}; bones.forEach(b => B[b.name] = b);
     // finger rigs: per bone curl axis + fist/open angles
@@ -21834,7 +21920,8 @@ function make(Q) {
     // ---- face on head bone (local coords relative to head joint)
     const head = B.head, hj = J('head'), add = (m, x, y, z) => { m.position.set(x - hj.x, y - hj.y, z - hj.z); m.castShadow = HI; head.add(m); return m; };
     const phys = (c, r, cc) => new (HI ? T.MeshPhysicalMaterial : T.MeshStandardMaterial)({ color: new T.Color(Math.pow(c[0], 2.2), Math.pow(c[1], 2.2), Math.pow(c[2], 2.2)), roughness: r, ...(HI ? { clearcoat: cc || 0, clearcoatRoughness: 0.1 } : {}) });
-    const sclera = phys([0.93, 0.92, 0.9], 0.3, 1), iris = phys([0.16, 0.26, 0.78], 0.25, 1), pupil = phys([0.02, 0.02, 0.03], 0.2, 1), brow = phys(COL.hair, 0.9), lip = phys([0.62, 0.34, 0.31], 0.4), skinM = rsShade(phys(COL.skin, 0.52), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0);
+    const sclera = phys([0.93, 0.92, 0.9], 0.3, 1), iris = phys([0.294, 0.235, 0.612], 0.25, 1), pupil = phys([0.02, 0.02, 0.03], 0.2, 1), brow = phys(COL.hair, 0.9), lip = phys([0.62, 0.34, 0.31], 0.4), skinM = rsShade(phys(COL.skin, 0.52), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0);
+    const FACE = { br: [] };
     [1, -1].forEach(sd => {
       const ex = 0.039 * sd, ey = 1.735, ez = 0.106;
       add(new T.Mesh(SG(0.019, 32, 24), sclera), ex, ey, ez);
@@ -21843,7 +21930,7 @@ function make(Q) {
       const lid = add(new T.Mesh(SG(0.0202, 32, 16, 0, Math.PI * 2, 0, Math.PI * 0.5), skinM), ex, ey, ez); lid.rotation.x = -0.5;   // a touch heavier lid
       // brow: thick, flat, slightly lowered toward the nose (determined, not surprised)
       const bg = new T.CylinderGeometry(0.0075, 0.0095, 0.05, 12, 1); bg.rotateZ(Math.PI / 2);
-      const br = add(new T.Mesh(bg, brow), ex, 1.762, 0.122); br.rotation.set(0.2, -0.25 * sd, -0.06 * sd); br.scale.set(1, 1, 0.7);
+      const br = add(new T.Mesh(bg, brow), ex, 1.762, 0.122); br.rotation.set(0.2, -0.25 * sd, -0.06 * sd); br.scale.set(1, 1, 0.7); FACE.br.push({ m: br, sd, rz: br.rotation.z, y: br.position.y });
       const ear = add(new T.Mesh(SG(0.026, 24, 16), skinM), 0.108 * sd, 1.72, -0.005); { const hx2 = add(new T.Mesh(new T.TorusGeometry(0.0225, 0.003, 8, 28, Math.PI * 1.5), skinM), 0.111 * sd, 1.72, -0.005); hx2.rotation.set(0, Math.PI / 2, 2.0 * sd); hx2.scale.set(0.68, 1.05, 0.5); } ear.scale.set(0.35, 1.05, 0.7);
       const lo = add(new T.Mesh(SG(0.0198, 24, 8, 0, Math.PI * 2, Math.PI * 0.62, Math.PI * 0.3), skinM), ex, ey, ez); lo.rotation.x = 0.35;
       const lash = add(new T.Mesh(new T.TorusGeometry(0.0196, 0.0016, 6, 24, Math.PI), brow), ex, ey + 0.0015, ez + 0.002); lash.rotation.set(-0.5 + Math.PI / 2 - 0.25, 0, 0); lash.rotation.order = 'YXZ'; lash.scale.set(1, 1, 0.85);
@@ -21851,12 +21938,23 @@ function make(Q) {
       add(new T.Mesh(SG(0.0042, 10, 8), phys([0.2, 0.1, 0.08], 0.9)), 0.0068 * sd, 1.673, 0.13).scale.set(1.2, 0.7, 0.8);
     });
     { const ng = SG(1, 28, 22), np = ng.attributes.position; for (let i = 0; i < np.count; i++) { const x = np.getX(i), y = np.getY(i), z = np.getZ(i), t = (1 - y) / 2;
-        np.setXYZ(i, x * (0.0065 + 0.0135 * Math.pow(t, 1.6)), y * 0.034, z > 0 ? z * (0.008 + 0.026 * Math.pow(t, 0.9)) * (1 - 0.22 * Math.pow(t, 10)) : z * 0.01); } ng.computeVertexNormals();
+        np.setXYZ(i, x * (0.0075 + 0.015 * Math.pow(t, 1.6)), y * 0.036, z > 0 ? z * (0.009 + 0.03 * Math.pow(t, 0.9)) * (1 - 0.22 * Math.pow(t, 10)) : z * 0.01); } ng.computeVertexNormals();
       add(new T.Mesh(ng, skinM), 0, 1.705, 0.112).rotation.x = -0.12;
       [1, -1].forEach(sd => { add(new T.Mesh(SG(0.0085, 16, 12), skinM), 0.0115 * sd, 1.68, 0.121).scale.set(0.85, 0.75, 1.05); }); }
-    const ul = add(new T.Mesh(new T.TorusGeometry(0.026, 0.005, 10, 32, Math.PI), lip), 0, 1.652, 0.123); ul.rotation.set(0.15, 0, Math.PI); ul.scale.set(1, 0.22, 1);   // firmer, flatter mouth
-    const ll = add(new T.Mesh(new T.TorusGeometry(0.022, 0.006, 10, 32, Math.PI), lip), 0, 1.648, 0.122); ll.rotation.set(-0.15, 0, Math.PI); ll.scale.set(1, 0.3, 1);
-    return { mesh, B, NAMES, layers, FR, HEMN, hemAng: [...Array(HEMN)].map((_, i) => 2 * Math.PI * i / HEMN), HEMH: HEMY - 0.99 };
+    // ---- v5.9.9 mouth interior: dark cavity (skull + jaw halves), upper teeth on the skull, lower teeth + tongue on the jaw bone
+    const jb = B.jaw, jj = J('jaw'), addJ = (m, x, y, z) => { m.position.set(x - jj.x, y - jj.y, z - jj.z); jb.add(m); return m; };
+    const cavM = new T.MeshBasicMaterial({ color: new T.Color(0.016, 0.005, 0.005) });
+    add(new T.Mesh(SG(1, 18, 12), cavM), 0, PM.y + 0.004, PM.z - 0.05).scale.set(0.034, 0.022, 0.036);
+    addJ(new T.Mesh(SG(1, 18, 12), cavM), 0, PM.y - 0.012, PM.z - 0.05).scale.set(0.032, 0.02, 0.034);
+    const tTex = (top) => { const c = document.createElement('canvas'); c.width = 128; c.height = 16; const x = c.getContext('2d'); x.fillStyle = '#ebe5d8'; x.fillRect(0, 0, 128, 16);
+      x.fillStyle = 'rgba(110,92,78,0.6)'; [0.1, 0.2, 0.31, 0.42, 0.5, 0.58, 0.69, 0.8, 0.9].forEach(e => x.fillRect(Math.round(e * 127) - 1, 0, 2, 16));
+      const gr = x.createLinearGradient(0, top ? 0 : 16, 0, top ? 16 : 0); gr.addColorStop(0, 'rgba(150,72,70,0.95)'); gr.addColorStop(0.22, 'rgba(150,72,70,0)'); gr.addColorStop(0.85, 'rgba(0,0,0,0)'); gr.addColorStop(1, 'rgba(70,58,48,0.35)');
+      x.fillStyle = gr; x.fillRect(0, 0, 128, 16); const t = new T.CanvasTexture(c); t.encoding = T.sRGBEncoding; return t; };
+    const TS = Math.max(8, Math.round(16 * Q));
+    const tU = add(new T.Mesh(new T.CylinderGeometry(0.0235, 0.0235, 0.0085, TS, 1, false, -0.78, 1.56), new T.MeshStandardMaterial({ map: tTex(1), roughness: 0.35 })), 0, PM.y + 0.0035, PM.z - 0.0042 - 0.0235); tU.castShadow = false;
+    addJ(new T.Mesh(new T.CylinderGeometry(0.0225, 0.0225, 0.008, TS, 1, false, -0.76, 1.52), new T.MeshStandardMaterial({ map: tTex(0), roughness: 0.35 })), 0, PM.y - 0.0042, PM.z - 0.0062 - 0.0225);
+    addJ(new T.Mesh(SG(1, 16, 10), phys([0.56, 0.25, 0.25], 0.45)), 0, PM.y - 0.012, PM.z - 0.036).scale.set(0.019, 0.007, 0.022);
+    return { mesh, B, NAMES, layers, FR, HEMN, face: FACE, PM, hemAng: [...Array(HEMN)].map((_, i) => 2 * Math.PI * i / HEMN), HEMH: HEMY - 0.99 };
   }
   return { build, NAMES };
 }
@@ -21928,7 +22026,7 @@ const VF_MV={
   fkick:{lead:'L',seg:[['kikA','s',1,'io'],['kikS','a',0.45,'o5'],['kikS','a',1,'lin'],['kikA','r',0.45,'o3'],['idle','r',1,'io']],step:'L',free:'L'},
 };
 function vfLerp(o,a,b,u){for(const k in a){const x=a[k],y=b[k];if(typeof x==='number')o[k]=x+(y-x)*u;else{const r=o[k]||(o[k]=[]);for(let i=0;i<x.length;i++)r[i]=x[i]+(y[i]-x[i])*u;}}return o;}
-function vfKey(I){const st=I.st;if(st==='idle'||st==='guard'||st==='gstun')return 'idle';if(st==='win')return 'win';if(st==='atk'&&VF_MV[I.pz])return 'atk';return null;}
+function vfKey(I){const st=I.st;if(st==='idle'||st==='guard'||st==='gstun')return 'idle';if((st==='walk'||st==='dash')&&window.__rsRun!==0)return 'run';if(st==='win')return 'win';if(st==='atk'&&VF_MV[I.pz])return 'atk';return null;}
 // build the target key for this frame
 function vfSample(X,I){const t=I.t||0,o=X.vfk||(X.vfk={});
   if(I.st==='atk'){const M=VF_MV[I.pz],mv=I.mv,fr=I.fr,len={s:mv.s,a:mv.a,r:mv.r},base={s:0,a:mv.s,r:mv.s+mv.a};
@@ -21937,6 +22035,7 @@ function vfSample(X,I){const t=I.t||0,o=X.vfk||(X.vfk={});
     // hit-stop accent: hold + tiny shake on the first active frames, recoil kick on recovery start
     const ac=fr-mv.s;if(ac>=0&&ac<mv.a){o.pel[1]+=0.006*Math.sin(ac*9);}
     return res;}
+  if(I.st==='walk'||I.st==='dash')return vfRun(X,I,o);
   const K=VF_LIB[I.st==='win'?'win':'idle'];vfLerp(o,K,K,0);
   // breathing + weight shift (slow, small, desynchronised)
   const br=Math.sin(t*2.1+(X.ph||0)),ws=Math.sin(t*0.85+(X.ph||0)*1.7);
@@ -21944,6 +22043,30 @@ function vfSample(X,I){const t=I.t||0,o=X.vfk||(X.vfk={});
   if(I.st==='win'){const pu=Math.pow(Math.max(0,Math.sin(t*4.2)),2);o.hR[1]+=0.07*pu;o.hR[2]+=0.03*pu;o.ch[0]-=0.04*pu;o.hd[0]-=0.06*pu;o.ch[1]+=0.05*Math.sin(t*1.3);o.pel[1]+=0.012*pu;}
   else{o.pel[0]+=0.022*ws;o.pel[2]-=0.008*ws;o.pel[5]-=0.03*ws;o.ab[2]+=0.025*ws;o.ch[2]-=0.02*ws;o.hR[1]+=0.008*br;o.hL[1]+=0.008*br;o.hR[0]+=0.01*ws;o.hL[0]+=0.01*ws;
     if(I.st!=='idle'){o.pel[1]+=0.02;o.ch[0]+=0.06;o.hd[0]+=0.06;o.hR=[-0.05,0.29,0.24];o.hL=[0.06,0.30,0.16];}}
+  return o;}
+// ---- v5.9.9 PREVIEW: athletic walk / run cycle for the realistic body (procedural keys → same IK as the fight keys)
+// sagittal arm drive from the shoulder (elbows ~85-95°, fists closed, no across-body swing), shoulders counter-rotate vs hips,
+// forward lean from the hips, long stride with a heavy heel-to-flat plant, minimal hip sway.
+const VF_RUN={walk:{A:0.22,Ab:0.24,H:0.09,sf:0.6,lean:0.1,th:[0.5,0.45],el:1.6,yw:0.1,cy:0.18,bob:0.018,drop:0.06},
+  dash:{A:0.3,Ab:0.34,H:0.3,sf:0.4,lean:0.5,th:[0.85,0.95],el:1.5,yw:0.14,cy:0.28,bob:0.035,drop:0.065}};
+function vfRun(X,I,o){const R=VF_RUN[I.st==='dash'?'dash':'walk'],ph=I.ph||0,lp=X.vfRp==null?ph:X.vfRp;X.vfRp=ph;
+  const dir=ph<lp-1e-4&&lp-ph<1?-1:1;X.vfRd=X.vfRd==null?dir:X.vfRd+(dir-X.vfRd)*0.2;const fw=Math.max(0,X.vfRd),bk=1-0.55*(1-fw);   // backing up: shorter, upright
+  vfLerp(o,VF_IDLE,VF_IDLE,0);const s=Math.sin(ph),c=Math.cos(ph),TAU=Math.PI*2;
+  // feet: stance slides back linearly (planted), swing lifts + reaches forward; L leads when sin(ph) rises
+  const foot=(S,off)=>{let u=((ph+off)/TAU)%1;if(u<0)u+=1;const sd=S==='L'?1:-1,A=R.A*bk,Ab=R.Ab*bk;let z,y,p;
+    if(u<R.sf){const v=u/R.sf;z=A-(A+Ab)*v;y=0.095;p=v>0.75?-0.5*(v-0.75)/0.25:v<0.12?0.25*(1-v/0.12):0;}   // heel strike → flat → heel lifts for toe-off
+    else{const v=(u-R.sf)/(1-R.sf),e=0.5-0.5*Math.cos(Math.PI*Math.pow(v,1.4));z=-Ab+(A+Ab)*e;y=0.095+R.H*Math.pow(Math.sin(Math.PI*Math.min(1,Math.pow(v,0.6)*1.06)),1.1);p=v<0.3?-0.5*(1-v/0.3)*0.8:0.22*Math.sin(Math.PI*v);}
+    o['f'+S]=[0.112*sd,y,z+0.02,0.04*sd,p];o['k'+S]=[0.12*sd,0,1];return u<R.sf?Math.sin(Math.PI*u/R.sf):0;};
+  const cL=foot('L',0),cR=foot('R',Math.PI),ld=cL+cR;   // ld: load on the planted leg (0 in flight)
+  // pelvis: forward over the stance foot, drops into the plant (heavy), small yaw with the swinging leg, almost no roll / sway
+  const ly=R.lean*(0.45+0.55*fw);
+  o.pel=[0.006*(cL-cR),R.drop+R.bob*ld,0.06*fw+0.02,-R.yw*s,0.05+ly*0.5,0.012*(cL-cR)];
+  o.ab=[0.04+ly*0.6,0,0];o.ch=[0.04+ly*0.45,R.cy*s,0.008*s];o.nk=[-0.04-ly*0.3,-0.3*R.cy*s,0];o.hd=[-0.02-ly*0.4,-0.25*R.cy*s,0];o.cv=[0.04,0.04,-0.01+0.05*Math.max(0,s),-0.01+0.05*Math.max(0,-s)];
+  // arms: shoulder flexion θ (forward +) opposite to the same-side leg, elbow bend β, fist lands just inside the shoulder line
+  const L1=0.243,L2=0.262,arm=(S,a)=>{const sd=S==='L'?1:-1,th=a>0?a*R.th[0]:a*R.th[1],be=R.el+(a>0?-0.12:0.12)*Math.abs(a),fa=th+(Math.PI-be);
+    const ex=0.205*sd+0.03*sd,ey=0.15-L1*Math.cos(th),ez=L1*Math.sin(th);
+    o['h'+S]=[0.205*sd*0.82+0.03*sd*(1-Math.abs(a)),ey-L2*Math.cos(fa),ez+L2*Math.sin(fa)];o['e'+S]=[0.22*sd,-0.25,-1];o['t'+S]=0.5;return [ex,ey,ez];};
+  arm('L',-s);arm('R',s);   // left arm forward while the right leg leads
   return o;}
 function vfWorldRot(b,qw){const p=b.parent;p.getWorldQuaternion(VF_T.q3);VF_T.q3.invert();b.getWorldQuaternion(VF_T.q2);b.quaternion.copy(VF_T.q3.multiply(qw).multiply(VF_T.q2));b.updateMatrixWorld(true);}
 // 2-bone IK with pole: rotates a (root) and b (mid) so c lands on T (world); P = pole direction (world)
@@ -21996,7 +22119,7 @@ let RS_INFO=null;   // pose-intent from the rsteve poseFor override → consumed
 const RS_GRIP={idle:1,walk:1,dash:1,guard:1,gstun:1,atk:1,win:1,lose:1,jsq:1,land:1,getup:0.8,grabbed:0.7,air:0.6,hurt:0.1,tumble:0.1,down:0.25,dodge:0.5};
 // masculine pose layer: rewrites the shared Steve pose targets for the realistic body only (blocky Steve is untouched)
 function rsMasc(F,t,P){
-  const st=F.st,mv=F.mv,fr=F.fr,br=Math.sin(t*2.6+F.side)*0.02,I={st,act:0,arm:'R',grip:RS_GRIP[st]===undefined?1:RS_GRIP[st],walk:0,t,fr,mv,pz:mv&&mv.pose};
+  const st=F.st,mv=F.mv,fr=F.fr,br=Math.sin(t*2.6+F.side)*0.02,I={st,act:0,arm:'R',grip:RS_GRIP[st]===undefined?1:RS_GRIP[st],walk:0,t,fr,mv,pz:mv&&mv.pose,ph:F.walkPh||0};
   const guard=(lead)=>{P.aL=-0.72+br;P.aR=-0.6-br;P.eL=-1.98;P.eR=-2.08;P.aLz=-0.24;P.aRz=0.24;P.wfL=P.wfR=0;if(lead!=='L'){}};
   if(st==='idle'){guard();P.kL=0.5;P.kR=0.56;P.lL=-0.24;P.lR=0.2;P.hd=0.16;P.lean=0.12;P.ch=0.1+br;P.cy=0.12;P.fpL=P.fpR=0;P.sx=1;P.sy=1+br*0.3;P.y=0;}
   else if(st==='walk'||st==='dash'){const ph=F.walkPh,s=Math.sin(ph),d=st==='dash';guard();P.aL+=-s*0.16;P.aR+=s*0.16;if(d){P.eL=P.eR=-1.75;}
@@ -22050,6 +22173,7 @@ function rsPose(V,I){const X=V.real;if(!X)return;const B=X.R.B,r=V.rig,R0=V.rest
   const gt=Math.max(window.__rsGripOv!=null?+window.__rsGripOv:I.grip,0);['L','R'].forEach(S=>{X.g[S]+=(gt-X.g[S])*Math.min(1,dt*16);});
   for(const f of X.R.FR){const g=X.g[f.S];f.b.quaternion.setFromAxisAngle(f.ax,f.op+(f.fi-f.op)*g);}
   rsFlutter(V,X,I,now,dt);
+  if(window.__rsFace!==0)try{rsFace(V,X,I,dt);}catch(e){if(!X.fe){X.fe=1;console.warn('[rsteve] face',e);}}
   if(window.__rsCS!==0)try{rsContact(V,X);}catch(e){}
 }
 // ---- secondary motion: cheap 2D spring bones (no cloth sim). Each channel chases a target built from the body's own velocity / acceleration
@@ -22081,6 +22205,23 @@ function rsFlutter(V,X,I,t,dt){const R=X.R,B=R.B,FL=X.fl;
   const hh=src('head',B.head),dh=drive(hh,0.02,0.0025);['hF','hB','hL','hR'].forEach((n,i)=>{const c=FL.hair[i];step(c,dh[0]+wind[0]*0.4,dh[1]+wind[1]*0.4,160,10);
     const b=B[n];b.rotation.x=Math.max(-0.12,Math.min(0.12,-c.z*2.2));b.rotation.z=Math.max(-0.12,Math.min(0.12,c.x*2.2));});
 }
+// ---- v5.9.9 facial expressions: jaw bone + lip/cheek morph targets + brows, eased toward a per-state target
+// channel order: [jaw, smile, frown, wide, upper-lip raise, lower-lip drop, brow (+furrow / -sad)]
+const RS_FX={idle:[0.04,0.08,0,0,0,0,0.15],walk:[0.04,0.05,0,0,0,0,0.25],guard:[0.03,0,0,0.12,0,0,0.5],gstun:[0.25,0,0,0.9,0.5,0.4,0.9],
+  hurt:[0.32,0,0.2,1,0.6,0.5,1],tumble:[0.45,0,0.3,0.8,0.4,0.6,0.8],down:[0.3,0,0.4,0.5,0.2,0.4,0.5],grabbed:[0.28,0,0.1,1,0.6,0.5,1],splat:[0.3,0,0.3,0.8,0.4,0.4,0.8],
+  win:[0.12,1,0,0.3,0.35,0.2,0],lose:[0.55,0,0.75,0.15,0,0.45,-0.75],air:[0.12,0,0,0.2,0.1,0.1,0.3],dodge:[0.1,0,0,0.3,0.2,0.1,0.4],dash:[0.08,0,0,0.25,0.1,0,0.4]};
+const RS_SHOUT=[0.9,0,0,0.55,0.75,0.6,1],RS_SET=[0.08,0,0,0.45,0.2,0.1,0.9];
+function rsFace(V,X,I,dt){const R=X.R,hm=R.layers&&R.layers.head,B=R.B;if(!hm||!B.jaw)return;
+  const st=I.st,mv=I.mv,t=I.t||0;let tg=RS_FX[st]||RS_FX.idle;
+  if(window.__rsFX)tg=window.__rsFX;
+  else if(st==='atk'&&mv){const sup=!!(mv.super||mv.key==='_sup'||mv.pose==='cine'||(mv.lvl||0)>=3),fr=I.fr||0,on=sup||(fr>=mv.s*0.4&&fr<mv.s+mv.a+(mv.r||0)*0.5);
+    tg=on?RS_SHOUT:RS_SET;if(sup){const w=0.85+0.15*Math.sin(t*9);tg=tg.slice();tg[0]*=w;}}
+  else if(st==='win'){const pu=Math.max(0,Math.sin(t*5.5));tg=tg.slice();tg[0]+=pu*0.35;tg[3]+=pu*0.35;tg[4]+=pu*0.3;}   // grin, roars on each fist pump
+  else if(st==='idle'||st==='walk'){tg=tg.slice();tg[0]+=0.03*Math.max(0,Math.sin(t*1.3));}
+  const F=X.fx||(X.fx=tg.slice()),k=Math.min(1,dt*(st==='atk'||st==='hurt'?22:9));for(let i=0;i<7;i++)F[i]+=(tg[i]-F[i])*k;
+  B.jaw.rotation.x=0.26*F[0];
+  const mi=hm.morphTargetInfluences;if(mi&&mi.length>=5){mi[0]=F[1];mi[1]=F[2];mi[2]=F[3];mi[3]=F[4];mi[4]=F[5];}
+  const fc=R.face;if(fc&&fc.br)fc.br.forEach(b=>{b.m.rotation.z=b.rz+b.sd*0.16*F[6];b.m.position.y=b.y-0.0022*Math.max(0,F[6])+0.0018*Math.max(0,-F[6]);});}
 {const mk0=makeFighterView;makeFighterView=function(def,big){const V=mk0(def,big);if(def&&def.real){try{rsAttach(V,def);}catch(e){console.warn('[rsteve] attach',e);}}return V;};
  const pf0=poseFor;poseFor=function(F,t){const P=pf0(F,t);RS_INFO=null;if(F&&F.def&&F.def.real){try{RS_INFO=rsMasc(F,t,P);}catch(e){console.warn('[rsteve] pose',e);}}return P;};
  const ap0=applyPose;applyPose=function(V,P,face){ap0(V,P,face);if(V.real){const I=RS_INFO;RS_INFO=null;try{rsPose(V,I);}catch(e){if(!V.real.err){V.real.err=1;console.warn('[rsteve] pose',e);}}}};}
