@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.9.7">
+<meta name="ba-version" content="v5.9.8">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -21634,7 +21634,7 @@ function make(Q) {
     H.t = { tb, td, tl, tip: p, axis: td.clone().cross(tn).normalize() }; });
   const NAMES = Object.keys(BJ), IDX = {}; NAMES.forEach((n, i) => IDX[n] = i);
   // ---------------- loft builder (per-layer buffers)
-  const LAY = {}; const LB = n => LAY[n] || (LAY[n] = { P: [], C: [], SI: [], SW: [], IX: [] });
+  const LAY = {}; const LB = n => LAY[n] || (LAY[n] = { P: [], C: [], SI: [], SW: [], IX: [], UV: [] });
   function catmull(pts, s) {
     if (s <= pts[0][0]) return pts[0][1]; if (s >= pts[pts.length - 1][0]) return pts[pts.length - 1][1];
     let i = 0; while (pts[i + 1][0] < s) i++;
@@ -21648,7 +21648,7 @@ function make(Q) {
     const hint = o.side || (Math.abs(ax.y) > 0.9 ? V3(1, 0, 0) : V3(0, 1, 0));
     const u1v = hint.clone().sub(ax.clone().multiplyScalar(hint.dot(ax))).normalize(), v1 = u1v.clone().cross(ax).normalize();
     const U0 = o.u0 || 0, U1 = o.u1 === undefined ? 1 : o.u1, p0 = o.pole0 !== false && U0 === 0, p1 = o.pole1 !== false && U1 === 1;
-    const NS = Math.max(4, Math.round((o.ns || 40) * Q)), NA = Math.max(8, Math.round((o.na || 36) * Q)), base = D.P.length / 3;
+    const NS = Math.max(4, Math.round((o.ns || 40) * Q)), NA = Math.max(8, Math.round((o.na || 36) * Q)), base = D.P.length / 3, CIRC = 2 * Math.PI * o.prof.reduce((x, q) => x + q[1], 0) / o.prof.length;
     for (let i = 0; i <= NS; i++) {
       const q = i / NS, s = p0 && p1 ? 0.5 - 0.5 * Math.cos(Math.PI * q) : p0 ? 1 - Math.cos(Math.PI * q / 2) : p1 ? Math.sin(Math.PI * q / 2) : q;
       const u = U0 + (U1 - U0) * s;
@@ -21660,7 +21660,7 @@ function make(Q) {
         let rr = r * (o.disp ? 1 + o.disp(u, th) : 1); if (o.grow) rr = o.grow(u, th, rr);
         const p = c0.clone().add(u1v.clone().multiplyScalar(ct * rr * ex)).add(v1.clone().multiplyScalar(st * rr * ez));
         if (o.warp) o.warp(p, u, th);
-        D.P.push(p.x, p.y, p.z);
+        D.P.push(p.x, p.y, p.z); D.UV.push(CIRC * j / NA, u * L);
         const col = o.col(u, th, p); D.C.push(Math.pow(col[0], 2.2), Math.pow(col[1], 2.2), Math.pow(col[2], 2.2));
         const w = o.w(u, p, th).filter(q => q[1] > 1e-4).sort((x, y) => y[1] - x[1]); const ii = [0, 0, 0, 0], ww = [0, 0, 0, 0]; let s2 = 0;
         w.slice(0, 4).forEach((q, k) => { ii[k] = IDX[q[0]]; ww[k] = q[1]; s2 += q[1]; }); if (!s2) { ii[0] = IDX.hips; ww[0] = 1; s2 = 1; }
@@ -21675,7 +21675,7 @@ function make(Q) {
     if (y < 1.33) { const t = sm(1.16, 1.33, y); return [['spine', 1 - t], ['chest', t]]; } const sh = sm(0.14, 0.2, Math.abs(p.x)) * sm(1.32, 1.42, y); const t = sm(1.47, 1.52, y);
     return [['chest', (1 - sh) * (1 - t)], [p.x > 0 ? 'armL' : 'armR', sh * 0.5], ['neck', t]]; };
   const muscle = (u, th) => { const s = Math.sin(th), c = Math.cos(th);   // pecs, lats, glutes
-    return 0.03 * sm(0.62, 0.72, u) * (1 - sm(0.8, 0.9, u)) * Math.max(0, s) * Math.pow(Math.abs(c) + 0.2, 0.6) + 0.05 * sm(0.04, 0.12, u) * (1 - sm(0.18, 0.28, u)) * Math.max(0, -s)
+    return 0.045 * sm(0.62, 0.72, u) * (1 - sm(0.8, 0.9, u)) * Math.max(0, s) * Math.pow(Math.abs(c) + 0.2, 0.6) - 0.012 * Math.exp(-Math.pow((u - 0.83) / 0.03, 2)) * Math.max(0, s) * (1 - Math.abs(c)) + 0.03 * sm(0.86, 0.95, u) * Math.pow(Math.abs(c), 2) * (1 - sm(0.97, 1, u)) + 0.05 * sm(0.04, 0.12, u) * (1 - sm(0.18, 0.28, u)) * Math.max(0, -s)
       + 0.02 * sm(0.55, 0.7, u) * (1 - sm(0.82, 0.9, u)) * Math.pow(Math.abs(c), 4); };
   const TBASE = { a: V3(0, y0, 0.0), b: V3(0, y1, 0.0), prof: TOR, side: V3(1, 0, 0), ex: 1, ez: TEZ };
   loft(Object.assign({}, TBASE, { L: 'body', ns: 44, na: 40, disp: muscle, col: (u, th, p) => mix(COL.skin, COL.skinD, 0.12 * (1 - Math.sin(th))), w: torsoW }));
@@ -21700,7 +21700,7 @@ function make(Q) {
   loft({ a: HA, b: HB, prof: HPROF, ns: 60, na: 72, ex: HEX, ez: HEZ,
     disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th);
       return 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.5) / 0.08, 2)) * Math.pow(Math.abs(c), 2) - 0.035 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.56) / 0.04, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.36) / 0.16, 2))
-        + 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.635) / 0.03, 2)) * (1 - Math.abs(c) * 0.5) + 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.06) / 0.05, 2)); },
+        + 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.635) / 0.03, 2)) * (1 - Math.abs(c) * 0.5) + 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.06) / 0.05, 2)) + 0.022 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.47) / 0.05, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.62) / 0.15, 2)) + 0.025 * Math.exp(-Math.pow((u - 0.15) / 0.06, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.82) / 0.15, 2)) - 0.012 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.33) / 0.05, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.5) / 0.12, 2)) - 0.02 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.545) / 0.035, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.36) / 0.13, 2)) + 0.012 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.6) / 0.06, 2)) * Math.exp(-Math.pow(c / 0.1, 2)); },
     col: (u, th, p) => { const s = Math.sin(th); const st = s > 0.15 ? sm(0.3, 0.12, u) * (1 - sm(0.55, 0.85, Math.abs(Math.cos(th)))) : 0;
       const mus = s > 0.6 ? Math.exp(-Math.pow((u - 0.335) / 0.025, 2)) * (1 - sm(0.2, 0.5, Math.abs(Math.cos(th)))) * 0.8 : 0;
       return mix(mix(COL.skin, COL.skinD, 0.15 * (1 - s)), COL.stub, Math.min(0.85, st + mus)); },
@@ -21713,15 +21713,33 @@ function make(Q) {
       return has * (0.09 + clump * 0.5 + 0.04 * sm(0.75, 0.9, u)) - (1 - has) * 0.05; },
     col: (u, th) => { const sh = 0.7 + 0.42 * (0.5 + 0.5 * Math.sin(th * 14 + u * 20)) + 0.14 * Math.sin(th * 61 + u * 23); return [COL.hair[0] * sh, COL.hair[1] * sh, COL.hair[2] * sh]; },
     w: (u, p, th) => { const s = Math.sin(th), c = Math.cos(th), ws = hairHas(u, th) * (0.3 + 0.7 * sm(0.62, 0.95, u)); return [['head', 1 - ws], [s > 0 ? 'hF' : 'hB', ws * s * s], [c > 0 ? 'hL' : 'hR', ws * c * c]]; } });
+  // ---- v5.9.8 PREVIEW: layered hair clumps (tapered, flattened locks) over the hair shell; they hug the skull curvature and share the hair bones
+  { const HC = V3(0, 1.725, 0), NCL = Q >= 0.75 ? Math.round(110 * Math.min(1.3, Q)) : Q >= 0.6 ? 46 : 0, hx = HB.clone().sub(HA), Lh = hx.length(); hx.normalize();
+    let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+    const shell = (u, th) => { const r = catmull(HPROF, u) * 1.075, c0 = HA.clone().add(hx.clone().multiplyScalar(u * Lh)); return c0.add(V3(Math.cos(th) * r * HEX(u, th), 0, Math.sin(th) * r * HEZ(u, th))); };
+    for (let n = 0, tries = 0; n < NCL && tries < NCL * 12; tries++) {
+      const u = 0.6 + 0.37 * Math.sqrt(rnd()), th = rnd() * Math.PI * 2; if (hairHas(u, th) < 0.85 || hairHas(Math.max(0, u - 0.06), th) < 0.4 && u < 0.8) continue; n++;
+      const layer = n / NCL, p0 = shell(u, th), nrm = p0.clone().sub(HC).normalize(), s = Math.sin(th), c = Math.cos(th);
+      // combed flow: crown → back/down, front → up then swept to the side (part on the left), sides → back/down
+      let fl = s > 0.35 && u < 0.9 ? V3(-0.85, 0.35, 0.25) : s > -0.2 && u < 0.86 ? V3(0, -0.5, -1) : V3(-0.2 * c, -0.25, -1);
+      fl.add(V3((rnd() - 0.5) * 0.5, (rnd() - 0.5) * 0.3, (rnd() - 0.5) * 0.4)); fl.sub(nrm.clone().multiplyScalar(fl.dot(nrm))).normalize();
+      const len = 0.035 + 0.035 * rnd() + (s > 0.35 ? 0.012 : 0), r0 = 0.009 + 0.008 * rnd(), R0 = p0.distanceTo(HC), lift = 0.002 + 0.005 * layer;
+      const b = p0.clone().add(fl.clone().multiplyScalar(len)), sh0 = 0.75 + 0.3 * rnd(), wv = (() => { const ws = hairHas(u, th) * (0.3 + 0.7 * sm(0.62, 0.95, u)); return [['head', 1 - ws], [s > 0 ? 'hF' : 'hB', ws * s * s], [c > 0 ? 'hL' : 'hR', ws * c * c]]; })();
+      loft({ L: 'hair', a: p0, b, side: nrm, ns: 7, na: 8, prof: [[0, r0 * 0.9], [0.3, r0], [0.7, r0 * 0.7], [1, 0.0015]], ex: 0.32, ez: 1, pole0: false,
+        warp: (p, uu) => { const f = (R0 + lift + 0.003 * Math.sin(uu * Math.PI)) / p0.clone().lerp(b, uu).distanceTo(HC); p.copy(HC).add(p.clone().sub(HC).multiplyScalar(f)); },
+        col: (uu) => { const k = sh0 * (0.62 + 0.55 * uu); return [COL.hair[0] * k * 1.1, COL.hair[1] * k, COL.hair[2] * k * 0.9]; }, w: () => wv }); } }
   // ---- arms: body = bare skin arm (thicker upper arm); shirt = open sleeve tube
   function arm(sd) { const S = sd > 0 ? 'L' : 'R', a = J('arm' + S).clone().add(V3(-0.03 * sd, 0.0, 0)), e = J('fore' + S), w = J('hand' + S);
     const Lu = a.distanceTo(e), Lf = e.distanceTo(w), L = Lu + Lf, ue = Lu / L, b = w.clone().add(w.clone().sub(e).normalize().multiplyScalar(0.012));
     const prof = [[0, 0.056], [0.06, 0.072], [0.2, 0.067], [0.33, 0.06], [ue - 0.04, 0.046], [ue, 0.043], [ue + 0.06, 0.049], [ue + 0.2, 0.045], [0.92, 0.033], [1, 0.03]];
     const armW = (u, p) => { const sh = 1 - sm(0.0, 0.12, u), t = sm(ue - 0.05, ue + 0.05, u), h = sm(0.95, 1.0, u); return [['chest', sh * 0.45], ['arm' + S, (1 - sh * 0.45) * (1 - t)], ['fore' + S, t * (1 - h)], ['hand' + S, h]]; };
-    loft({ a, b, side: V3(0, 0, 1), ns: 48, na: 32, prof, ex: 1, ez: u => 0.9 + 0.1 * sm(0.5, 0.9, u),
-      col: (u, th) => mix(COL.skin, COL.skinD, 0.12 * Math.max(0, Math.sin(th))), w: armW });
+    const amus = (u, th) => { const c = Math.cos(th), lat = Math.sin(th) * sd, g = (m, w) => Math.exp(-Math.pow((u - m) / w, 2));
+      return 0.13 * g(0.07, 0.07) * sm(-0.5, 0.3, lat) + 0.12 * g(0.24, 0.08) * Math.pow(Math.max(0, c), 1.5) + 0.09 * g(0.2, 0.1) * Math.pow(Math.max(0, -c), 1.5)
+        + 0.12 * g(ue + 0.1, 0.07) * Math.max(0, 0.6 * c + 0.8 * lat) + 0.05 * g(ue + 0.12, 0.08) * Math.max(0, -lat) - 0.04 * g(ue - 0.01, 0.025) * Math.max(0, c); };
+    loft({ a, b, side: V3(0, 0, 1), ns: 60, na: 40, prof, ex: 1, ez: u => 0.9 + 0.1 * sm(0.5, 0.9, u), disp: amus,
+      col: (u, th) => mix(COL.skin, COL.skinD, 0.12 * Math.max(0, Math.sin(th)) + 0.1 * Math.exp(-Math.pow((u - ue) / 0.03, 2))), w: armW });
     loft({ L: 'shirt', a, b, side: V3(0, 0, 1), ns: 16, na: 32, prof, ex: 1, ez: u => 0.92, u0: 0.0, u1: 0.33, pole0: false, pole1: false,
-      grow: (u, th, r) => r * 1.06 + 0.011 + 0.007 * sm(0.22, 0.33, u), disp: (u, th) => 0.012 * Math.sin(th * 5 + u * 20) * sm(0.1, 0.25, u),
+      grow: (u, th, r) => r * 1.06 + 0.011 + 0.007 * sm(0.22, 0.33, u), disp: (u, th) => amus(u, th) + 0.012 * Math.sin(th * 5 + u * 20) * sm(0.1, 0.25, u),
       col: (u, th) => mix(COL.shirt, COL.shirtD, 0.15 + 0.1 * Math.sin(th * 5) + (u > 0.31 ? 0.3 : 0)),
       w: (u, p) => { const sh = 1 - sm(0.0, 0.12, u), sl = sm(0.16, 0.3, u) * 0.85; return [['chest', sh * 0.45], ['arm' + S, (1 - sh * 0.45) * (1 - sl)], ['slv' + S, (1 - sh * 0.45) * sl]]; } }); }
   arm(1); arm(-1);
@@ -21749,23 +21767,56 @@ function make(Q) {
       col: (u, th) => mix(COL.pants, COL.pantsD, (Math.abs(Math.cos(th)) > 0.985 ? 0.55 : 0) + (u < 0.14 && Math.sin(th) > 0.4 && Math.abs(Math.abs(Math.cos(th)) - 0.55 + u * 1.2) < 0.03 ? 0.6 : 0) + 0.25 * (0.5 + 0.5 * Math.sin(th * 7 + u * 22)) * sm(uk - 0.06, uk, u) * (1 - sm(uk + 0.02, uk + 0.08, u)) + (u > 0.95 ? 0.3 : 0)),
       w: (u, p) => { const hp = 1 - sm(0.0, 0.14, u), t = sm(uk - 0.05, uk + 0.05, u); return [['hips', hp * 0.6], ['thigh' + S, (1 - hp * 0.6) * (1 - t)], ['shin' + S, t]]; } });
     const hb = f.clone().add(V3(0, -0.035, -0.06)), toe = V3(f.x + 0.008 * sd, 0.035, 0.17);
-    loft({ L: 'pants', a: hb, b: toe, side: V3(0, 1, 0), ns: 28, na: 32, prof: [[0, 0.045], [0.12, 0.058], [0.45, 0.056], [0.75, 0.054], [0.92, 0.043], [1, 0.02]], ex: 0.78, ez: 1.15,
+    loft({ L: 'pants', a: hb, b: toe, side: V3(0, 1, 0), ns: 28, na: 32, prof: [[0, 0.045], [0.12, 0.058], [0.45, 0.056], [0.75, 0.054], [0.92, 0.043], [1, 0.02]], ex: 0.78, ez: 1.15, disp: (u, th) => 0.08 * Math.pow(Math.max(0, Math.cos(th)), 3) * sm(0.3, 0.42, u) * (1 - sm(0.66, 0.76, u)) + 0.02 * Math.max(0, Math.cos(th)) * Math.max(0, Math.sin(u * 70)) * sm(0.35, 0.4, u) * (1 - sm(0.68, 0.72, u)),
+      grow: (u, th, r) => r * (1 + 0.07 * sm(-0.2, -0.75, Math.cos(th))),
       warp: (p, u) => { if (p.y < 0.008) p.y = 0.008 + (p.y - 0.008) * 0.15; },
-      col: (u, th, p) => p.y < 0.03 ? COL.sole : (Math.cos(th) > 0.72 && u > 0.35 && u < 0.72 && Math.sin(u * 70) > 0.4) ? [0.82, 0.82, 0.8] : (Math.abs(u - 0.78) < 0.012 ? COL.sole : mix(COL.shoe, COL.sole, 0.15 * Math.max(0, Math.sin(th * 2)))), w: (u) => { const t = sm(0.0, 0.25, u); return [['shin' + S, (1 - t) * 0.4], ['foot' + S, 1 - (1 - t) * 0.4]]; } }); }
+      col: (u, th, p) => p.y < 0.016 ? COL.sole : p.y < 0.034 ? [0.86, 0.85, 0.82] : (u < 0.16 || u > 0.86) && Math.cos(th) < 0.5 ? mix(COL.shoe, COL.sole, 0.55) : (Math.cos(th) > 0.72 && u > 0.35 && u < 0.72 && Math.sin(u * 70) > 0.4) ? [0.82, 0.82, 0.8] : (Math.abs(u - 0.78) < 0.012 ? COL.sole : mix(COL.shoe, COL.sole, 0.15 * Math.max(0, Math.sin(th * 2)))), w: (u) => { const t = sm(0.0, 0.25, u); return [['shin' + S, (1 - t) * 0.4], ['foot' + S, 1 - (1 - t) * 0.4]]; } }); }
   leg(1); leg(-1);
   // ---------------- assemble: one Skeleton, four SkinnedMeshes (body is the parent; layers are children bound to the same bones)
   function geo(D) { const g = new T.BufferGeometry();
     g.setAttribute('position', new T.Float32BufferAttribute(D.P, 3)); g.setAttribute('color', new T.Float32BufferAttribute(D.C, 3));
-    g.setAttribute('skinIndex', new T.Uint16BufferAttribute(D.SI, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(D.SW, 4)); g.setIndex(D.IX);
+    g.setAttribute('uv', new T.Float32BufferAttribute(D.UV, 2)); g.setAttribute('skinIndex', new T.Uint16BufferAttribute(D.SI, 4)); g.setAttribute('skinWeight', new T.Float32BufferAttribute(D.SW, 4)); g.setIndex(D.IX);
     g.computeVertexNormals();
     const pos = g.attributes.position, nor = g.attributes.normal, map = new Map();
     for (let i = 0; i < pos.count; i++) { const k = Math.round(pos.getX(i) * 2e4) + ',' + Math.round(pos.getY(i) * 2e4) + ',' + Math.round(pos.getZ(i) * 2e4); (map.get(k) || map.set(k, []).get(k)).push(i); }
     map.forEach(l => { if (l.length < 2) return; let x = 0, y = 0, z = 0; l.forEach(i => { x += nor.getX(i); y += nor.getY(i); z += nor.getZ(i); }); const n = Math.hypot(x, y, z) || 1; l.forEach(i => nor.setXYZ(i, x / n, y / n, z / n)); });
     return g; }
   const HI = Q >= 0.75;
+  // ---- v5.9.8 PREVIEW graphics: procedural fabric normal/colour maps (knit jersey, denim twill), strand map for hair, skin SSS + rim shader hook
+  const TEXC = make.TEXC || (make.TEXC = {});
+  function fabTex(kind) { if (TEXC[kind]) return TEXC[kind]; const N = 256, H = new Float32Array(N * N), R = (x, y) => { const s = Math.sin(x * 127.1 + y * 311.7) * 43758.5453; return s - Math.floor(s); };
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { let h = 0;
+      if (kind === 'knit') { const cx = x % 8, row = Math.floor(y / 6), cy = (y % 6) / 6, v = Math.abs(cx - 3.5) / 3.5; h = (1 - v * v) * (0.6 + 0.4 * Math.sin(cy * Math.PI)) * (cx < 4 ? 1 : 0.85) + 0.15 * R(Math.floor(x / 8), row); }
+      else if (kind === 'denim') { const d = ((x + y * 0.5) % 6) / 6; h = 0.5 + 0.5 * Math.sin(d * Math.PI * 2) + 0.25 * R(x >> 1, y >> 2) + 0.15 * Math.sin(y * 0.9 + R(0, y) * 6); }
+      else { const sx = x / N * 40; h = 0.5 + 0.35 * Math.sin(sx * 6.283 + Math.sin(y * 0.05) * 2) + 0.25 * R(x, 0) - 0.1 * R(x >> 2, y >> 5); }
+      // broad soft creases (fold normal detail) on top of the weave
+      if (kind !== 'hair') h += 0.9 * Math.pow(Math.max(0, Math.sin((x * 0.6 + y) / N * Math.PI * 4 + Math.sin(x / N * 6.283) * 1.4)), 6);
+      H[y * N + x] = h; }
+    const cn = document.createElement('canvas'); cn.width = cn.height = N; const cx2 = cn.getContext('2d'), id = cx2.createImageData(N, N), cc = document.createElement('canvas'); cc.width = cc.height = N; const ccx = cc.getContext('2d'), cd = ccx.createImageData(N, N);
+    const st = kind === 'knit' ? 2.2 : kind === 'denim' ? 2.6 : 2.0;
+    for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const g = (a, b) => H[((b + N) % N) * N + ((a + N) % N)];
+      let nx = (g(x - 1, y) - g(x + 1, y)) * st, ny = (g(x, y - 1) - g(x, y + 1)) * st, nz = 1; const l = Math.hypot(nx, ny, nz); nx /= l; ny /= l; nz /= l; const i = (y * N + x) * 4;
+      id.data[i] = (nx * 0.5 + 0.5) * 255; id.data[i + 1] = (ny * 0.5 + 0.5) * 255; id.data[i + 2] = (nz * 0.5 + 0.5) * 255; id.data[i + 3] = 255;
+      const lv = Math.min(255, 255 * (0.84 + 0.12 * Math.min(1, H[y * N + x]) + (kind === 'denim' ? 0.08 * R(x >> 1, y) : 0))); cd.data[i] = cd.data[i + 1] = cd.data[i + 2] = lv; cd.data[i + 3] = 255; }
+    cx2.putImageData(id, 0, 0); ccx.putImageData(cd, 0, 0);
+    const mk = (c, srgb) => { const t = new T.CanvasTexture(c); t.wrapS = t.wrapT = T.RepeatWrapping; t.anisotropy = 4; if (srgb) t.encoding = T.sRGBEncoding; return t; };
+    return TEXC[kind] = { n: mk(cn), c: mk(cc, true) }; }
+  // shader hook: view-space rim (stage back-light feel in every stage) + warm subsurface-like wrap for skin
+  const rsShade = (m, rim, sss, rp) => { m.onBeforeCompile = sh => { sh.uniforms.rsRim = { value: new T.Vector3(...rim) }; sh.uniforms.rsSSS = { value: new T.Vector3(...sss) };
+      sh.fragmentShader = 'uniform vec3 rsRim;\nuniform vec3 rsSSS;\n' + sh.fragmentShader.replace('vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;',
+        `vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;
+        { vec3 rN = normalize( normal ); float rNV = clamp( dot( rN, normalize( vViewPosition ) ), 0.0, 1.0 ); float rF = pow( 1.0 - rNV, ${rp.toFixed(1)} );
+          float rK = clamp( dot( rN, normalize( vec3( 0.35, 0.8, -0.3 ) ) ) * 0.6 + 0.5, 0.0, 1.0 );
+          outgoingLight += rsRim * rF * rK * ( 0.4 + 0.6 * diffuseColor.rgb );
+          float rL = dot( reflectedLight.directDiffuse, vec3( 0.3, 0.59, 0.11 ) );
+          outgoingLight += rsSSS * diffuseColor.rgb * ( 1.0 - smoothstep( 0.0, 0.45, rL ) ) * ( 0.6 + 0.6 * rF ) + reflectedLight.directDiffuse * rsSSS * 1.5; }`); };
+    m.customProgramCacheKey = () => 'rsvf' + rim.join() + sss.join() + rp; return m; };
   const lm = (o) => { const m = HI && o.phys ? new T.MeshPhysicalMaterial(Object.assign({ vertexColors: true, metalness: 0, skinning: true }, o.p)) : new T.MeshStandardMaterial(Object.assign({ vertexColors: true, metalness: 0, skinning: true }, o.s || o.p)); if (o.side) m.side = o.side; return m; };
-  const MATS = { body: () => lm({ phys: 1, p: { roughness: 0.6, clearcoat: 0.06, clearcoatRoughness: 0.6 }, s: { roughness: 0.64 } }), shirt: () => lm({ p: { roughness: 0.86 }, side: T.DoubleSide }),
-    pants: () => lm({ p: { roughness: 0.8 } }), hair: () => lm({ phys: 1, p: { roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.5 }, s: { roughness: 0.6 } }) };
+  const FT = (k, rep, ns) => { if (Q < 0.6) return {}; const t = fabTex(k), n = t.n.clone(), c = t.c.clone(); n.needsUpdate = c.needsUpdate = true; n.repeat.set(rep, rep); c.repeat.set(rep, rep); return { normalMap: n, normalScale: new T.Vector2(ns, ns), map: c }; };
+  const MATS = { body: () => rsShade(lm({ phys: 1, p: { roughness: 0.52, clearcoat: 0.1, clearcoatRoughness: 0.45 }, s: { roughness: 0.58 } }), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0),
+    shirt: () => rsShade(lm({ phys: 1, p: Object.assign({ roughness: 0.9, sheen: new T.Color(0.12, 0.2, 0.2) }, FT('knit', 11, 0.55)), s: Object.assign({ roughness: 0.88 }, FT('knit', 11, 0.5)), side: T.DoubleSide }), [0.12, 0.14, 0.15], [0, 0, 0], 3.5),
+    pants: () => rsShade(lm({ phys: 1, p: Object.assign({ roughness: 0.84, sheen: new T.Color(0.08, 0.08, 0.16) }, FT('denim', 13, 0.7)), s: Object.assign({ roughness: 0.82 }, FT('denim', 13, 0.6)) }), [0.1, 0.1, 0.14], [0, 0, 0], 3.5),
+    hair: () => rsShade(lm({ phys: 1, p: Object.assign({ roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.35, sheen: new T.Color(0.3, 0.22, 0.15) }, FT('hair', 5, 0.3)), s: { roughness: 0.55 } }), [0.16, 0.13, 0.1], [0, 0, 0], 2.5) };
   function build() {
     const bones = NAMES.map(n => { const b = new T.Bone(); b.name = n; return b; });
     NAMES.forEach((n, i) => { const [par, wp] = BJ[n]; if (par) { bones[IDX[par]].add(bones[i]); bones[i].position.copy(wp).sub(BJ[par][1]); } else bones[i].position.copy(wp); });
@@ -21783,7 +21834,7 @@ function make(Q) {
     // ---- face on head bone (local coords relative to head joint)
     const head = B.head, hj = J('head'), add = (m, x, y, z) => { m.position.set(x - hj.x, y - hj.y, z - hj.z); m.castShadow = HI; head.add(m); return m; };
     const phys = (c, r, cc) => new (HI ? T.MeshPhysicalMaterial : T.MeshStandardMaterial)({ color: new T.Color(Math.pow(c[0], 2.2), Math.pow(c[1], 2.2), Math.pow(c[2], 2.2)), roughness: r, ...(HI ? { clearcoat: cc || 0, clearcoatRoughness: 0.1 } : {}) });
-    const sclera = phys([0.93, 0.92, 0.9], 0.3, 1), iris = phys([0.16, 0.26, 0.78], 0.25, 1), pupil = phys([0.02, 0.02, 0.03], 0.2, 1), brow = phys(COL.hair, 0.9), lip = phys([0.7, 0.42, 0.38], 0.45), skinM = phys(COL.skin, 0.6);
+    const sclera = phys([0.93, 0.92, 0.9], 0.3, 1), iris = phys([0.16, 0.26, 0.78], 0.25, 1), pupil = phys([0.02, 0.02, 0.03], 0.2, 1), brow = phys(COL.hair, 0.9), lip = phys([0.62, 0.34, 0.31], 0.4), skinM = rsShade(phys(COL.skin, 0.52), [0.2, 0.17, 0.15], [0.07, 0.016, 0.008], 3.0);
     [1, -1].forEach(sd => {
       const ex = 0.039 * sd, ey = 1.735, ez = 0.106;
       add(new T.Mesh(SG(0.019, 32, 24), sclera), ex, ey, ez);
@@ -21793,14 +21844,16 @@ function make(Q) {
       // brow: thick, flat, slightly lowered toward the nose (determined, not surprised)
       const bg = new T.CylinderGeometry(0.0075, 0.0095, 0.05, 12, 1); bg.rotateZ(Math.PI / 2);
       const br = add(new T.Mesh(bg, brow), ex, 1.762, 0.122); br.rotation.set(0.2, -0.25 * sd, -0.06 * sd); br.scale.set(1, 1, 0.7);
-      const ear = add(new T.Mesh(SG(0.026, 24, 16), skinM), 0.108 * sd, 1.72, -0.005); ear.scale.set(0.35, 1.05, 0.7);
+      const ear = add(new T.Mesh(SG(0.026, 24, 16), skinM), 0.108 * sd, 1.72, -0.005); { const hx2 = add(new T.Mesh(new T.TorusGeometry(0.0225, 0.003, 8, 28, Math.PI * 1.5), skinM), 0.111 * sd, 1.72, -0.005); hx2.rotation.set(0, Math.PI / 2, 2.0 * sd); hx2.scale.set(0.68, 1.05, 0.5); } ear.scale.set(0.35, 1.05, 0.7);
       const lo = add(new T.Mesh(SG(0.0198, 24, 8, 0, Math.PI * 2, Math.PI * 0.62, Math.PI * 0.3), skinM), ex, ey, ez); lo.rotation.x = 0.35;
       const lash = add(new T.Mesh(new T.TorusGeometry(0.0196, 0.0016, 6, 24, Math.PI), brow), ex, ey + 0.0015, ez + 0.002); lash.rotation.set(-0.5 + Math.PI / 2 - 0.25, 0, 0); lash.rotation.order = 'YXZ'; lash.scale.set(1, 1, 0.85);
       const ie = add(new T.Mesh(SG(0.014, 16, 10), phys([0.62, 0.42, 0.33], 0.7)), 0.111 * sd, 1.72, -0.002); ie.scale.set(0.2, 0.75, 0.45);
-      add(new T.Mesh(SG(0.0042, 10, 8), phys([0.2, 0.1, 0.08], 0.9)), 0.0075 * sd, 1.687, 0.128).scale.set(1.2, 0.7, 0.8);
+      add(new T.Mesh(SG(0.0042, 10, 8), phys([0.2, 0.1, 0.08], 0.9)), 0.0068 * sd, 1.673, 0.13).scale.set(1.2, 0.7, 0.8);
     });
-    const nb = add(new T.Mesh(new T.CylinderGeometry(0.009, 0.013, 0.045, 16), skinM), 0, 1.714, 0.12); nb.rotation.x = -0.35;
-    add(new T.Mesh(SG(0.0135, 24, 16), skinM), 0, 1.695, 0.124).scale.set(1.15, 0.8, 0.85);
+    { const ng = SG(1, 28, 22), np = ng.attributes.position; for (let i = 0; i < np.count; i++) { const x = np.getX(i), y = np.getY(i), z = np.getZ(i), t = (1 - y) / 2;
+        np.setXYZ(i, x * (0.0065 + 0.0135 * Math.pow(t, 1.6)), y * 0.034, z > 0 ? z * (0.008 + 0.026 * Math.pow(t, 0.9)) * (1 - 0.22 * Math.pow(t, 10)) : z * 0.01); } ng.computeVertexNormals();
+      add(new T.Mesh(ng, skinM), 0, 1.705, 0.112).rotation.x = -0.12;
+      [1, -1].forEach(sd => { add(new T.Mesh(SG(0.0085, 16, 12), skinM), 0.0115 * sd, 1.68, 0.121).scale.set(0.85, 0.75, 1.05); }); }
     const ul = add(new T.Mesh(new T.TorusGeometry(0.026, 0.005, 10, 32, Math.PI), lip), 0, 1.652, 0.123); ul.rotation.set(0.15, 0, Math.PI); ul.scale.set(1, 0.22, 1);   // firmer, flatter mouth
     const ll = add(new T.Mesh(new T.TorusGeometry(0.022, 0.006, 10, 32, Math.PI), lip), 0, 1.648, 0.122); ll.rotation.set(-0.15, 0, Math.PI); ll.scale.set(1, 0.3, 1);
     return { mesh, B, NAMES, layers, FR, HEMN, hemAng: [...Array(HEMN)].map((_, i) => 2 * Math.PI * i / HEMN), HEMH: HEMY - 0.99 };
@@ -21818,7 +21871,7 @@ function make(Q) {
   // every per-character table falls back to Steve's entry (same moveset, strings, personality, win/lose lists)
   [typeof XP!=='undefined'&&XP.ID,typeof XP!=='undefined'&&XP.WINS,typeof LEGO_CHARS!=='undefined'&&LEGO_CHARS,typeof DP_STR!=='undefined'&&DP_STR,typeof SD!=='undefined'&&SD].forEach(T_=>{if(T_&&T_.steve&&!T_.rsteve)T_.rsteve=T_.steve;});
 })();
-const RSQ=()=>{const l=(typeof GQ!=='undefined'&&GQ.level)||'high';return l==='ultra'?1.5:l==='high'?1.15:l==='mid'?0.7:0.45;};  // v5.9.3 finer mesh LOD (was 1/0.75/0.5/0.4)// retarget map: blocky rig joint → real bone, matched by side (world x sign at rest) so L/R never swap
+const RSQ=()=>{const l=(typeof GQ!=='undefined'&&GQ.level)||'high';return l==='ultra'?1.5:l==='high'?1.3:l==='mid'?0.7:0.45;};  // v5.9.3 finer mesh LOD (was 1/0.75/0.5/0.4)// retarget map: blocky rig joint → real bone, matched by side (world x sign at rest) so L/R never swap
 function rsAttach(V,def){
   const R=RealSteveLib.make(RSQ()).build(),mesh=R.mesh;
   V.obj.traverse(o=>{if(o.isMesh||o.isSprite||o.isLine)o.visible=false;});
@@ -21834,11 +21887,116 @@ function rsAttach(V,def){
   const sp=n=>[...Array(n)].map((_,i)=>({x:0,z:0,vx:0,vz:0,ph:i*2.17+Math.random()*6}));
   V.real={R,mesh,map,k,rest0:{},y0:-def.H*0.5,g:{L:1,R:1},fl:{hem:sp(R.HEMN),slv:sp(2),hair:sp(4),src:{}},t:0,st:''};
 }
+// ---- v5.9.8 PREVIEW (patch26/vf598): VF-style hand-keyframed motion for the realistic body.
+// Full override of the realistic bones for idle / guard / jab / straight / kick / win (other states keep the v5.9.7 retarget layer).
+// Bones: hips = pelvis, spine = abdomen, chest = chest. Keys are authored as pelvis/abdomen/chest/neck/head eulers + planted foot targets (mesh space)
+// + fist targets (chest space) + elbow/knee pole vectors, solved with 2-bone IK every frame (feet locked to the floor, no sliding).
+const VF_T={q:new THREE.Quaternion(),q2:new THREE.Quaternion(),q3:new THREE.Quaternion(),a:new THREE.Vector3(),b:new THREE.Vector3(),c:new THREE.Vector3(),d:new THREE.Vector3(),e:new THREE.Vector3(),f:new THREE.Vector3(),m:new THREE.Matrix4(),m2:new THREE.Matrix4(),eu:new THREE.Euler(0,0,0,'YXZ')};
+const VF_E={lin:u=>u,io:u=>u<0.5?2*u*u:1-Math.pow(-2*u+2,2)/2,o3:u=>1-Math.pow(1-u,3),o5:u=>1-Math.pow(1-u,5),i2:u=>u*u,
+  back:u=>{const c=1.9;return 1+(c+1)*Math.pow(u-1,3)+c*Math.pow(u-1,2);}};
+// key fields: pel [dx,dy(drop),dz,yaw,pitch,roll]  ab/ch/nk/hd [x,y,z]  cv [hunchL,hunchR,raiseL,raiseR]
+// fL/fR [x,y,z,yaw,pitch] ankle target in mesh space (ankle bind y 0.095)   kL/kR knee pole dir   hL/hR fist target (chest space)   eL/eR elbow pole dir   tL/tR forearm pronation
+const VF_IDLE={pel:[0.03,0.15,-0.05,0.52,0.08,0.02],ab:[0.11,-0.10,-0.02],ch:[0.14,-0.16,0.03],nk:[-0.10,-0.10,0],hd:[0.08,-0.17,-0.03],cv:[0.10,0.16,0.02,0.03],
+  fL:[0.235,0.095,-0.215,0.62,0],fR:[-0.165,0.095,0.245,0.12,0],kL:[0.55,-0.1,0.85],kR:[-0.25,-0.1,1],
+  hL:[0.075,0.265,0.175],hR:[-0.045,0.255,0.315],eL:[0.55,-1,-0.1],eR:[-0.35,-1,0.05],tL:0.25,tR:0.35};
+const VF_K=(o)=>Object.assign(JSON.parse(JSON.stringify(VF_IDLE)),o);
+const VF_LIB={
+  idle:VF_IDLE,
+  // lead-hand jab: cock (hips/chest wind back a touch, fist drops in) → snap out with hip→chest turn, lead shoulder rolls up over the chin, small lead-foot step → recoil
+  jabA:VF_K({pel:[0.03,0.145,-0.06,0.46,0.07,0.02],ch:[0.12,-0.24,0.03],hR:[-0.035,0.235,0.25],cv:[0.10,0.12,0.02,0.0]}),
+  jabS:VF_K({pel:[0.02,0.14,-0.015,0.66,0.08,0.03],ab:[0.09,0.02,-0.02],ch:[0.12,0.10,0.05],nk:[-0.1,-0.18,0],hd:[0.1,-0.28,-0.05],cv:[0.08,0.34,0.02,0.10],
+    fR:[-0.165,0.095,0.30,0.12,0],hR:[-0.015,0.245,0.56],eR:[-0.8,-0.6,0],tR:1.45,hL:[0.065,0.275,0.16]}),
+  // rear straight: rear foot pivots on the ball (heel up, toes in), hips + chest unwind fully, weight rolls onto the lead leg
+  strA:VF_K({pel:[0.035,0.15,-0.065,0.60,0.06,0.03],ch:[0.10,-0.10,0.03],hL:[0.085,0.25,0.12],cv:[0.12,0.16,0.0,0.03]}),
+  strS:VF_K({pel:[-0.01,0.155,0.045,0.02,0.12,-0.03],ab:[0.10,-0.12,0.02],ch:[0.14,-0.22,-0.02],nk:[-0.08,0.1,0],hd:[0.1,0.15,0.04],cv:[0.36,0.10,0.10,0.02],
+    fL:[0.235,0.122,-0.2,0.12,0.42],hL:[0.02,0.24,0.58],eL:[0.8,-0.6,0],tL:1.45,hR:[-0.06,0.28,0.17],eR:[-0.4,-1,0.2]}),
+  // rear-leg front kick (teep): chamber knee high → drive the heel/ball through with the hips, chest leans back, arms counter-balance → re-chamber → plant
+  kikA:VF_K({pel:[-0.02,0.085,-0.02,0.30,-0.02,-0.04],ab:[0.02,-0.06,0],ch:[0.04,-0.08,0.03],fL:[0.11,0.48,0.12,0.25,-0.25],kL:[0.15,0.35,1],
+    fR:[-0.14,0.095,0.20,-0.05,0],hL:[0.13,0.20,0.16],hR:[-0.06,0.27,0.26]}),
+  kikS:VF_K({pel:[-0.04,0.085,0.05,0.16,-0.36,-0.06],ab:[-0.06,-0.04,0],ch:[-0.04,-0.06,0.04],nk:[0.04,-0.05,0],hd:[0.22,-0.1,0],
+    fL:[0.06,0.92,0.84,0.1,-1.15],kL:[0.1,0.6,1],fR:[-0.14,0.095,0.20,-0.32,0],kR:[-0.3,-0.1,1],
+    hL:[0.26,-0.02,-0.14],eL:[1,-0.2,-0.6],tL:0,hR:[-0.07,0.29,0.24],cv:[0.02,0.2,0.0,0.06]}),
+  // win: square, grounded wide base, chest up, right fist pumped overhead, left fist clenched at the hip
+  win:VF_K({pel:[0.0,0.085,0.0,0.12,0.0,0.0],ab:[-0.02,-0.04,0],ch:[-0.10,-0.08,0.04],nk:[-0.04,-0.03,0],hd:[-0.12,0.0,-0.05],cv:[-0.04,0.02,0.02,0.12],
+    fL:[0.27,0.095,-0.06,0.42,0],fR:[-0.25,0.095,0.09,-0.34,0],kL:[0.7,0,1],kR:[-0.7,0,1],
+    hR:[-0.17,0.64,0.06],eR:[-1,0.1,-0.3],tR:0.2,hL:[0.22,-0.04,0.16],eL:[1,-0.3,-0.6],tL:0.6}),
+};
+// attack scripts: [key, end-of-segment (phase-relative: 's'=startup, 'a'=active, 'r'=recovery), ease]; the first segment eases from the stance
+const VF_MV={
+  jab:{lead:'R',seg:[['jabA','s',.65,'io'],['jabS','s',1,'o5'],['jabS','a',1,'lin'],['jabA','r',0.35,'o3'],['idle','r',1,'io']],step:'R'},
+  jab2:{lead:'L',seg:[['strA','s',.6,'io'],['strS','s',1,'o5'],['strS','a',1,'lin'],['strA','r',0.4,'o3'],['idle','r',1,'io']],step:null},
+  fkick:{lead:'L',seg:[['kikA','s',1,'io'],['kikS','a',0.45,'o5'],['kikS','a',1,'lin'],['kikA','r',0.45,'o3'],['idle','r',1,'io']],step:'L',free:'L'},
+};
+function vfLerp(o,a,b,u){for(const k in a){const x=a[k],y=b[k];if(typeof x==='number')o[k]=x+(y-x)*u;else{const r=o[k]||(o[k]=[]);for(let i=0;i<x.length;i++)r[i]=x[i]+(y[i]-x[i])*u;}}return o;}
+function vfKey(I){const st=I.st;if(st==='idle'||st==='guard'||st==='gstun')return 'idle';if(st==='win')return 'win';if(st==='atk'&&VF_MV[I.pz])return 'atk';return null;}
+// build the target key for this frame
+function vfSample(X,I){const t=I.t||0,o=X.vfk||(X.vfk={});
+  if(I.st==='atk'){const M=VF_MV[I.pz],mv=I.mv,fr=I.fr,len={s:mv.s,a:mv.a,r:mv.r},base={s:0,a:mv.s,r:mv.s+mv.a};
+    let prev='idle',p0=0,res=null;for(const sg of M.seg){const end=base[sg[1]]+len[sg[1]]*sg[2];
+      if(fr<=end||sg===M.seg[M.seg.length-1]){const u=Math.max(0,Math.min(1,(fr-p0)/Math.max(0.001,end-p0)));res=vfLerp(o,VF_LIB[prev],VF_LIB[sg[0]],VF_E[sg[3]](u));break;}prev=sg[0];p0=end;}
+    // hit-stop accent: hold + tiny shake on the first active frames, recoil kick on recovery start
+    const ac=fr-mv.s;if(ac>=0&&ac<mv.a){o.pel[1]+=0.006*Math.sin(ac*9);}
+    return res;}
+  const K=VF_LIB[I.st==='win'?'win':'idle'];vfLerp(o,K,K,0);
+  // breathing + weight shift (slow, small, desynchronised)
+  const br=Math.sin(t*2.1+(X.ph||0)),ws=Math.sin(t*0.85+(X.ph||0)*1.7);
+  o.ch[0]-=0.022*br;o.ab[0]-=0.01*br;o.cv[2]+=0.02*br;o.cv[3]+=0.02*br;o.pel[1]+=0.008*(0.5+0.5*Math.sin(t*2.1+1.2+(X.ph||0)));
+  if(I.st==='win'){const pu=Math.pow(Math.max(0,Math.sin(t*4.2)),2);o.hR[1]+=0.07*pu;o.hR[2]+=0.03*pu;o.ch[0]-=0.04*pu;o.hd[0]-=0.06*pu;o.ch[1]+=0.05*Math.sin(t*1.3);o.pel[1]+=0.012*pu;}
+  else{o.pel[0]+=0.022*ws;o.pel[2]-=0.008*ws;o.pel[5]-=0.03*ws;o.ab[2]+=0.025*ws;o.ch[2]-=0.02*ws;o.hR[1]+=0.008*br;o.hL[1]+=0.008*br;o.hR[0]+=0.01*ws;o.hL[0]+=0.01*ws;
+    if(I.st!=='idle'){o.pel[1]+=0.02;o.ch[0]+=0.06;o.hd[0]+=0.06;o.hR=[-0.05,0.29,0.24];o.hL=[0.06,0.30,0.16];}}
+  return o;}
+function vfWorldRot(b,qw){const p=b.parent;p.getWorldQuaternion(VF_T.q3);VF_T.q3.invert();b.getWorldQuaternion(VF_T.q2);b.quaternion.copy(VF_T.q3.multiply(qw).multiply(VF_T.q2));b.updateMatrixWorld(true);}
+// 2-bone IK with pole: rotates a (root) and b (mid) so c lands on T (world); P = pole direction (world)
+function vfIK(a,b,c,T,P){const R=VF_T.a.setFromMatrixPosition(a.matrixWorld),M=VF_T.b.setFromMatrixPosition(b.matrixWorld),E=VF_T.c.setFromMatrixPosition(c.matrixWorld);
+  const l1=M.distanceTo(R),l2=E.distanceTo(M),dir=VF_T.d.copy(T).sub(R);let d=dir.length();d=Math.max(Math.abs(l1-l2)+1e-3,Math.min((l1+l2)*0.999,d));dir.normalize();
+  const pn=VF_T.e.copy(P).addScaledVector(dir,-P.dot(dir));if(pn.lengthSq()<1e-8)pn.set(0,0,1);pn.normalize();
+  const ca=(l1*l1-l2*l2+d*d)/(2*d),h=Math.sqrt(Math.max(0,l1*l1-ca*ca));
+  const M2=VF_T.f.copy(R).addScaledVector(dir,ca).addScaledVector(pn,h);
+  const u0=M.clone().sub(R).normalize(),u1=M2.clone().sub(R).normalize();VF_T.q.setFromUnitVectors(u0,u1);vfWorldRot(a,VF_T.q);
+  const M3=new THREE.Vector3().setFromMatrixPosition(b.matrixWorld),E3=new THREE.Vector3().setFromMatrixPosition(c.matrixWorld),T2=R.clone().addScaledVector(dir,d);
+  VF_T.q.setFromUnitVectors(E3.sub(M3).normalize(),T2.sub(M3).normalize());vfWorldRot(b,VF_T.q);}
+function vfPose(V,X,I){const B=X.R.B,mesh=X.mesh;let K=vfSample(X,I);
+  // state-change cross-fade target (keys blend, not bones) so idle→jab→idle never pops
+  const sk=I.st==='atk'?'atk'+I.pz+(I.mvId||''):I.st;
+  if(X.vfS!==sk){X.vfFrom=X.vfLast?JSON.parse(JSON.stringify(X.vfLast)):null;X.vfS=sk;X.vfB=0;}
+  if(X.vfFrom&&X.vfB<1){X.vfB=Math.min(1,X.vfB+(I.st==='atk'?0.34:0.12));K=vfLerp({},X.vfFrom,K,VF_E.io(X.vfB));}
+  X.vfLast=vfLerp(X.vfLast||{},K,K,0);
+  // mesh: cancel the blocky lean / squash / hop so the realistic body stands on the floor with its own pose
+  const P=V.pivot;P.updateMatrixWorld(true);VF_T.m.copy(P.matrixWorld).invert().multiply(mesh.parent.matrixWorld).invert();
+  VF_T.m2.makeScale(X.k,X.k,X.k);VF_T.m.multiply(VF_T.m2);VF_T.m.decompose(mesh.position,mesh.quaternion,mesh.scale);
+  // foot lock: planted feet keep their world position through the attack (root lunge does not slide them)
+  const p=K.pel;B.hips.position.set(p[0],0.96-p[1],p[2]);VF_T.eu.set(p[4],p[3],p[5],'YXZ');B.hips.quaternion.setFromEuler(VF_T.eu);
+  B.spine.rotation.set(K.ab[0],K.ab[1],K.ab[2]);B.chest.rotation.set(K.ch[0],K.ch[1],K.ch[2]);B.neck.rotation.set(K.nk[0],K.nk[1],K.nk[2]);B.head.rotation.set(K.hd[0],K.hd[1],K.hd[2]);
+  B.clavL.rotation.set(0,-K.cv[0],K.cv[2]);B.clavR.rotation.set(0,K.cv[1],-K.cv[3]);
+  mesh.updateMatrixWorld(true);
+  const lockOn=I.st==='atk';if(lockOn){const mv=I.mv,r0=mv.s+mv.a+mv.r*0.35,u=Math.max(0,Math.min(1,(I.fr-r0)/Math.max(1,mv.r*0.65)));X.vfLw=1-VF_E.io(u);}if(!lockOn)X.vfM0=null;else if(!X.vfM0)X.vfM0=mesh.matrixWorld.clone();
+  ['L','R'].forEach(S=>{const f=K['f'+S],w=VF_T.a.set(f[0],f[1],f[2]),M=VF_MV[I.pz]||{};
+    if(lockOn&&M.free!==S){const tw=w.clone().applyMatrix4(X.vfM0),tl=mesh.worldToLocal(tw.clone());if(tl.distanceTo(w)<0.3)w.lerp(tl,X.vfLw);}   // planted: keyed foot in the attack-start frame
+    const T=mesh.localToWorld(new THREE.Vector3(w.x,w.y,w.z)),kp=K['k'+S],Pd=new THREE.Vector3(kp[0],kp[1],kp[2]).applyQuaternion(mesh.getWorldQuaternion(VF_T.q2)).normalize();
+    vfIK(B['thigh'+S],B['shin'+S],B['foot'+S],T,Pd);
+    VF_T.eu.set(f[4],f[3],0,'YXZ');VF_T.q.setFromEuler(VF_T.eu);mesh.getWorldQuaternion(VF_T.q2);VF_T.q2.multiply(VF_T.q);B['shin'+S].getWorldQuaternion(VF_T.q3).invert();B['foot'+S].quaternion.copy(VF_T.q3.multiply(VF_T.q2));B['foot'+S].updateMatrixWorld(true);});
+  ['L','R'].forEach(S=>{const h=K['h'+S],c=B.chest,T=c.localToWorld(new THREE.Vector3(h[0],h[1]+1.27-1.27,h[2]));
+    const ep=K['e'+S],Pd=new THREE.Vector3(ep[0],ep[1],ep[2]).applyQuaternion(c.getWorldQuaternion(VF_T.q2)).normalize();
+    vfIK(B['arm'+S],B['fore'+S],B['hand'+S],T,Pd);
+    const fo=B['fore'+S],hd=B['hand'+S],ax=VF_T.d.setFromMatrixPosition(hd.matrixWorld).sub(VF_T.e.setFromMatrixPosition(fo.matrixWorld)).normalize();
+    VF_T.q.setFromAxisAngle(ax,(S==='L'?1:-1)*(K['t'+S]||0));vfWorldRot(fo,VF_T.q);hd.rotation.set(0,0,(S==='L'?0.12:-0.12));});
+}
+// ---- v5.9.8 PREVIEW: contact shadows / AO under each foot + a soft body blob (multiply decals on the floor, follow the feet)
+let RS_BLOB=null;
+function rsContact(V,X){if(!X.cs){if(!RS_BLOB){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d'),gr=g.createRadialGradient(32,32,2,32,32,31);
+    gr.addColorStop(0,'rgba(0,0,0,1)');gr.addColorStop(0.45,'rgba(0,0,0,0.55)');gr.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gr;g.fillRect(0,0,64,64);RS_BLOB=new THREE.CanvasTexture(c);}
+    X.cs=[0.62,0.78,0.78].map((o,i)=>{const m=new THREE.Mesh(new THREE.PlaneGeometry(1,1),new THREE.MeshBasicMaterial({map:RS_BLOB,color:0x000000,transparent:true,opacity:o,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-2}));
+      m.rotation.x=-Math.PI/2;m.renderOrder=2;m.userData.o=o;V.root.add(m);return m;});}
+  const B=X.R.B,v=RS_V,air=V.root.position.y>0.03,ks=V.root.scale.x||1;V.root.updateMatrixWorld(true);
+  const put=(m,obj,sx,sz,yaw,h0)=>{v.setFromMatrixPosition(obj.matrixWorld);V.root.worldToLocal(v);const h=Math.max(0,v.y-h0*X.k/ks);const f=air?0:Math.max(0,1-h/(0.35*X.k/ks));
+    m.position.set(v.x,0.004,v.z);m.rotation.z=yaw;m.scale.set(sx*X.k*(1+h*1.5),sz*X.k*(1+h*1.5),1);m.material.opacity=m.userData.o*f;m.visible=f>0.01;};
+  const yw=V.pivot.rotation.y,fy=S=>{B['foot'+S].getWorldQuaternion(VF_T.q);VF_T.eu.setFromQuaternion(VF_T.q,'YXZ');return VF_T.eu.y;};
+  put(X.cs[0],B.hips,0.75,0.55,yw,0.9);put(X.cs[1],B.footL,0.2,0.36,fy('L'),0.095);put(X.cs[2],B.footR,0.2,0.36,fy('R'),0.095);}
 let RS_INFO=null;   // pose-intent from the rsteve poseFor override → consumed by the next applyPose (same fighter, same frame)
 const RS_GRIP={idle:1,walk:1,dash:1,guard:1,gstun:1,atk:1,win:1,lose:1,jsq:1,land:1,getup:0.8,grabbed:0.7,air:0.6,hurt:0.1,tumble:0.1,down:0.25,dodge:0.5};
 // masculine pose layer: rewrites the shared Steve pose targets for the realistic body only (blocky Steve is untouched)
 function rsMasc(F,t,P){
-  const st=F.st,mv=F.mv,fr=F.fr,br=Math.sin(t*2.6+F.side)*0.02,I={st,act:0,arm:'R',grip:RS_GRIP[st]===undefined?1:RS_GRIP[st],walk:0};
+  const st=F.st,mv=F.mv,fr=F.fr,br=Math.sin(t*2.6+F.side)*0.02,I={st,act:0,arm:'R',grip:RS_GRIP[st]===undefined?1:RS_GRIP[st],walk:0,t,fr,mv,pz:mv&&mv.pose};
   const guard=(lead)=>{P.aL=-0.72+br;P.aR=-0.6-br;P.eL=-1.98;P.eR=-2.08;P.aLz=-0.24;P.aRz=0.24;P.wfL=P.wfR=0;if(lead!=='L'){}};
   if(st==='idle'){guard();P.kL=0.5;P.kR=0.56;P.lL=-0.24;P.lR=0.2;P.hd=0.16;P.lean=0.12;P.ch=0.1+br;P.cy=0.12;P.fpL=P.fpR=0;P.sx=1;P.sy=1+br*0.3;P.y=0;}
   else if(st==='walk'||st==='dash'){const ph=F.walkPh,s=Math.sin(ph),d=st==='dash';guard();P.aL+=-s*0.16;P.aR+=s*0.16;if(d){P.eL=P.eR=-1.75;}
@@ -21863,6 +22021,8 @@ function rsFootY(X){const B=X.R.B;B.hips.updateMatrixWorld(true);const mi=X.mi||
   const a=RS_V.setFromMatrixPosition(B.footL.matrixWorld).applyMatrix4(mi).y,b=RS_V.setFromMatrixPosition(B.footR.matrixWorld).applyMatrix4(mi).y;return Math.min(a,b);}
 function rsPose(V,I){const X=V.real;if(!X)return;const B=X.R.B,r=V.rig,R0=V.rest,J=r.J||{},c=V.pose,m=X.map;I=I||{st:'idle',act:0,arm:'R',grip:1,walk:0};
   X.R.NAMES.forEach(n=>{const b=B[n];b.rotation.set(0,0,0);if(b.scale.x!==1||b.scale.z!==1)b.scale.set(1,1,1);});
+  const vk=window.__rsVF===0?null:vfKey(I);if(!X.hp0)X.hp0=B.hips.position.clone();if(X.ph==null)X.ph=Math.random()*6;
+  if(vk){vfPose(V,X,I);}else{X.vfS=null;X.vfM0=null;B.hips.position.copy(X.hp0);X.mesh.quaternion.identity();X.mesh.position.set(0,X.y0,0);
   const dl=(o,n)=>{const b=B[m[n]];if(!o||!b)return;const r0=R0[n]||{x:0,y:0,z:0};b.rotation.x+=o.rotation.x-r0.x;b.rotation.z+=(o.rotation.z-r0.z);b.rotation.y+=(o.rotation.y-(r0.y||0))*0.5;};
   ['armL','armR','legL','legR'].forEach(n=>dl(r[n],n));
   ['armL','armR'].forEach(n=>{const b=B[m[n]];if(b)b.rotation.z+=(m[n]==='armL'?-0.14:0.14);});
@@ -21884,11 +22044,13 @@ function rsPose(V,I){const X=V.real;if(!X)return;const B=X.R.B,r=V.rig,R0=V.rest
     const bk=sg>0?'R':'L';B['foot'+bk].rotation.y+=0.3*Math.max(0,a*sg);}
   if(I.walk){B.chest.rotation.y+=0.09*I.walk;B.hips.rotation.y-=0.07*I.walk;B.spine.rotation.x+=0.04;}
   if(gr){const y1=rsFootY(X);X.mesh.position.y=X.y0+(y0-y1)*X.mesh.scale.y;}else X.mesh.position.y=X.y0;
+  }
   // ---- fingers: spring toward fist / open per hand (blocky grip channel can only add)
   const now=performance.now()*0.001,dt=Math.min(0.05,Math.max(0.001,now-(X.t||now-0.016)));X.t=now;
   const gt=Math.max(window.__rsGripOv!=null?+window.__rsGripOv:I.grip,0);['L','R'].forEach(S=>{X.g[S]+=(gt-X.g[S])*Math.min(1,dt*16);});
   for(const f of X.R.FR){const g=X.g[f.S];f.b.quaternion.setFromAxisAngle(f.ax,f.op+(f.fi-f.op)*g);}
   rsFlutter(V,X,I,now,dt);
+  if(window.__rsCS!==0)try{rsContact(V,X);}catch(e){}
 }
 // ---- secondary motion: cheap 2D spring bones (no cloth sim). Each channel chases a target built from the body's own velocity / acceleration
 // (inertia + drag), a slow wind and a hit impulse; result → small bone rotations (hem panels, sleeves) / scalp-pivot rotations (hair).
