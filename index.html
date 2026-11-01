@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.9.2.1">
+<meta name="ba-version" content="v5.9.5">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -6139,8 +6139,8 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
     gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(19, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(19, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
-  function saveSave() { try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
+  function saveSave() { try { wo595Stamp(save); } catch (e) {} try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
   // ---------- tile textures ----------
@@ -10095,7 +10095,7 @@ const BlockAction = (() => {
     const el = $('baSelect'); if (!el) return;
     const grid = el.querySelector('.ba-cards'); grid.innerHTML = '';
     STAGES.forEach((s, i) => {
-      const locked = i + 1 > save.unlocked, b = save.best[s.id];
+      const locked = i + 1 > save.unlocked && !clr595(i), b = save.best[s.id];
       const c = document.createElement('button'); c.type = 'button'; c.className = 'ba-card th-' + s.theme + (locked ? ' locked' : '') + (b && b.clear ? ' cleared' : '');
       c.innerHTML = `<div class="ba-id"></div><div class="ba-nm"></div><div class="ba-sub"></div><div class="ba-best"></div>`;
       c.querySelector('.ba-id').textContent = (locked ? '🔒 ' : b && b.clear ? '⭐ ' : '') + 'STAGE ' + s.id;
@@ -10127,7 +10127,7 @@ const BlockAction = (() => {
       h.textContent = def.id + ' 클리어!';
       p.innerHTML = ''; const lines = [`스테이지 점수 ${info.gained.toLocaleString()}${info.newBest ? '  🏆 최고 기록!' : ''}`, `클리어 시간 ${G.clearTime.toFixed(1)}초`, `코인 ${G.coins} · 남은 목숨 ${G.lives}`, `난이도 ${diffLbl57(G.d57)}${bestLine57(def.id)}`];
       if (info.unlockedNow) lines.push(`🔓 ${STAGES[stageIdx + 1].id} ${STAGES[stageIdx + 1].name} 해금!`);
-      if (stageIdx + 1 >= STAGES.length) lines.push('🎉 네더를 정복했습니다! 모든 스테이지 클리어');
+      if (stageIdx + 1 >= STAGES.length) lines.push('🎉 모든 월드를 정복했습니다! 모든 스테이지 클리어');
       lines.forEach(t => { const d = document.createElement('div'); d.textContent = t; p.appendChild(d); });
       if (G.w582) { const W = G.w582, d = document.createElement('div'); d.className = 'w582'; d.dataset.earn = W.earn; d.dataset.w = W.w; p.appendChild(d); const t0 = performance.now(); const f = now => { if (!d.isConnected) return; const k = Math.min(1, Math.max(0, (now - t0 - 900) / 900)); d.textContent = `🪙 +${Math.round(W.earn * k)} 코인 → 지갑 ${(W.w - W.earn + Math.round(W.earn * k)).toLocaleString()}${W.first ? ' (첫 클리어 +20)' : ''}`; if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
       if (stageIdx + 1 < STAGES.length) add('다음 스테이지 ▶', () => shopGo582(stageIdx + 1, () => { stageIdx++; cpReached = false; startStage(true); }), 'pri');
@@ -10188,7 +10188,7 @@ const BlockAction = (() => {
     bindInput();
     window.addEventListener('resize', onResize);
     dom5(); showSelect(); showMap5();
-    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); installDebug54(); installDebug56(); installDebug57(); installDebug58(); installDebug59(); }
+    if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); installDebug54(); installDebug56(); installDebug57(); installDebug58(); installDebug59(); installDebug595(); }
     last = performance.now(); requestAnimationFrame(animate);
   }
   function bindInput() {
@@ -10204,7 +10204,7 @@ const BlockAction = (() => {
       if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) e.preventDefault();
       if (e.repeat) return;
       if (e.code === 'Escape' || e.code === 'KeyP') { if (state === 'pause') resume(); else pause(); }
-      if (state === 'select' && /^Digit[1-9]$/.test(e.code)) { const i = +e.code.slice(5) - 1; if (i < save.unlocked) newRun(i); }
+      if (state === 'select' && /^Digit[1-9]$/.test(e.code)) { const i = +e.code.slice(5) - 1; if (i < STAGES.length && (i < save.unlocked || clr595(i))) newRun(i); }
       if ((state === 'over') && (e.code === 'Enter')) { const b = document.querySelector('#baOver .ba-btns button'); if (b) b.click(); }
     });
     window.addEventListener('keyup', e => { if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') return; keys[e.code] = false; });
@@ -11413,7 +11413,7 @@ const BlockAction = (() => {
   function endCut5() {
     if (!CUT.on) return; CUT.on = false; cine5(false); cam.ov = null; VOICE.cancel();
     const id = CUT.id, after = CUT.after; CUT.after = null;
-    if (id === 'intro') story5().intro = 1; if (id === 'portal') story5().portal = 1; if (id === 'ending') story5().ending = 1; if (id === 'crayon') story5().crayon58 = 1; if (id === 'rocket58') story5().rocket58 = 1; if (id === 'book59') story5().book59 = 1; saveSave();
+    if (id === 'intro') story5().intro = 1; if (id === 'portal') story5().portal = 1; if (id === 'ending') story5().ending = 1; if (id === 'crayon') story5().crayon58 = 1; if (id === 'rocket58') story5().rocket58 = 1; if (id === 'book59') story5().book59 = 1; if (id === 'gift595') story5().gift595 = 1; if (id === 'sky595') story5().sp595 = 1; saveSave();
     if (after) after(); else showMap5();
   }
   function abortCut5() { if (!CUT.on) return; CUT.on = false; CUT.after = null; CUT.hero = null; cine5(false); cam.ov = null; VOICE.cancel(); }
@@ -11476,7 +11476,7 @@ const BlockAction = (() => {
     if (CUT.on && CUT.i >= CUT.steps.length) endCut5();
   }
   function fw5(x, y) { const c = [0xff5a7a, 0xffd04a, 0x6ad8ff, 0xa0ff6a, 0xd07aff][Math.floor(Math.random() * 5)]; spawnParts(x, y, ZP - 1.5, c, NP(26), 0.16, 0.02); const g = glowSprite(LIN(c), 3); g.material.opacity = 0.8; g.position.set(x, y, ZP - 1.5); W3.group.add(g); pops.push({ type: 'fade5', m: g, t: 0 }); sfx5('firework'); }
-  const CREDITS5 = `<h1>마인크래프트 마리오 · 꾸꾸의 모험</h1>
+  let CREDITS5 = `<h1>마인크래프트 마리오 · 꾸꾸의 모험</h1>
 <h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>
 <h3>CAST</h3><div class="l">꾸꾸 — 용감한 주인공</div><div class="l">뚜뚜 — 호박 농사꾼 친구</div><div class="l">촌장 — 마을의 어르신</div><div class="l">무시룸 · 철골렘 · 눈골렘 — 든든한 동료들</div><div class="l">골렘 왕 — 되찾은 수호자</div><div class="l">그락 — 피글린 대장</div><div class="l">위더 — 네더의 지배자</div><div class="l">별별이 — 크레용 나라의 길잡이</div><div class="l">크레용 로봇 — 낙서에서 태어난 친구</div>
 <h3>WORLD 1</h3><div class="l">성 밖 들판 · 지하 동굴 · 성벽 위 공중 발판 · 성 안 보스전</div>
@@ -11625,9 +11625,7 @@ const BlockAction = (() => {
   function afterClear5(def, info) {
     if (def.id === '1-4') { const first = !story5().portal; if (first || STORY5.forcePortal) { playCut5('portal', () => { save.node = 6; saveSave(); showMap5({ celebrate: 6 }); }); return true; } }
     if (def.id === '2-4' && (!story5().ending || STORY5.forceEnding)) { playCut5('ending', () => { if (!story5().crayon58) playCut5('crayon', () => { save.node = 10; saveSave(); showMap5({ celebrate: 11 }); }); else { save.node = 9; saveSave(); showMap5(); } }); return true; }
-    if (def.id === '4-3' && !story5().book59) { playCut5('book59', () => { save.node = 19; saveSave(); showMap5({ celebrate: 20 }); }); return true; }
-    if (def.id === '5-4' && (!story5().fin59 || STORY5.forceFinale583)) { playCut5('bookend59', () => playFinale583()); return true; }
-    if (def.id === '3-4' && !story5().rocket58) { playCut5('rocket58', () => { save.node = 15; saveSave(); showMap5({ celebrate: 16 }); }); return true; }
+    if (afterClear595(def)) return true;   // v5.9.5: crayon → storybook → space (finale after the last world's final stage)
     return false;
   }
   function story5Tick(inp) {
@@ -11649,15 +11647,14 @@ const BlockAction = (() => {
     if (n.k === 'village') return true;
     if (n.k === 'rocket') return w4Open58();
     if (n.k === 'book') return w5Open59();
-    if (n.s >= 15 && !w5Open59()) return false;
     if (n.k === 'crayon') return w3Open54();
-    if (n.s >= 12 && !w4Open58()) return false;
-    if (n.s >= 8 && !w3Open54()) return false;
+    if (n.gw595 && n.k === 'gate') return worldOpen595(n.gw595);
+    if (n.s !== undefined && STAGES[n.s] && WIDX595(STAGES[n.s].wk) >= 2 && !worldOpen595(STAGES[n.s].wk)) return false;
     if (n.k === 'portal') return !!S.portal || !!(save.best['1-4'] && save.best['1-4'].clear);
     if (n.s >= 4 && !S.portal && !(save.best['1-4'] && save.best['1-4'].clear)) return false;
-    return n.s < save.unlocked && n.s < STAGES.length;
+    return (n.s < save.unlocked || clr595(n.s)) && n.s < STAGES.length;
   }
-  function nodeClear5(i) { const n = MAPN5[i]; if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
+  function nodeClear5(i) { const n = MAPN5[i]; if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : n.k === 'gate' ? worldOpen595(n.gw595) : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
   function buildMap5() {
     const sc = new THREE.Scene(); MAP.scene = sc; MAP.cam = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
     sc.background = new THREE.Color(0x8ec5f0); sc.fog = new THREE.Fog(0x8ec5f0, 22, 60);
@@ -11736,7 +11733,7 @@ const BlockAction = (() => {
     const n = 160, pos = new Float32Array(n * 3); for (let i = 0; i < n; i++) { pos[i * 3] = rnd(22, 46); pos[i * 3 + 1] = rnd(0, 6); pos[i * 3 + 2] = rnd(-5, 5); }
     const eg = new THREE.BufferGeometry(); eg.setAttribute('position', new THREE.BufferAttribute(pos, 3));
     MAP.embers = new THREE.Points(eg, new THREE.PointsMaterial({ color: LIN(0xffa050), size: 0.09, transparent: true, opacity: 0.85, toneMapped: false })); g.add(MAP.embers);
-    buildMapCrayon58(g); { const g4 = new THREE.Group(); g4.position.x = 22; g.add(g4); buildMapSpace54(g4); } buildMapBook59(g); MAP.built = true; MAP.cx = 0; MAP.hx = MAPN5[0].x; MAP.hz = MAPN5[0].z; MAP.ph = 0;
+    mapDecor595(g); MAP.built = true; MAP.cx = 0; MAP.hx = MAPN5[0].x; MAP.hz = MAPN5[0].z; MAP.ph = 0;
   }
   function refreshMap5() { refreshMap5b(); refreshMapCrayon58(); refreshMapSpace54(); refreshMapBook59(); }
   function refreshMap5b() {
@@ -11750,10 +11747,11 @@ const BlockAction = (() => {
     const D = dom5(), n = MAPN5[MAP.at], i = MAP.at, S = story5(), P = D.map;
     const mid = P.querySelector('.mid'), h = P.querySelector('h3'), p = P.querySelector('p'), btns = P.querySelector('.ba-btns'); btns.innerHTML = '';
     const add = (txt, fn, cls, dis) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = txt; b.className = cls || ''; b.disabled = !!dis; b.onclick = (ev) => { ev.stopPropagation(); snd('select'); fn(); }; btns.appendChild(b); return b; };
-    if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = (n.s >= 15 ? '월드 5 · 그림책 나라' : n.s >= 12 ? '월드 4 · 우주' : n.s >= 8 ? '월드 3 · 크레용 나라' : n.s >= 4 ? '월드 2 · 네더' : '월드 1 · 성') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}${bestLine57(st.id)} — ${st.sub}` : st.sub; add('▶ 시작', () => shopGo582(n.s, () => playFromMap5(n.s)), 'pri'); }
+    if (n.s !== undefined) { const st = STAGES[n.s], b = save.best[st.id]; mid.textContent = WT595(st.wk, 'map') + ' — STAGE ' + st.id; h.textContent = st.name; p.textContent = b && b.clear ? `⭐ 최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}${bestLine57(st.id)} — ${st.sub}` : st.sub; add('▶ 시작', () => shopGo582(n.s, () => playFromMap5(n.s)), 'pri'); }
     else if (n.k === 'village') { mid.textContent = '월드 1 · 시작'; h.textContent = '꾸꾸의 마을'; p.textContent = S.ending ? '모두가 돌아온 평화로운 마을. 축제가 한창이에요!' : '골렘 왕에게 습격당한 마을. 뚜뚜와 마을 주민들을 구하러 가자!'; add('📜 프롤로그 보기', () => playCut5('intro'), 'pri'); }
-    else if (n.k === 'rocket') { mid.textContent = '월드 4 · 우주'; h.textContent = '크레용 로켓 발사대'; p.textContent = '크레용 로봇이 그려 준 로켓! 우주 해적 UFO가 달과 정거장을 노리고 있어요.'; add('🚀 발사 장면 보기', () => rocketCut54(), 'pri'); add('📜 크레용 로켓 장면 보기', () => playCut5('rocket58'), '', !S.rocket58); }
-    else if (n.k === 'book') { mid.textContent = '월드 5 · 그림책 나라'; h.textContent = '커다란 그림책'; p.textContent = 'UFO를 물리치자 펼쳐진 커다란 그림책! 잉크 낙서 드래곤이 페이지를 까맣게 칠하고 있어요.'; add('📖 그림책 장면 보기', () => playCut5('book59', () => showMap5()), 'pri', !S.book59); }
+    else if (n.k === 'rocket') { mid.textContent = WT595('space'); h.textContent = '색연필 로켓 발사대'; p.textContent = '이야기꾼 부엉이가 그려 준 로켓! 우주 해적 UFO가 훔쳐 간 그림책의 마지막 페이지를 되찾자.'; add('🚀 발사 장면 보기', () => rocketCut54(), 'pri'); add('📜 로켓 장면 보기', () => playCut5('sky595', () => showMap5()), '', !S.sp595); }
+    else if (n.k === 'book') { mid.textContent = WT595('book'); h.textContent = '커다란 그림책'; p.textContent = '크레용 로봇이 그려 준 커다란 그림책! 잉크 낙서 드래곤이 페이지를 까맣게 칠하고 있어요.'; add('📖 그림책 장면 보기', () => playCut5('gift595', () => playCut5('book59', () => showMap5())), 'pri', !S.book59); }
+    else if (n.k === 'gate') { mid.textContent = WT595(n.gw595); h.textContent = (WMETA595[n.gw595] || { name: n.gw595 }).name; p.textContent = '새로운 세계로 가는 길.'; }
     else if (n.k === 'crayon') { mid.textContent = '월드 3 · 크레용 나라'; h.textContent = '이상한 포털'; p.textContent = '위더를 물리친 뒤 포털이 오작동! 모든 것이 크레용으로 그려진 나라로 이어져요.'; add('📜 크레용 나라 장면 보기', () => playCut5('crayon'), 'pri', !S.crayon58); }
     else { mid.textContent = '차원문'; h.textContent = '네더 포탈'; p.textContent = '성 깊은 곳에 열린 보랏빛 차원문. 위더가 기다리는 네더로 이어져요.'; add('📜 포탈 장면 보기', () => playCut5('portal'), 'pri', !S.portal); }
     add('🛒 상점 · 🪙 ' + shopSt582().w.toLocaleString(), () => shopOpen582(() => mapPanel5()), 'shop582');
@@ -12303,8 +12301,8 @@ const BlockAction = (() => {
   };
   // ===== v5.8.3 FINALE: after the World 4 UFO boss — home, Cybertruck, cameos, fireworks, credits, 끝 card, stats =====
   function st583() { if (!save.st583 || typeof save.st583 !== 'object') save.st583 = { c: 0, d: 0, t: 0 }; return save.st583; }
-  function allClear583() { const b = save.best && save.best['5-4']; return !!(b && b.clear); }
-  function finIdx583() { const i = MAPN5.findIndex(n => n.s !== undefined && STAGES[n.s] && STAGES[n.s].id === '5-4'); return i < 0 ? MAPN5.length - 1 : i; }
+  function allClear583() { return WORLD_ORDER595.length > 0 && WORLD_ORDER595.every(k => clrId595(finalOf595(k))); }
+  function finIdx583() { const i = MAPN5.findIndex(n => n.s !== undefined && STAGES[n.s] && STAGES[n.s].id === lastFinal595()); return i < 0 ? MAPN5.length - 1 : i; }
   function finStats583() {
     const S = st583(), ids = STAGES.map(s => s.id), B = save.best || {};
     let clr = 0, sc = 0, tm = 0; ids.forEach(id => { const b = B[id]; if (b && b.clear) { clr++; sc += b.score || 0; tm += b.time || 0; } });
@@ -12332,8 +12330,9 @@ const BlockAction = (() => {
     FIN583.card = c;
   }
   function finHide583() { if (FIN583.card) FIN583.card.classList.remove('show'); const D = typeof dom5 === 'function' ? dom5() : null; if (D && D.cred) D.cred.classList.remove('show'); if (FIN583.tr && FIN583.tr.m && FIN583.tr.m.parent) FIN583.tr.m.parent.remove(FIN583.tr.m); FIN583.tr = null; }
-  const FINCRED583 = () => CREDITS5.replace('<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>', '<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루, 크레용 나라, 우주, 그리고 그림책 나라까지</div>')
+  const FINCRED583 = () => CREDITS5.replace('<h3>STORY</h3><div class="l">골렘 왕의 습격에서 네더의 보루까지</div>', '<h3>STORY</h3><div class="l">' + STORY595() + '</div>')
     .replace('<h3>CAST</h3>', '<h3>CAST</h3><div class="l">사이버트럭 — 꾸꾸의 든든한 단짝</div>')
+    .replace('크레용 로봇 — 낙서에서 태어난 친구</div>', '크레용 로봇 — 낙서에서 태어난 친구</div><div class="l">토토 · 이야기꾼 부엉이 — 그림책 나라의 친구들</div><div class="l">잉크 드래곤 · 우주 해적 UFO — 마지막 페이지를 노린 말썽꾼들</div>')
     .replace('<h3>THANK YOU</h3>', '<div class="fin583"><h2>👑 모든 월드 클리어!</h2><div class="l">' + finStats583().slice(0, 6).map(r => r[0] + ' ' + r[1]).join('</div><div class="l">') + '</div></div><h3>THANK YOU</h3>');
   function finTruck583(x) {   // the Cybertruck as a cut prop (no rainbow aura / arcs)
     const m = makeCybertruck(), u = m.userData;
@@ -12367,19 +12366,19 @@ const BlockAction = (() => {
     const cheer = on => Object.keys(CUT.actors).forEach(k => { const a = CUT.actors[k]; if (k !== 'ufo') { a.hop = on ? 1 : 0; a.cheer = on; } });
     return [
       { wait: 30 },
-      { fn: () => { banner('🏠 꾸꾸의 마을', '그림책의 마지막 페이지를 덮고 집으로!', 2200); } },
+      { fn: () => { banner('🏠 꾸꾸의 마을', '되찾은 마지막 페이지를 들고 집으로!', 2200); } },
       { walk: 'haru', to: 12.2, sp: 0.06, nb: 1 }, { cam: [12, 3.3, 9.4], t: 120 },
-      { say: 'bori', text: '꾸꾸! 정말 돌아왔구나! 그림책 나라의 잉크 드래곤까지 물리쳤다며?' },
-      { say: 'haru', text: '응! 달도, 유성우 정거장도, 그림책 나라도 모두 안전해!' },
+      { say: 'bori', text: '꾸꾸! 정말 돌아왔구나! 우주 해적 UFO까지 물리쳤다며?' },
+      { say: 'haru', text: '응! 그림책의 마지막 페이지도 되찾았어. 이제 모든 세계가 안전해!' },
       { fn: () => { cheer(1); fw5(14, 8.6); fw5(20, 9); } }, { wait: 40 }, { fn: () => cheer(0) },
-      { say: 'elder', text: '다섯 개의 세계를 모두 구한 우리 마을의 영웅이로구나! 오늘은 최고의 축제를 열자꾸나!' },
+      { say: 'elder', text: NUMK595(WORLD_ORDER595.length) + ' 개의 세계를 모두 구한 우리 마을의 영웅이로구나! 오늘은 최고의 축제를 열자꾸나!' },
       { fn: () => { finTruck583(-12).tx = 8.6; sfx5('firework'); cam.shake = 4; } },
       { cam: [5, 3.2, 9.2], t: 80, nb: 1 }, { wait: 150 },
       { say: 'haru', text: '부릉부릉~ 사이버트럭! 너도 축하하러 와 줬구나!' },
       { cam: [30, 3.9, 13.5], t: 110 },
       { say: 'grak', text: '꿀꿀! 네더 대표로 축하하러 왔다. 금으로 만든 케이크다!' },
-      { say: 'toto59', text: '깡총! 그림책 나라에서도 축하하러 왔어! 이야기꾼 할아버지가 오늘 이야기를 새 책으로 엮어 주신대!' },
-      { say: 'crobo', text: '삐빅! 크레용 나라 친구들도 다 같이 왔어! 로켓 여행 즐거웠지?' },
+      { say: 'toto59', text: '깡총! 그림책 나라에서도 축하하러 왔어! 이야기꾼 할아버지가 되찾은 마지막 페이지에 오늘 이야기를 써 주신대!' },
+      { say: 'crobo', text: '삐빅! 크레용 나라 친구들도 다 같이 왔어! 내가 그린 그림책, 재미있었지?' },
       { say: 'moosh', text: '음머~ 축하해! 오늘은 버섯 수프 파티야!' },
       { say: 'golem', text: '마을은 내가 지키겠다. 영웅이여, 마음껏 즐겨라.' },
       { fn: () => { cheer(1); fwOn(22); } },
@@ -12396,11 +12395,11 @@ const BlockAction = (() => {
       { credits: 2, tick(adv) { const s = this; if (!s._on) { s._on = 1; s._t = 0; FIN583.go = 0; FIN583.card.querySelector('.gr').innerHTML = finStats583().map(r => '<div><span>' + r[0] + '</span><b>' + r[1] + '</b></div>').join(''); FIN583.card.classList.add('show'); sfx5('firework'); }
           s._t++; if ((FIN583.go || adv) && s._t > 40 || s._t > 20 * 60 || (STORY5.auto && s._t > 90)) { FIN583.card.classList.remove('show'); return true; } return false; } }
     ]; } };
-  function finAfter583() { CUT.every = null; finHide583(); story5().finale583 = 1; story5().fin59 = 1; save.node = finIdx583(); saveSave(); MAP.at = finIdx583(); showMap5(); }
+  function finAfter583() { CUT.every = null; finHide583(); story5().finale583 = 1; story5().fin59 = 1; story5().fin595 = 1; save.node = finIdx583(); saveSave(); MAP.at = finIdx583(); showMap5(); }
   function playFinale583() { playCut5('finale583', finAfter583); }
   function finAuto583() {   // players who already beat 4-3 before v5.8.3 get the ending once when the map opens
-    if (!allClear583() || story5().fin59 || STORY5.noFinale583) return;
-    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().fin59) playFinale583(); }, 700);
+    if (!allClear583() || story5().fin595 || STORY5.noFinale583) return;
+    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().fin595) playFinale583(); }, 700);
   }
   function mapCrown583() {   // clear badge: a gold crown on map-Steve once everything is cleared
     const H = MAP.hero; if (!H) return;
@@ -12566,9 +12565,7 @@ const BlockAction = (() => {
     const el = $('baSelect'); if (!el) return; const panel = el.querySelector('.ba-panel');
     if (!el.querySelector('.ba-tomap')) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ba-tomap'; b.textContent = '🗺 월드맵으로'; b.style.cssText = 'margin:4px 0 10px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#f8d36a,#e0a020);color:#2a1a04;font-weight:900;cursor:pointer;'; b.onclick = () => { snd('select'); showMap5(); }; panel.insertBefore(b, panel.querySelector('.ba-cards')); }
     const grid = el.querySelector('.ba-cards'); if (grid && !grid.querySelector('.ba-wtitle')) { const cards = grid.querySelectorAll('.ba-card'); const t1 = document.createElement('div'); t1.className = 'ba-wtitle'; t1.textContent = '월드 1 · 골렘 왕의 성'; grid.insertBefore(t1, cards[0]); if (cards[4]) { const t2 = document.createElement('div'); t2.className = 'ba-wtitle'; t2.textContent = '월드 2 · 네더'; grid.insertBefore(t2, cards[4]); }
-      if (cards[8]) { const t3 = document.createElement('div'); t3.className = 'ba-wtitle'; t3.textContent = '월드 3 · 크레용 나라'; grid.insertBefore(t3, cards[8]); }
-      if (cards[15]) { const t5 = document.createElement('div'); t5.className = 'ba-wtitle'; t5.textContent = '월드 5 · 그림책 나라'; grid.insertBefore(t5, cards[15]); }
-      if (cards[12]) { const t4 = document.createElement('div'); t4.className = 'ba-wtitle'; t4.textContent = '월드 4 · 우주'; grid.insertBefore(t4, cards[12]); }
+      WORLD_ORDER595.forEach((k, wi) => { const i0 = WSTART595(k); if (wi < 2 || i0 < 0 || !cards[i0]) return; const t = document.createElement('div'); t.className = 'ba-wtitle'; t.textContent = WT595(k, 'sel'); grid.insertBefore(t, cards[i0]); });
       cards.forEach((c, i) => { if (i >= 4 && !nodeOpen5(nodeOf58(i)) && !c.disabled) { c.disabled = true; c.classList.add('locked'); } }); }
   }
   function playFromMap5(s) { save.node = nodeOf58(s); saveSave(); MAP.leaving = true; modeClass5(null); if (DOM5) DOM5.map.classList.remove('show'); renderer.toneMappingExposure = MAP.exp0 !== undefined ? MAP.exp0 : renderer.toneMappingExposure; newRun(s); }
@@ -12581,21 +12578,21 @@ const BlockAction = (() => {
     let at = typeof save.node === 'number' ? save.node : 0; if (!nodeOpen5(at)) at = 0;
     MAP.at = at; MAP.walk = null; MAP.path = []; MAP.hx = MAPN5[at].x; MAP.hz = MAPN5[at].z; MAP.cx = MAP.hx; MAP.leaving = false;
     if (o.celebrate !== undefined && nodeOpen5(o.celebrate)) { MAP.at = Math.max(0, o.celebrate - 2); MAP.hx = MAPN5[MAP.at].x; MAP.hz = MAPN5[MAP.at].z; MAP.cx = MAP.hx; walkTo5(o.celebrate); }
-    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59();
+    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59(); spaceAuto595();
     if (MAP.exp0 === undefined) MAP.exp0 = renderer.toneMappingExposure;
   }
   function walkTo5(target) {
     if (target === MAP.at || !nodeOpen5(target)) return;
     const dir = Math.sign(target - MAP.at), path = [];
-    for (let k = MAP.at + dir; dir > 0 ? k <= target : k >= target; k += dir) { if (!nodeOpen5(k)) break; path.push(k); }
+    for (let k = MAP.at + dir; dir > 0 ? k <= target : k >= target; k += dir) { path.push(k); }
     if (path.length) { MAP.path = path; MAP.walk = { to: path.shift() }; }
   }
   function mapTick5(inp) {
     if (!MAP.built) return;
     const lP = inp.left && !MAPIN5.pl, rP = inp.right && !MAPIN5.pr; MAPIN5.pl = inp.left; MAPIN5.pr = inp.right;
     if (!MAP.walk) {
-      if (rP && nodeOpen5(MAP.at + 1)) walkTo5(MAP.at + 1); else if (lP && MAP.at > 0) walkTo5(MAP.at - 1);
-      else if ((inp.jumpP || MAPIN5.act) && !SHOP582.open) { MAPIN5.act = false; const n = MAPN5[MAP.at]; snd('select'); if (n.s !== undefined) shopGo582(n.s, () => playFromMap5(n.s)); else if (n.k === 'village') playCut5('intro'); else if (n.k === 'rocket') rocketCut54(); else if (n.k === 'crayon') { if (story5().crayon58) playCut5('crayon'); } else if (story5().portal) playCut5('portal'); return; }
+      if (rP && nextOpen595(MAP.at, 1) >= 0) walkTo5(nextOpen595(MAP.at, 1)); else if (lP && MAP.at > 0 && nextOpen595(MAP.at, -1) >= 0) walkTo5(nextOpen595(MAP.at, -1));
+      else if ((inp.jumpP || MAPIN5.act) && !SHOP582.open) { MAPIN5.act = false; const n = MAPN5[MAP.at]; snd('select'); if (n.s !== undefined) shopGo582(n.s, () => playFromMap5(n.s)); else if (n.k === 'village') playCut5('intro'); else if (n.k === 'rocket') rocketCut54(); else if (n.k === 'book') { if (story5().book59) playCut5('book59'); } else if (n.k === 'gate') { } else if (n.k === 'crayon') { if (story5().crayon58) playCut5('crayon'); } else if (story5().portal) playCut5('portal'); return; }
     } else MAPIN5.act = false;
     if (MAP.walk) { const n = MAPN5[MAP.walk.to], dx = n.x - MAP.hx, dz = n.z - MAP.hz, d = Math.hypot(dx, dz), sp = 0.11;
       MAP.face = Math.atan2(dx, dz);
@@ -12617,7 +12614,7 @@ const BlockAction = (() => {
     MAP.cx = lerp(MAP.cx, MAP.hx, 0.06);
     const w2 = Math.max(0, Math.min(1, (MAP.cx - 19) / 6));
     const bg = new THREE.Color(0x8ec5f0).lerp(new THREE.Color(0x4a1010), w2); MAP.scene.background.copy(bg); MAP.scene.fog.color.copy(bg);
-    MAP.sun.color.setHex(0xfff2d8).lerp(new THREE.Color(0xff8a5a), w2); mapCrayon58(MAP.cx); mapSpace54(MAP.cx); mapBook59(MAP.cx);
+    MAP.sun.color.setHex(0xfff2d8).lerp(new THREE.Color(0xff8a5a), w2); mapFrame595(MAP.cx);
     const dist = a < 1 ? 16 : 13.5;
     const sh583 = (m.clientHeight || 800) < 520 ? 1.6 : 0;   // v5.8.3: short (phone landscape) screens -> keep Steve above the node panel
     MAP.cam.position.set(MAP.cx, 13.5 + (a < 1 ? 3.5 : 0), MAP.hz * 0.3 + dist + sh583); MAP.cam.lookAt(MAP.cx, 0, MAP.hz * 0.3 + (a < 1 ? 1.6 : 1.1) + sh583);
@@ -13276,7 +13273,7 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     let el = document.getElementById('tc53');
     if (!el) { el = document.createElement('div'); el.id = 'tc53'; el.innerHTML = '<div class="bar"><div class="w"></div><div class="id"></div><div class="nm"></div><div class="sub"></div><div class="lv"></div></div>'; host53().appendChild(el); }
     const wn = String(def.id).split('-')[0];
-    const WN = { 1: '오버월드', 2: '네더', 3: '크레용 나라', 4: '우주', 5: '그림책 나라' }; el.classList.toggle('bk59', wn === '5'); if (wn === '5') bkPage59(def.name, 'WORLD 5 · 그림책 나라');
+    const WN = WN595(), bk595 = def.wk === 'book'; el.classList.toggle('bk59', bk595); if (bk595) bkPage59(def.name, 'WORLD ' + wn + ' · 그림책 나라');
     el.querySelector('.w').textContent = 'WORLD ' + wn + (WN[wn] ? ' · ' + WN[wn] : '');
     el.querySelector('.id').textContent = def.id; el.querySelector('.nm').textContent = def.name; el.querySelector('.sub').textContent = def.sub || '';
     el.querySelector('.lv').textContent = '♥ × ' + (G ? G.lives : 3);
@@ -13341,7 +13338,7 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     window.__ba.faceSheet572 = () => { const S = 256, cv = document.createElement('canvas'); cv.width = S * 5; cv.height = S; const g = cv.getContext('2d'); ['open', 'blink', 'focus', 'happy', 'hurt'].forEach((e, i) => { const t = document.createElement('canvas'); t.width = t.height = S; drawSteveFace572(t.getContext('2d'), S, S, e, false); g.drawImage(t, i * S, 0); }); return cv.toDataURL(); };
     window.__ba.iris = (o, d) => iris53(o, d);
     window.__ba.addG = (sc, co) => { G.score += sc; G.coins += co; };
-    window.__ba.bd592 = { stats: () => JSON.parse(JSON.stringify(BDN592)), set: v => { BDN592.on = v !== false; return BDN592.on; }, spawn: (k, x, y) => { const e = addEnemy(k, x, y); return enemies.length - 1; }, clear: () => { enemies.forEach(e => { if (e.mesh && e.mesh.parent) e.mesh.parent.remove(e.mesh); }); enemies.length = 0; return 0; },
+    window.__ba.bd592 = { stats: () => JSON.parse(JSON.stringify(BDN592)), fv: () => JSON.parse(JSON.stringify(FV594)), set: v => { BDN592.on = v !== false; return BDN592.on; }, spawn: (k, x, y) => { const e = addEnemy(k, x, y); return enemies.length - 1; }, clear: () => { enemies.forEach(e => { if (e.mesh && e.mesh.parent) e.mesh.parent.remove(e.mesh); }); enemies.length = 0; return 0; },
       shot: (o) => { o = o || {}; if (o.i !== undefined && enemies[o.i]) { const e = enemies[o.i]; e.mesh.visible = true; e.mesh.position.set(e.x, e.y, ZP); e.mesh.updateMatrixWorld(true); } const c = renderer.domElement, cm = new THREE.PerspectiveCamera(o.fov || 22, c.width / c.height, 0.05, 200); const a = o.a || 0, d = o.d || 3.2;
         cm.position.set(o.x + Math.sin(a) * d, o.y + (o.dy || 0.6), ZP + Math.cos(a) * d); cm.lookAt(o.x, o.y + (o.ly || 0.5), ZP); renderer.setRenderTarget(null); renderer.render(scene, cm); return c.toDataURL('image/png'); },
       calls: () => renderer.info.render.calls, info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles }) };
@@ -13783,7 +13780,7 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     explode(e.x, e.y + 0.6, 3.0, { owner: 'tnt', ultra: true }); G.ufoDown = true; cam.lockX = null;
     const A = L.arena; for (let y = 2; y < 13; y++) setTile(A.x1 + 1, y, E);
     if (A.gateR) pops.push({ type: 'gate', m: A.gateR, t: 0, dir: 1 }); updBossBar();
-    banner('우주 해적 퇴치!', '로켓을 타고 집으로!', 1600); snd('wave');
+    banner('우주 해적 퇴치!', '마지막 페이지를 되찾았다!', 1600); snd('wave');
     nballs.forEach(b => b.gone = true);
     enemies.forEach(o => { if (o.alive && (o.kind === 'alien' || o.kind === 'drone')) killFlip(o, 100); });
   }
@@ -13921,10 +13918,10 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
   }
   function refreshMapSpace54() {
     if (!MAP.pads) return;
-    MAP.pads.forEach((p, i) => { if (i < 15) return; const open = nodeOpen5(i), clr = nodeClear5(i);
+    MAP.pads.forEach((p, i) => { if (!padIn595(i, 'space')) return; const open = nodeOpen5(i), clr = nodeClear5(i);
       p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : 0x40d8ff); p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : 0x0a3a5a) : 0); });
-    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (seg < 14) return; const open = nodeOpen5(seg + 1); c.setHex(open ? 0x8aa0c8 : 0x2a3040); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
-    if (w4Open58() && !save.w4seen) { save.w4seen = 1; saveSave(); setTimeout(() => { if (state === 'map') banner('월드 4 · 우주가 열렸다!', '로켓 발사대에서 우주로 출발!', 2200); }, 600); }
+    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (!padIn595(seg + 1, 'space')) return; const open = nodeOpen5(seg + 1); c.setHex(open ? 0x8aa0c8 : 0x2a3040); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
+    if (w4Open58() && !save.w4seen) { save.w4seen = 1; saveSave(); setTimeout(() => { if (state === 'map') banner(WT595('space') + '가 열렸다!', '마지막 모험! 로켓을 타고 우주로!', 2200); }, 600); }
   }
   function rocketCut54() { const R = MAP.rocket54; if (!R || R.t >= 0) return; R.t = 0; sfx5('rocket'); }
   function mapSpace54(cx) {
@@ -13937,7 +13934,7 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     if (MAP.ufo54) { MAP.ufo54.position.y = 2.2 + Math.sin(t * 2) * 0.15; MAP.ufo54.children[0].userData.disc.rotation.y = t; MAP.ufo54.visible = !G_ufoBeaten54(); }
     const R = MAP.rocket54; if (R && R.t >= 0) { R.t += 1; const a = R.t < 90 ? Math.max(0, R.t - 15) : Math.max(0, 165 - R.t); R.rk.position.y = a * a * 0.0012; R.fl.material.opacity = R.t < 150 ? 0.9 : 0; if (R.t >= 165) { R.t = -1; R.rk.position.y = 0; } }
   }
-  function G_ufoBeaten54() { const b = save.best['4-3']; return !!(b && b.clear); }
+  function G_ufoBeaten54() { return clrId595(finalOf595('space')); }
   // ---------- debug (only with window.__BA_DEBUG) ----------
   function installDebug54() {
     window.__ba.space = () => ({ lowG: L && L.def ? L.def.lowG || 0 : 0, g0: LG54(0), g1: LG54(1), jk: LG54(2), ships: SP54.ships.length, planets: SP54.planets.length, met: SP54.met.length, rocket: !!SP54.rocket, rgo: SP54.rocket ? SP54.rocket.go : false,
@@ -14889,7 +14886,7 @@ const CRD={
     explode(e.x, e.y + 1.0, 3.0, { owner: 'tnt', ultra: true }); G.roboDown = true; cam.lockX = null;
     const A = L.arena; for (let y = 2; y < 13; y++) setTile(A.x1 + 1, y, E);
     if (A.gateR) pops.push({ type: 'gate', m: A.gateR, t: 0, dir: 1 }); updBossBar();
-    banner('크레용 로봇 퇴치!', '크레용 로켓을 찾아가자!', 1600); snd('wave');
+    banner('크레용 로봇 퇴치!', '로봇이 뭔가 그려 주고 싶대!', 1600); snd('wave');
     nballs.forEach(b => b.gone = true);
     enemies.forEach(o => { if (o.alive && o.kind === 'crab58') killFlip(o, 100); });
   }
@@ -15000,7 +14997,7 @@ const CRD={
         { say: 'crobo', text: '삐-빅! 내 그림 나라에 침입자 발견! 전부 낙서로 지워 주마!' },
         { walk: 'crobo', to: 48, sp: 0.09, nb: 1 }, { wait: 50 },
         { say: 'haru', text: '저 보라색 뿔 로봇이구나! 우리가 막을게!' },
-        { say: 'villager', text: '로봇은 크레용 로켓을 그릴 줄 안대. 로켓만 있으면 어디든 갈 수 있을 거야!' },
+        { say: 'villager', text: '크레용 로봇은 뭐든지 그릴 수 있대. 커다란 그림책도 말이야!' },
         { say: 'bori', text: '좋아, 크레용 나라 모험 출발!' },
         { wait: 30 }
       ]; } },
@@ -15038,8 +15035,8 @@ const CRD={
     if (typeof o.node === 'number' && o.node >= 10) o.node = Math.min(18, o.node + 5);
     o.v58 = 1; return o;
   }
-  function nodeOf58(s) { return s < 4 ? s + 1 : s < 8 ? s + 2 : s < 12 ? s + 3 : s < 15 ? s + 4 : s + 5; }
-  function w4Open58() { const S = story5(); return save.unlocked >= 13 || !!(save.best['3-4'] && save.best['3-4'].clear) || !!S.rocket58; }
+  function nodeOf58(s) { const i = MAPN5.findIndex(n => n.s === s); return i < 0 ? 0 : i; }
+  function w4Open58() { return worldOpen595('space'); }   // v5.9.5: space world (now the last world)
   // ---- world map: crayon island between the nether and the moon ----
   MAPN5.push({ k: 'crayon', x: 45, z: 0.4 }, { s: 8, x: 49.5, z: -0.7 }, { s: 9, x: 53.5, z: 0.8 }, { s: 10, x: 57.5, z: -0.6 }, { s: 11, x: 62, z: 0.6 },
     { k: 'rocket', x: 66.5, z: 0.4 }, { s: 12, x: 71.5, z: -0.7 }, { s: 13, x: 76.5, z: 0.8 }, { s: 14, x: 81.5, z: -0.4 });
@@ -15066,9 +15063,9 @@ const CRD={
   }
   function refreshMapCrayon58() {
     if (!MAP.pads) return;
-    MAP.pads.forEach((p, i) => { if (i < 10 || i > 14) return; const open = nodeOpen5(i), clr = nodeClear5(i);
+    MAP.pads.forEach((p, i) => { if (!padIn595(i, 'crayon')) return; const open = nodeOpen5(i), clr = nodeClear5(i);
       p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : 0xff7ab0); p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : 0x5a1a3a) : 0); });
-    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (seg < 9 || seg > 13) return; c.setHex(nodeOpen5(seg + 1) ? 0xe8a25a : 0x4a3a40); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
+    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (!padIn595(seg + 1, 'crayon')) return; c.setHex(nodeOpen5(seg + 1) ? 0xe8a25a : 0x4a3a40); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
     if (MAP.robo58) { const b = save.best['3-4']; MAP.robo58.visible = !(b && b.clear); }
     if (w3Open54() && !save.w3seen) { save.w3seen = 1; saveSave(); setTimeout(() => { if (state === 'map') banner('월드 3 · 크레용 나라가 열렸다!', '이상한 포털 너머 크레용 나라로!', 2200); }, 600); }
   }
@@ -15084,7 +15081,7 @@ const CRD={
   }
   // ---------- debug (only with window.__BA_DEBUG) ----------
   function installDebug58() {
-    window.__ba.cr58 = () => ({ w3: STAGES.filter(s => s.world === 3).map(s => s.id), w4: STAGES.filter(s => s.world === 4).map(s => s.id), theme: L && L.def ? L.def.theme : null,
+    window.__ba.cr58 = () => ({ w3: STAGES.filter(s => s.wk === 'crayon').map(s => s.id), w4: STAGES.filter(s => s.wk === 'space').map(s => s.id), theme: L && L.def ? L.def.theme : null,
       crayon: !!(L && L.def && crTh58Of(L.def.theme)), mats: Object.keys(CR58.mats).length, boil: CR58.boil.length, q: CR58.q.length, par: CR58.par.length, jit: CR58.jit.length, f: CR58.f, grain: !!(CR58.ov && CR58.ov.style.display !== 'none'),
       sky: !!CR58.sky, nodes: MAPN5.length, save: { unlocked: save.unlocked, w3seen: save.w3seen, w4seen: save.w4seen, node: save.node, v58: save.v58, keys: Object.keys(save.best || {}) },
       enemies: enemies.filter(e => /58$/.test(e.kind)).map(e => ({ k: e.kind, alive: e.alive, x: +e.x.toFixed(1), y: +e.y.toFixed(1), ai: e.ai })),
@@ -15262,7 +15259,7 @@ const BLOCK_DETAILS=(function(){
   // ------------------------------------------------ 스티브: hair voxels, sculpted brows/eyes/nose, collar, pocket, belt + buckle, jeans seams/pockets/cuffs, shoe soles
   {const hair=0x4b301d,hairD=0x35200f,skinD=0xa66c50,sh=0x33b8b3,shD=0x1f8584,pa=0x3c41b4,paD=0x2a2d86,gold=0xc9a24a;
   D.steve=[
-    ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.34,0.5,0.016,hair],['P','head','f',-0.5,-0.22,0.2,0.34,0.016,hair],['P','head','f',0.3,0.5,0.24,0.34,0.016,hairD],
+    ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.4,0.5,0.008,hair],['P','head','f',-0.5,-0.28,0.26,0.4,0.008,hair],['P','head','f',-0.12,0.1,0.31,0.4,0.007,hair],['P','head','f',0.32,0.5,0.28,0.4,0.008,hairD],
     ['P','head','l',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','r',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','l',0.28,0.5,-0.16,0.12,0.013,hairD],['P','head','r',0.28,0.5,-0.16,0.12,0.013,hairD],
     ['P','head','b',-0.5,0.5,-0.3,0.5,0.011,hair],['N','head','b',10,0.03,0.008,hairD,'c',4,[-0.5,0.5,-0.3,0.5]],['N','head','t',9,0.035,0.008,hairD,'c',5],
     ['P','head','f',-0.34,-0.06,0.015,0.085,0.013,0x3a2414],['P','head','f',0.06,0.34,0.015,0.085,0.013,0x3a2414],
@@ -15309,7 +15306,7 @@ const BLOCK_DETAILS=(function(){
   D.ttuttu=[
     ['S','head:5','t',-0.5,0.5,-0.32,-0.28,stD],['S','head:5','t',-0.5,0.5,0.28,0.32,stD],['S','head:5','t',-0.32,-0.28,-0.5,0.5,stD],['S','head:5','t',0.28,0.32,-0.5,0.5,stD],
     ['S','head:6','f',-0.5,0.5,-0.08,0.08,stD],['S','head:6','l',-0.5,0.5,-0.08,0.08,stD],['S','head:6','r',-0.5,0.5,-0.08,0.08,stD],['S','head:6','b',-0.5,0.5,-0.08,0.08,stD],
-    ['P','head:7','f',0.18,0.42,-2.2,2.2,0.02,0xffffff],['P','head:7','f',0.26,0.34,-1.0,1.0,0.03,0xf2c230,'g'],
+    ['P','head:7','f',0.14,0.24,-0.38,0.38,0.02,0xff6f9f],['P','head:7','f',0.36,0.46,-0.38,0.38,0.02,0xff6f9f],['P','head:7','f',0.24,0.36,0.22,0.5,0.02,0xff9cc0],['P','head:7','f',0.24,0.36,-0.5,-0.22,0.02,0xff9cc0],['P','head:7','f',0.46,0.56,-0.45,0.0,0.014,0x4c9a3a],['P','head:7','f',0.24,0.36,-0.22,0.22,0.03,0xf2c230,'g'],
     ['W','head:3',-0.5,-0.32,0.012,0xd0303a],['W','head:4',-0.5,-0.32,0.012,0xd0303a],['S','head:3','f',-0.5,0.5,0.0,0.06,0xa86010],['S','head:4','f',-0.5,0.5,0.0,0.06,0xa86010],
     ['S','head:3','f',-0.5,0.5,0.3,0.36,0xa86010],['S','head:4','f',-0.5,0.5,0.3,0.36,0xa86010],
     ['P','torso','f',-0.26,0.26,0.38,0.5,0.01,0xf8f6ee],['P','torso','t',-0.26,0.26,-0.5,0.5,0.008,0xf8f6ee],
@@ -15416,7 +15413,7 @@ const BLOCK_DETAILS=(function(){
   {const rb=0x6a4a2a,rD=0x4a2f18;
   D.villager=[
     ['P','head','f',-0.42,0.42,0.1,0.18,0.012,0x2a1a10],['P','head:1','d',-0.3,0.3,0.15,0.4,0.008,0x5a2a14],
-    ['P','torso','t',-0.3,0.3,-0.5,0.5,0.008,rD],['P','torso','f',-0.3,0.3,0.4,0.5,0.012,rD],['W','torso',-0.35,-0.25,0.01,0x3a2410],['P','torso','f',0.2,0.38,-0.5,-0.32,0.02,0x8a6a3a],
+    ['P','torso','t',-0.3,0.3,-0.5,0.5,0.008,rD],['P','torso','f',-0.3,0.3,0.4,0.5,0.012,rD],['W','torso',-0.35,-0.25,0.01,0x8a6238],['P','torso','f',0.2,0.38,-0.5,-0.32,0.02,0x8a6a3a],
     ['P','body:1','f',-0.5,-0.38,-0.5,0.5,0.01,rD],['P','body:1','f',0.38,0.5,-0.5,0.5,0.01,rD],['P','body:1','f',-0.38,0.38,-0.12,0.12,0.004,0x5a3a1c],
     
     ...shoe(0x2a1a0e,0x4a3220,0x8a6a40)];}
@@ -15469,6 +15466,7 @@ const BLOCK_DETAILS=(function(){
 // part: head torso hips | tents | armU* armF* hand* legU* legF* foot* (* = both sides, auto-mirrored) | legU4 legF4 (all four legs)
 //       | 'head:2' 'body:1' 'chest:0' = n-th direct mesh child of that group | 'tail' | 'wing*'
 // opt : {low, flat (all but glow/slime -> one matte mesh per part), only:['head','torso',..] (part-name whitelist; 'head' also admits 'head:1'), spec}
+// fine(obj,rig,opt): v5.9.3 fine voxel re-sculpt of every box part (see FINE VOXELS below)
 // mat : c matte (default)  m metal  g gloss  s slime (translucent)  e glow (unlit)
 var BlockDetail=(function(){
   const V3=()=>new THREE.Vector3();
@@ -15552,12 +15550,109 @@ var BlockDetail=(function(){
     const out=[];let boxes=0;accs.forEach(A=>{if(!A.nb)return;const mesh=new THREE.Mesh(geo(A),M[A.mt]||M.c);mesh.name='bdDetail';mesh.userData.bd=1;mesh.userData.bdNoSh=A.nb<4;
       mesh.castShadow=!low&&A.nb>=4;mesh.receiveShadow=false;if(A.mt==='s')mesh.renderOrder=2;A.m.add(mesh);out.push(mesh);boxes+=A.nb;});
     obj.userData.bd={meshes:out.length,boxes};return obj.userData.bd;}
-  return {apply,parts,mats,box,version:1};
+  // ================================================================ v5.9.3 FINE VOXELS — re-sculpt every big body block from small cubes
+  // fine(obj, rig, opt): each axis-aligned box part (head/torso/limbs/hands/feet/big accessories) is rebuilt as ONE merged mesh of sub-voxels
+  // (default 16 across the head = half a Minecraft pixel): 1-voxel stepped chamfer on every edge, dark texels (eyes, mouth, seams, nostrils)
+  // carved one voxel deep, per-voxel shade jitter so the grid reads, colours sampled from the part's own texture (vertex colours, greedy-merged
+  // quads). The original block keeps its bounds (drawRange 0 -> no draw call), so hit boxes / height normalisation / crowd far-LOD are unchanged.
+  // opt: {res (voxels across the head, default 16), jit (shade jitter, default 0.05), carve (default true), maxCells, skip:[part names]}
+  const FVMAT=new Map(),FVGEO=new Map(),FVHID=new WeakMap(),IMGD=new WeakMap();
+  function texData(t){if(!t||!t.image)return null;const im=t.image;if(IMGD.has(im))return IMGD.get(im);const w=im.naturalWidth||im.width,h=im.naturalHeight||im.height;
+    if(!w||!h||(im.complete===false))return null;let D=null;try{const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);D={w,h,d:g.getImageData(0,0,w,h).data};}catch(e){D=null;}
+    IMGD.set(im,D);return D;}
+  const s2l=v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);
+  function fvMat(m){const em=m.emissive?m.emissive.getHex():0;const key=m.type+'|'+(m.roughness!==undefined?m.roughness.toFixed(2):'')+'|'+(m.metalness!==undefined?m.metalness.toFixed(2):'')+'|'+em+'|'+(m.emissiveIntensity||1)+'|'+(m.shininess||0)+'|'+(m.flatShading?1:0)+'|'+(m.side||0);
+    let M=FVMAT.get(key);if(M)return M;const P={vertexColors:true,emissive:em,emissiveIntensity:m.emissiveIntensity||1,side:m.side||0,flatShading:!!m.flatShading};
+    if(m.isMeshLambertMaterial)M=new THREE.MeshLambertMaterial(P);else if(m.isMeshPhongMaterial)M=new THREE.MeshPhongMaterial(Object.assign(P,{shininess:m.shininess,specular:m.specular}));
+    else M=new THREE.MeshStandardMaterial(Object.assign(P,{roughness:m.roughness!==undefined?m.roughness:0.85,metalness:m.metalness||0}));
+    if(m.envMapIntensity!==undefined&&M.envMapIntensity!==undefined)M.envMapIntensity=m.envMapIntensity;M.name='bd_fv';M.userData.bd=1;FVMAT.set(key,M);return M;}
+  // source box faces: dir index (0 +x,1 -x,2 +y,3 -y,4 +z,5 -z) -> {o,a,b,ua,ub,uv0,uv1,uv2,mat}
+  function boxFaces(g,mats){const P=g.attributes.position,N=g.attributes.normal,U=g.attributes.uv;if(!P||!N||!U||P.count!==24)return null;const F=[];
+    for(let f=0;f<6;f++){const k=f*4,nx=N.getX(k),ny=N.getY(k),nz=N.getZ(k);const ax=Math.abs(nx)>0.9?0:Math.abs(ny)>0.9?1:Math.abs(nz)>0.9?2:-1;if(ax<0)return null;const sg=(ax===0?nx:ax===1?ny:nz)>0?0:1;
+      const p=i=>[P.getX(i),P.getY(i),P.getZ(i)],p0=p(k),p1=p(k+1),p2=p(k+2);let A=-1,B=-1;for(let q=0;q<3;q++){if(Math.abs(p1[q]-p0[q])>1e-6)A=q;if(Math.abs(p2[q]-p0[q])>1e-6)B=q;}if(A<0||B<0)return null;
+      let mi=0;if(g.groups&&g.groups.length){const ix=g.index?g.index.array:null;for(const gr of g.groups){const s0=gr.start,s1=gr.start+gr.count;let hit=false;for(let t=s0;t<s1;t++){const v=ix?ix[t]:t;if(v>=k&&v<k+4){hit=true;break;}}if(hit){mi=gr.materialIndex||0;break;}}}
+      const mat=Array.isArray(mats)?mats[mi]||mats[0]:mats;F[ax*2+sg]={p0,A,B,dA:p1[A]-p0[A],dB:p2[B]-p0[B],uv0:[U.getX(k),U.getY(k)],uv1:[U.getX(k+1),U.getY(k+1)],uv2:[U.getX(k+2),U.getY(k+2)],mat};}
+    return F.length===6&&F.every(Boolean)?F:null;}
+  // any box-like geometry (rounded bevelBox, segmented BoxGeometry, rig58 limb pieces): per axis face, least-squares fit uv=f(A,B) on its flat verts
+  function boxFacesG(g,mats){const P=g.attributes.position,N=g.attributes.normal,U=g.attributes.uv;if(!P||!N||!U||P.count>4000)return null;if(!g.boundingBox)g.computeBoundingBox();
+    const bb=g.boundingBox,mn=[bb.min.x,bb.min.y,bb.min.z],mx=[bb.max.x,bb.max.y,bb.max.z];const vm=new Int16Array(P.count).fill(-1);
+    if(g.groups&&g.groups.length){const ix=g.index;for(const gr of g.groups){for(let t=gr.start;t<gr.start+gr.count;t++){const v=ix?ix.getX(t):t;if(v<P.count)vm[v]=gr.materialIndex||0;}}}
+    const F=[];for(let f=0;f<6;f++){const ax=f>>1,sg=f&1,A=ax===0?2:0,B=ax===1?2:1;const nv=sg?-1:1;let S=[0,0,0,0,0,0,0,0,0],Su=[0,0,0],Sv=[0,0,0],cnt=0;const mc={};
+      for(let i=0;i<P.count;i++){const nn=[N.getX(i),N.getY(i),N.getZ(i)];if(nn[ax]*nv<0.97)continue;const p=[P.getX(i),P.getY(i),P.getZ(i)];const ext=mx[ax]-mn[ax];if(Math.abs(p[ax]-(sg?mn[ax]:mx[ax]))>ext*0.05+1e-5)continue;
+        const x=[1,p[A],p[B]],u=U.getX(i),v=U.getY(i);for(let r=0;r<3;r++){for(let c=0;c<3;c++)S[r*3+c]+=x[r]*x[c];Su[r]+=x[r]*u;Sv[r]+=x[r]*v;}cnt++;const mi=vm[i]<0?0:vm[i];mc[mi]=(mc[mi]||0)+1;}
+      if(cnt<3)return null;const det=m=>m[0]*(m[4]*m[8]-m[5]*m[7])-m[1]*(m[3]*m[8]-m[5]*m[6])+m[2]*(m[3]*m[7]-m[4]*m[6]);const D0=det(S);if(Math.abs(D0)<1e-14)return null;
+      const sol=y=>[0,1,2].map(c=>{const m=S.slice();for(let r=0;r<3;r++)m[r*3+c]=y[r];return det(m)/D0;});const cu=sol(Su),cv=sol(Sv);const at=(a,b)=>[cu[0]+cu[1]*a+cu[2]*b,cv[0]+cv[1]*a+cv[2]*b];
+      let mi=0,best=-1;for(const k in mc)if(mc[k]>best){best=mc[k];mi=+k;}const mat=Array.isArray(mats)?mats[mi]||mats[0]:mats;
+      const p0=[0,0,0];p0[ax]=sg?mn[ax]:mx[ax];p0[A]=mn[A];p0[B]=mn[B];const dA=mx[A]-mn[A],dB=mx[B]-mn[B];if(dA<1e-6||dB<1e-6)return null;
+      F[ax*2+sg]={p0,A,B,dA,dB,uv0:at(mn[A],mn[B]),uv1:at(mx[A],mn[B]),uv2:at(mn[A],mx[B]),mat};}
+    return F;}
+  function sampler(F){const t=F.mat.map,D=t?texData(t):null;if(t&&!D)return null;const mc=F.mat.color||new THREE.Color(1,1,1),lin=t&&THREE.sRGBEncoding&&t.encoding===THREE.sRGBEncoding;
+    if(t&&t.matrixAutoUpdate)t.updateMatrix();const me=t?t.matrix.elements:null;
+    return p=>{const fa=(p[F.A]-F.p0[F.A])/F.dA,fb=(p[F.B]-F.p0[F.B])/F.dB;let r=mc.r,g=mc.g,b=mc.b,a=1;
+      if(D){let u=F.uv0[0]+(F.uv1[0]-F.uv0[0])*fa+(F.uv2[0]-F.uv0[0])*fb,v=F.uv0[1]+(F.uv1[1]-F.uv0[1])*fa+(F.uv2[1]-F.uv0[1])*fb;
+        if(me){const u2=me[0]*u+me[3]*v+me[6],v2=me[1]*u+me[4]*v+me[7];u=u2;v=v2;}u-=Math.floor(u);v-=Math.floor(v);
+        const px=Math.min(D.w-1,Math.floor(u*D.w)),py=Math.min(D.h-1,Math.floor((t.flipY!==false?1-v:v)*D.h));const o=(py*D.w+px)*4;
+        let tr=D.d[o]/255,tg=D.d[o+1]/255,tb=D.d[o+2]/255;a=D.d[o+3]/255;if(lin){tr=s2l(tr);tg=s2l(tg);tb=s2l(tb);}r*=tr;g*=tg;b*=tb;}
+      return [r,g,b,a];};}
+  function fineGeo(src,mats,n,o){
+    const F=src.attributes.position.count===24?boxFaces(src,mats):boxFacesG(src,mats);if(!F)return null;const S=F.map(sampler);if(S.some(x=>!x))return null;
+    if(!src.boundingBox)src.computeBoundingBox();const bb=src.boundingBox,mn=[bb.min.x,bb.min.y,bb.min.z],sz=[bb.max.x-bb.min.x,bb.max.y-bb.min.y,bb.max.z-bb.min.z],cs=[sz[0]/n[0],sz[1]/n[1],sz[2]/n[2]];
+    const [nx,ny,nz]=n,id=(i,j,l)=>(l*ny+j)*nx+i,occ=new Uint8Array(nx*ny*nz).fill(1),dd=(i,a)=>Math.min(i,n[a]-1-i);
+    const surfP=(f,i,j,l)=>{const ax=f>>1,c=[mn[0]+(i+0.5)*cs[0],mn[1]+(j+0.5)*cs[1],mn[2]+(l+0.5)*cs[2]];c[ax]=(f&1)?mn[ax]:mn[ax]+sz[ax];return c;};
+    // chamfer: drop every cell that sits on two (or three) outer faces of a thick-enough axis pair
+    for(let l=0;l<nz;l++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const d=[dd(i,0),dd(j,1),dd(l,2)];let e=0;for(let a=0;a<3;a++)if(d[a]===0&&n[a]>=4)e++;if(e>=2)occ[id(i,j,l)]=0;}
+    // carve dark texels one voxel deep (eyes, mouths, seams, gaps) + drop transparent texels
+    if(o.carve!==false){for(let f=0;f<6;f++){const ax=f>>1;if(n[ax]<4)continue;const u=(ax+1)%3,w=(ax+2)%3;const L=[],cells=[];
+      for(let q=0;q<n[w];q++)for(let p=0;p<n[u];p++){const c=[0,0,0];c[u]=p;c[w]=q;c[ax]=(f&1)?0:n[ax]-1;const k=id(c[0],c[1],c[2]);if(!occ[k])continue;const col=S[f](surfP(f,c[0],c[1],c[2]));const lu=0.2126*col[0]+0.7152*col[1]+0.0722*col[2];L.push(lu);cells.push([k,lu,col[3]]);}
+      if(!L.length)continue;const so=L.slice().sort((a,b)=>a-b),med=so[so.length>>1];
+      for(const [k,lu,al] of cells){if(al<0.4||(lu<med*0.42&&lu<0.09&&med>0.02))occ[k]=0;}}}
+    const nearF=(i,j,l)=>{const c=[i,j,l];let best=0,bv=1e9;for(let a=0;a<3;a++){const lo=c[a]+0.5,hi=n[a]-c[a]-0.5,s=sz[a]>0?1/n[a]:1;if(lo*s<bv){bv=lo*s;best=a*2+1;}if(hi*s<bv){bv=hi*s;best=a*2;}}return best;};
+    const jit=o.jit!==undefined?o.jit:0.05;const hsh=(i,j,l)=>{let h=(i*73856093)^(j*19349663)^(l*83492791);h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)%3;};
+    const pos=[],nor=[],colA=[],idx=[];let quads=0;
+    const qz=v=>Math.round(Math.sqrt(Math.max(0,Math.min(1,v)))*63);
+    for(let f=0;f<6;f++){const ax=f>>1,sg=(f&1)?-1:1,u=(ax+1)%3,w=(ax+2)%3,nu=n[u],nw=n[w];const key=new Int32Array(nu*nw),CL=[];
+      for(let s=0;s<n[ax];s++){key.fill(-1);CL.length=0;let any=false;
+        for(let q=0;q<nw;q++)for(let p=0;p<nu;p++){const c=[0,0,0];c[ax]=s;c[u]=p;c[w]=q;if(!occ[id(c[0],c[1],c[2])])continue;const nb=c.slice();nb[ax]+=sg;
+          if(nb[ax]>=0&&nb[ax]<n[ax]&&occ[id(nb[0],nb[1],nb[2])])continue;
+          const dax=(f&1)?s:n[ax]-1-s;const sf=dax<=1?f:nearF(c[0],c[1],c[2]);const col=S[sf](surfP(sf,c[0],c[1],c[2]));const k=1+(jit?(hsh(c[0],c[1],c[2])-1)*jit:0)*(1);
+          const r=qz(col[0]*k),g=qz(col[1]*k),b=qz(col[2]*k);key[q*nu+p]=(r<<12)|(g<<6)|b;any=true;}
+        if(!any)continue;
+        for(let q=0;q<nw;q++)for(let p=0;p<nu;){const kk=key[q*nu+p];if(kk<0){p++;continue;}let W=1;while(p+W<nu&&key[q*nu+p+W]===kk)W++;let H=1,ok=true;
+          while(q+H<nw&&ok){for(let t=0;t<W;t++)if(key[(q+H)*nu+p+t]!==kk){ok=false;break;}if(ok)H++;}
+          for(let h2=0;h2<H;h2++)for(let t=0;t<W;t++)key[(q+h2)*nu+p+t]=-1;
+          const plane=mn[ax]+(sg>0?(s+1):s)*cs[ax],u0=mn[u]+p*cs[u],u1=mn[u]+(p+W)*cs[u],w0=mn[w]+q*cs[w],w1=mn[w]+(q+H)*cs[w];
+          const b0=pos.length/3,cr=((kk>>12)&63)/63,cg=((kk>>6)&63)/63,cb=(kk&63)/63;const V=[[u0,w0],[u1,w0],[u1,w1],[u0,w1]];
+          for(const [a1,a2] of V){const P3=[0,0,0];P3[ax]=plane;P3[u]=a1;P3[w]=a2;pos.push(P3[0],P3[1],P3[2]);const N3=[0,0,0];N3[ax]=sg;nor.push(N3[0],N3[1],N3[2]);colA.push(cr*cr,cg*cg,cb*cb);}
+          if(sg>0)idx.push(b0,b0+1,b0+2,b0,b0+2,b0+3);else idx.push(b0,b0+2,b0+1,b0,b0+3,b0+2);quads++;p+=W;}}}
+    if(!quads)return null;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(colA,3));g.setIndex(pos.length/3>65535?new THREE.Uint32BufferAttribute(idx,1):idx);g.computeBoundingBox();g.computeBoundingSphere();g.userData.bd=1;g.userData.fvQuads=quads;
+    return {g,mat:fvMat(F[4].mat)};}
+  // box-like = bbox faces are flat: every vertex lies on/near the bbox shell (rounded edges allowed)
+  function boxy(g){if(g.userData.fvBoxy!==undefined)return g.userData.fvBoxy;let ok=false;try{const P=g.attributes.position;if(P&&P.count<=4000&&g.attributes.uv&&g.attributes.normal){if(!g.boundingBox)g.computeBoundingBox();const bb=g.boundingBox,mn=bb.min.toArray(),mx=bb.max.toArray();const e=[0,1,2].map(a=>mx[a]-mn[a]);
+      if(Math.min(e[0],e[1],e[2])>1e-4){ok=true;const tol=Math.min(e[0],e[1],e[2])*0.3;for(let i=0;i<P.count&&ok;i++){const p=[P.getX(i),P.getY(i),P.getZ(i)];let dmin=1e9;for(let a=0;a<3;a++)dmin=Math.min(dmin,p[a]-mn[a],mx[a]-p[a]);if(dmin>tol)ok=false;}}}}catch(e){ok=false;}
+    g.userData.fvBoxy=ok;return ok;}
+  function fine(obj,rig,opt){opt=opt||{};if(!obj||(obj.userData&&obj.userData.fvDone))return null;obj.userData.fvDone=1;obj.updateMatrixWorld(true);
+    const P=parts(obj,rig||{}),os=V3(),ws=V3();obj.getWorldScale(os);const skip=new Set();(opt.skip||[]).forEach(nm=>resolve(P,nm).forEach(m=>skip.add(m)));
+    const wsz=m=>{const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const s=V3();g.boundingBox.getSize(s);m.getWorldScale(ws);return [s.x*ws.x/os.x,s.y*ws.y/os.y,s.z*ws.z/os.z];};
+    const ref=P.head||P.torso;if(!ref)return null;const rs=wsz(ref),res=opt.res||16;const st=Math.max(rs[0],rs[1],rs[2])/(P.head?res:res*0.75),maxC=opt.maxCells||30000;
+    const why={};const W_=k=>{why[k]=(why[k]||0)+1;};const list=[];obj.traverse(o=>{if(isPart(o)&&!o.isSkinnedMesh&&!o.isInstancedMesh&&!skip.has(o))list.push(o);});let parts_=0,tris=0;
+    for(const m of list){const ms=Array.isArray(m.material)?m.material:[m.material];if(ms.some(x=>!x||x.transparent||x.alphaTest>0||x.isMeshBasicMaterial||x.emissiveMap||x.isShaderMaterial||x.wireframe)){W_('mat');continue;}
+      const src=m.geometry.userData&&m.geometry.userData.src?m.geometry.userData.src:m.geometry;if(!src.attributes||!src.attributes.position||(src.attributes.position.count!==24&&!boxy(src))){W_('v'+(src.attributes&&src.attributes.position?src.attributes.position.count:0));continue;}
+      const w=wsz(m),n=w.map(v=>Math.max(1,Math.min(40,Math.round(Math.abs(v)/st))));if(Math.max(n[0],n[1],n[2])<3||n[0]*n[1]*n[2]>maxC){W_('size');continue;}
+      const key=src.uuid+'|'+ms.map(x=>x.uuid).join(',')+'|'+n.join('x')+'|'+(opt.jit!==undefined?opt.jit:'d')+(opt.carve===false?'n':'');let R=FVGEO.get(key);
+      if(R===undefined){R=fineGeo(src,m.material,n,opt);if(R)FVGEO.set(key,R);}if(!R){W_('geo');continue;}
+      // the fine shell is built in the source box's frame; bevelled copies are centred the same way
+      const fm=new THREE.Mesh(R.g,R.mat);fm.name='bdDetail';fm.userData.bd=1;fm.userData.fv=1;fm.castShadow=m.castShadow!==false;fm.receiveShadow=m.receiveShadow;m.add(fm);
+      let H=FVHID.get(m.geometry);if(!H){H=m.geometry.clone();H.setDrawRange(0,0);if(H.groups)H.groups.forEach(gr=>gr.count=0);H.userData.fvHidden=1;FVHID.set(m.geometry,H);}m.geometry=H;
+      parts_++;tris+=R.g.index.count/3;}
+    obj.userData.fv={parts:parts_,tris,step:st,why};return obj.userData.fv;}
+  return {apply,fine,parts,mats,box,version:2};
 })();
 
 
     return { BD: BlockDetail, S: BLOCK_DETAILS };
   })();
+  const FV594 = { n: 0, parts: 0, tris: 0, err: null, by: {} };   /* FV594 */
   const BDK592 = { hero: 'steve', walker: 'foe', guard: 'foe', charger: 'foe', hopper: 'foe', floater: 'foe', skeleton: 'skel', wskel: 'wskel', ghast: 'ghast', creeper: 'creeper', pillager: 'pillager',
     zombie: 'zombie', bzombie: 'zombie', moosh: 'moosh', irongolem: 'iron', axolotl: 'axo', chief: 'grak', boss: 'golemk', villager: 'villager' };
   const BDF592 = { hero: 1, boss: 1, chief: 1 };   // full spec; everything else lite
@@ -15583,6 +15678,8 @@ var BlockDetail=(function(){
       const full = !!BDF592[kind], low = rigLow58();
       const opt = full ? { spec, low, flat: kind === 'hero' } : { spec, low: true, flat: true, only: ['head', 'torso', 'hips', 'body', 'chest'] };
       const r = BD592.BD.apply(obj, rig, id, opt);
+      if (r && full && !low && window.__fv594 !== 0 && BD592.BD.fine && !(window.GQ && GQ.level === 'low')) { try { const fv = BD592.BD.fine(obj, rig, { res: window.GQ && GQ.level === 'mid' ? 12 : 16 });
+        if (fv) { FV594.n++; FV594.parts += fv.parts; FV594.tris += fv.tris; FV594.by[kind] = fv; if (low) obj.traverse(o => { if (o.userData && o.userData.fv && o.isMesh) o.castShadow = false; }); } } catch (e2) { FV594.err = String(e2 && e2.stack || e2).slice(0, 300); } }
       if (r) { BDN592.n++; if (!full) BDN592.lite++; BDN592.meshes += r.meshes; BDN592.boxes += r.boxes; BDN592.by[kind] = r;
         if (!full || low) obj.traverse(o => { if (o.userData && o.userData.bd && o.isMesh) o.castShadow = false; }); }
       return r;
@@ -16302,7 +16399,7 @@ var BlockDetail=(function(){
     explode(e.x, e.y + 1.0, 3.0, { owner: 'tnt', ultra: true }); G.dragDown59 = true; cam.lockX = null;
     const A = L.arena; for (let y = 2; y < 13; y++) setTile(A.x1 + 1, y, E);
     if (A.gateR) pops.push({ type: 'gate', m: A.gateR, t: 0, dir: 1 }); updBossBar();
-    banner('잉크 낙서 드래곤 퇴치!', '그림책의 마지막 페이지로!', 1600); snd('wave');
+    banner('잉크 낙서 드래곤 퇴치!', '그런데 마지막 페이지가…?', 1600); snd('wave');
     nballs.forEach(b => b.gone = true);
     enemies.forEach(o => { if (o.alive && (o.kind === 'blot59' || o.kind === 'blots59')) killFlip(o, 100); });
   }
@@ -16403,9 +16500,9 @@ var BlockDetail=(function(){
       CUT.cam0 = [16, 4.2, 12];
       return [
         { wait: 20 },
-        { fn: () => bkPage59('월드 5', '그림책 나라') }, { wait: 60 },
+        { fn: () => bkPage59('월드 ' + (WIDX595('book') + 1), '그림책 나라') }, { wait: 60 },
         { fn: () => { player.visible = true; flashScreen(0.6, '#fbf3de'); sfxBk59('chime'); spawnParts(10, 3, ZP, 0xf49ab8, NP(24), 0.1, 0.05); } }, { wait: 30 },
-        { say: 'haru', text: '어…? UFO를 물리쳤더니 커다란 책이 펼쳐졌어!' },
+        { say: 'haru', text: '와…! 크레용 로봇이 그려 준 그림책 속으로 들어왔어!' },
         { fn: () => { ow.g.visible = true; sfxBk59('page'); } }, { cam: [24, 4.4, 11], t: 60, nb: 1 }, { wait: 30 },
         { say: 'narr59', text: '어서 오렴, 꼬마 영웅. 여기는 수채화와 색연필로 그린 그림책 나라란다.' },
         { say: 'narr59', text: '그런데 잉크 낙서 드래곤이 페이지마다 잉크를 쏟고 있지 뭐니.' },
@@ -16428,7 +16525,7 @@ var BlockDetail=(function(){
       ]; } }
   });
   // ---------- map: picture-book island after the moon ----------
-  function w5Open59() { const S = story5(); return save.unlocked >= 16 || !!(save.best['4-3'] && save.best['4-3'].clear) || !!S.book59; }
+  function w5Open59() { return worldOpen595('book'); }   // v5.9.5: storybook world (now World 4)
   MAPN5.push({ k: 'book', x: 88, z: 0.4 }, { s: 15, x: 91.5, z: -0.7 }, { s: 16, x: 96, z: 0.8 }, { s: 17, x: 100.5, z: -0.6 }, { s: 18, x: 105, z: 0.5 });
   function buildMapBook59(g) {
     const cube = new THREE.BoxGeometry(1, 1, 1); cube.userData.keep = true;
@@ -16453,11 +16550,11 @@ var BlockDetail=(function(){
   }
   function refreshMapBook59() {
     if (!MAP.pads) return;
-    MAP.pads.forEach((p, i) => { if (i < 19) return; const open = nodeOpen5(i), clr = nodeClear5(i);
+    MAP.pads.forEach((p, i) => { if (!padIn595(i, 'book')) return; const open = nodeOpen5(i), clr = nodeClear5(i);
       p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : 0xf49ab8); p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : 0x4a1a2a) : 0); });
-    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (seg < 18) return; c.setHex(nodeOpen5(seg + 1) ? 0xd9a46a : 0x3a3040); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
-    if (MAP.drag59) { const b = save.best['5-4']; MAP.drag59.visible = !(b && b.clear); }
-    if (w5Open59() && !save.w5seen) { save.w5seen = 1; saveSave(); setTimeout(() => { if (state === 'map') banner('월드 5 · 그림책 나라가 열렸다!', '커다란 그림책 속으로!', 2200); }, 600); }
+    const m = MAP.pathMesh, c = new THREE.Color(); if (m) { MAP.pth.forEach((p, i) => { const seg = p[6]; if (!padIn595(seg + 1, 'book')) return; c.setHex(nodeOpen5(seg + 1) ? 0xd9a46a : 0x3a3040); m.setColorAt(i, c); }); m.instanceColor.needsUpdate = true; }
+    if (MAP.drag59) { MAP.drag59.visible = !clrId595(finalOf595('book')); }
+    if (w5Open59() && !save.w5seen) { save.w5seen = 1; saveSave(); setTimeout(() => { if (state === 'map') banner(WT595('book') + '가 열렸다!', '크레용 로봇이 그려 준 그림책 속으로!', 2200); }, 600); }
   }
   const PAPER59 = new THREE.Color(0xf4ead4);
   function mapBook59(cx) {
@@ -16468,13 +16565,13 @@ var BlockDetail=(function(){
     if (MAP.drag59) MAP.drag59.position.y = 0.6 + Math.sin(t * 2) * 0.15;
   }
   function bookAuto59() {   // saves that already beat 4-3 get the World 5 opening once
-    if (!(save.best['4-3'] && save.best['4-3'].clear) || story5().book59 || STORY5.noFinale583) return;
-    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().book59) playCut5('book59', () => { save.node = 19; saveSave(); showMap5({ celebrate: 20 }); }); }, 700);
+    if (!clrId595(finalOf595('crayon')) || story5().book59 || STORY5.noFinale583) return;
+    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().book59) playCut5('gift595', () => playCut5('book59', () => { const gi = gateNode595('book'); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); })); }, 700);
   }
-  if (save && save.best && save.best['4-3'] && save.best['4-3'].clear && save.unlocked < 16) save.unlocked = 16;
+  if (save && !save.wo && save.best && save.best['4-3'] && save.best['4-3'].clear && save.unlocked < 16) save.unlocked = 16;   // legacy layout only (v5.9.5 migrates after)
   // ---------- debug (only with window.__BA_DEBUG) ----------
   function installDebug59() {
-    window.__ba.bk59 = () => ({ w5: STAGES.filter(s => s.world === 5).map(s => s.id), idx: STAGES.findIndex(s => s.id === '5-1'), theme: L && L.def ? L.def.theme : null, book: !!(W3 && W3.th && W3.th.book),
+    window.__ba.bk59 = () => ({ w5: STAGES.filter(s => s.wk === 'book').map(s => s.id), idx: STAGES.findIndex(s => s.uid595 === 'book-1'), theme: L && L.def ? L.def.theme : null, book: !!(W3 && W3.th && W3.th.book),
       mats: Object.keys(BK59.mats).length, par: BK59.par.length, anim: BK59.anim.length, fl: BK59.fl.length, sky: !!BK59.sky, grain: !!(BK59.ov && BK59.ov.style.display !== 'none'), nodes: MAPN5.length, w5Open: w5Open59(),
       save: { unlocked: save.unlocked, w5seen: save.w5seen, node: save.node, keys: Object.keys(save.best || {}) }, story: Object.assign({}, story5()), allClear: allClear583(), fin: finIdx583(),
       enemies: enemies.filter(e => /59$/.test(e.kind)).map(e => ({ k: e.kind, alive: e.alive, x: +e.x.toFixed(1), y: +e.y.toFixed(1), ai: e.ai })),
@@ -16494,6 +16591,208 @@ var BlockDetail=(function(){
     } catch (e) { }
   }
   /* /W59 */
+  /* W595 */
+  // ===== v5.9.5 WORLD ORDER: worlds play in WORLD_ORDER595; space is always the grand finale =====
+  // To add a world: give its STAGES entries wk:'<key>' (and optionally a WMETA595/WMAP595 entry). It is placed
+  // before 'space' automatically; space is re-pinned last by code, and the ending follows the last world's final stage.
+  const WBASE595 = ['field', 'nether', 'crayon', 'book'];
+  const WLEG595 = { 1: 'field', 2: 'nether', 3: 'crayon', 4: 'space', 5: 'book' };   // world keys of the v5.9.x stage ids
+  const WLAYOLD595 = [['field', 4], ['nether', 4], ['crayon', 4], ['space', 3], ['book', 4]];   // save layout before v5.9.5
+  const WMETA595 = { field: { name: '오버월드', map: '성', sel: '골렘 왕의 성' }, nether: { name: '네더', story: '네더의 보루' }, crayon: { name: '크레용 나라' }, book: { name: '그림책 나라' }, space: { name: '우주' } };
+  // map islands: nat = x where the island was authored, bx = builder group base offset, gate = gate node, nodes = stage nodes (authored x)
+  const WMAP595 = {
+    crayon: { nat: 45, span: 22, bx: 0, gate: { k: 'crayon', x: 45, z: 0.4 }, nodes: [[49.5, -0.7], [53.5, 0.8], [57.5, -0.6], [62, 0.6]], build: g => buildMapCrayon58(g), frame: cx => mapCrayon58(cx) },
+    space: { nat: 67, span: 22, bx: 22, gate: { k: 'rocket', x: 66.5, z: 0.4 }, nodes: [[71.5, -0.7], [76.5, 0.8], [81.5, -0.4]], build: g => buildMapSpace54(g), frame: cx => mapSpace54(cx) },
+    book: { nat: 87, span: 22, bx: 0, gate: { k: 'book', x: 88, z: 0.4 }, nodes: [[91.5, -0.7], [96, 0.8], [100.5, -0.6], [105, 0.5]], build: g => buildMapBook59(g), frame: cx => mapBook59(cx) }
+  };
+  const WORLD_ORDER595 = [];
+  const WO595 = { dx: {}, gate: {}, start: {}, done: false };
+  function WIDX595(k) { return WORLD_ORDER595.indexOf(k); }
+  function WSTART595(k) { return STAGES.findIndex(d => d.wk === k); }
+  function finalOf595(k) { let id = null; STAGES.forEach(d => { if (d.wk === k) id = d.id; }); return id; }
+  function lastFinal595() { return finalOf595(WORLD_ORDER595[WORLD_ORDER595.length - 1]); }
+  function clrId595(id) { const b = id && save.best && save.best[id]; return !!(b && b.clear); }
+  function clr595(i) { return !!(STAGES[i] && clrId595(STAGES[i].id)); }
+  function WT595(k, mode) { const m = WMETA595[k] || { name: k }; return '월드 ' + (WIDX595(k) + 1) + ' · ' + ((mode && m[mode]) || m.name); }
+  function WN595() { const o = {}; WORLD_ORDER595.forEach((k, i) => { o[i + 1] = (WMETA595[k] || { name: k }).name; }); return o; }
+  function NUMK595(n) { return ['영', '한', '두', '세', '네', '다섯', '여섯', '일곱', '여덟', '아홉', '열'][n] || String(n); }
+  function STORY595() { const a = WORLD_ORDER595.slice(1).map(k => (WMETA595[k] && (WMETA595[k].story || WMETA595[k].name)) || k); const last = a.pop(); return '골렘 왕의 습격에서 ' + (a.length ? a.join(', ') + ', 그리고 ' : '') + last + '까지'; }
+  function worldOpen595(k) {
+    const wi = WIDX595(k), i0 = WSTART595(k); if (wi < 0 || i0 < 0) return false; if (wi === 0) return true;
+    if (k === 'crayon') return w3Open54();
+    if (k === 'nether') { const b = save.best[finalOf595('field')]; return !!story5().portal || !!(b && b.clear); }
+    if (save.unlocked > i0) return true;
+    if (clrId595(finalOf595(WORLD_ORDER595[wi - 1]))) return true;
+    if (STAGES.some(d => d.wk === k && clrId595(d.id))) return true;
+    const S = story5(); return (k === 'book' && !!S.book59) || (k === 'space' && !!S.sp595);
+  }
+  function padIn595(i, k) { const n = MAPN5[i]; if (!n) return false; if (n.gw595 === k) return true; return n.s !== undefined && !!STAGES[n.s] && STAGES[n.s].wk === k; }
+  function gateNode595(k) { const i = MAPN5.findIndex(n => n.gw595 === k); return i < 0 ? 0 : i; }
+  function nextOpen595(at, dir) { for (let k = at + dir; k >= 0 && k < MAPN5.length; k += dir) if (nodeOpen5(k)) return k; return -1; }
+  function wo595Stamp(sv) { if (wo595Stamp.ok && sv && typeof sv === 'object') sv.wo = wo595Stamp.ok; }
+  function layout595() { return WORLD_ORDER595.map(k => [k, STAGES.filter(d => d.wk === k).length]); }
+  function nodeIds595(lay) { const r = ['village']; lay.forEach(([k, c], wi) => { if (wi === 0) { for (let n = 1; n <= c; n++) r.push(k + '-' + n); return; } r.push('g:' + k); for (let n = 1; n <= c; n++) r.push(k + '-' + n); }); return r; }
+  // ---- save migration: re-key everything by world key, never by index ----
+  function migrateWO595(sv) {
+    if (!sv || typeof sv !== 'object') return sv;
+    const cur = layout595(), old = Array.isArray(sv.wo) && sv.wo.length ? sv.wo : WLAYOLD595;
+    if (JSON.stringify(old) === JSON.stringify(cur)) { sv.wo = cur; return sv; }
+    const oldU = [], oldId = {}; old.forEach(([k, c], wi) => { for (let n = 1; n <= c; n++) { oldU.push(k + '-' + n); oldId[(wi + 1) + '-' + n] = k + '-' + n; } });
+    const newId = {}; STAGES.forEach(d => { newId[d.uid595] = d.id; });
+    const B = sv.best || {}, nb = {}, orph = Object.assign({}, sv.orph595 || {});
+    Object.keys(B).forEach(id => { const u = oldId[id]; if (u && newId[u]) nb[newId[u]] = B[id]; else if (u) orph[u] = B[id]; else if (!(id in nb)) nb[id] = B[id]; });
+    Object.keys(orph).forEach(u => { if (newId[u] && !nb[newId[u]]) { nb[newId[u]] = orph[u]; delete orph[u]; } });
+    sv.best = nb; if (Object.keys(orph).length) sv.orph595 = orph; else delete sv.orph595;
+    // unlocked = longest new-order prefix of (old unlocked set + cleared + the stage after each clear)
+    const have = new Set(oldU.slice(0, Math.max(0, sv.unlocked | 0)));
+    STAGES.forEach((d, i) => { const b = nb[d.id]; if (b && b.clear) { have.add(d.uid595); if (STAGES[i + 1]) have.add(STAGES[i + 1].uid595); } });
+    let u = 0; while (u < STAGES.length && have.has(STAGES[u].uid595)) u++;
+    sv.unlocked = Math.max(1, Math.min(STAGES.length, u));
+    // map node by identity
+    if (typeof sv.node === 'number') { const oi = nodeIds595(old)[sv.node], ni = nodeIds595(cur).indexOf(oi); sv.node = ni < 0 ? 0 : ni; }
+    const S = sv.story && typeof sv.story === 'object' ? sv.story : (sv.story = {});
+    if (S.fin59) S.fin595 = 1;
+    sv.wo = cur; sv.v595 = 1; return sv;
+  }
+  // ---- 1) tag + order STAGES ----
+  {
+    const tk = {};
+    STAGES.forEach(d => { const pre = String(d.id).split('-')[0]; if (!d.wk) d.wk = WLEG595[pre] || ('w' + pre); d.n595 = +String(d.id).split('-')[1] || 1; d.uid595 = d.wk + '-' + d.n595; if (TALKS5[d.id]) { tk[d.uid595] = TALKS5[d.id]; } });
+    STAGES.forEach(d => { if (d.wk !== 'field' && d.wk !== 'nether') delete TALKS5[d.id]; });
+    WBASE595.forEach(k => WORLD_ORDER595.push(k));
+    STAGES.forEach(d => { if (d.wk !== 'space' && WORLD_ORDER595.indexOf(d.wk) < 0) WORLD_ORDER595.push(d.wk); });
+    for (let i = WORLD_ORDER595.length - 1; i >= 0; i--) if (!STAGES.some(d => d.wk === WORLD_ORDER595[i])) WORLD_ORDER595.splice(i, 1);
+    if (STAGES.some(d => d.wk === 'space')) WORLD_ORDER595.push('space');   // pinned last, always
+    const arr = STAGES.slice().map((d, i) => [d, i]).sort((a, b) => (WIDX595(a[0].wk) - WIDX595(b[0].wk)) || (a[1] - b[1])).map(a => a[0]);
+    STAGES.length = 0; arr.forEach(d => STAGES.push(d));
+    STAGES.forEach(d => { d.world = WIDX595(d.wk) + 1; d.id = d.world + '-' + d.n595; if (tk[d.uid595] && d.wk !== 'field' && d.wk !== 'nether') TALKS5[d.id] = tk[d.uid595]; });
+  }
+  // ---- 2) rebuild the world-map node list in the same order ----
+  {
+    MAPN5.length = 10; MAPN5[0].id595 = 'village'; MAPN5[5].gw595 = 'nether';
+    let x0 = 45;
+    WORLD_ORDER595.forEach((k, wi) => {
+      if (wi < 2) return; const idx = []; STAGES.forEach((d, i) => { if (d.wk === k) idx.push(i); });
+      const M = WMAP595[k];
+      if (M) { const dx = x0 - M.nat; WO595.dx[k] = dx; MAPN5.push({ k: M.gate.k, x: M.gate.x + dx, z: M.gate.z, gw595: k });
+        idx.forEach((s, j) => { const p = M.nodes[j] || [M.nodes[M.nodes.length - 1][0] + 4.5 * (j - M.nodes.length + 1), j % 2 ? 0.7 : -0.7]; MAPN5.push({ s, x: p[0] + dx, z: p[1] }); });
+        x0 += M.span; }
+      else { MAPN5.push({ k: 'gate', x: x0 + 1, z: 0.4, gw595: k }); idx.forEach((s, j) => MAPN5.push({ s, x: x0 + 4.5 + 4.5 * j, z: j % 2 ? 0.8 : -0.7 })); x0 += 6 + 4.5 * idx.length; }
+    });
+  }
+  function mapDecor595(g) { WORLD_ORDER595.forEach(k => { const M = WMAP595[k]; if (!M || WO595.dx[k] === undefined) return; const sg = new THREE.Group(); sg.position.x = M.bx + WO595.dx[k]; g.add(sg); M.build(sg); }); }
+  function mapFrame595(cx) { WORLD_ORDER595.forEach(k => { const M = WMAP595[k]; if (M && WO595.dx[k] !== undefined) M.frame(cx - WO595.dx[k]); }); }
+  // ---- 3) story flow between worlds ----
+  function introCut595(nk, go) {
+    const S = story5();
+    if (nk === 'book' && !S.book59) { playCut5('gift595', () => playCut5('book59', go)); return true; }
+    if (nk === 'space' && !S.sp595) { playCut5('sky595', go); return true; }
+    return false;
+  }
+  function afterClear595(def) {
+    const S = story5(), k = def.wk; if (!k || finalOf595(k) !== def.id) return false;
+    if (def.id === lastFinal595()) { if (allClear583() && (!S.fin595 || STORY5.forceFinale583)) { playFinale583(); return true; } return false; }
+    const nk = WORLD_ORDER595[WIDX595(k) + 1]; if (!nk || nk === 'nether' || nk === 'crayon') return false;
+    const go = () => { const gi = gateNode595(nk); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); };
+    return introCut595(nk, go);
+  }
+  function spaceAuto595() {   // saves that already finished the storybook get the trip to space once
+    const S = story5(); if (S.sp595 || S.fin595 || STORY5.noFinale583 || !clrId595(finalOf595('book'))) return;
+    setTimeout(() => { if (state === 'map' && !CUT.on && !story5().sp595 && !story5().fin595) playCut5('sky595', () => { const gi = gateNode595('space'); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); }); }, 900);
+  }
+  function book595() {   // the giant picture book the crayon robot draws
+    const G = new THREE.Group();
+    const cov = new THREE.Mesh(new THREE.BoxGeometry(5.4, 3.8, 0.16), std({ color: 0x8a4fd8, roughness: 0.8 })); cov.position.y = 1.95; G.add(cov);
+    const pm = std({ color: 0xfbf3de, roughness: 0.9, emissive: LIN(0x3a3020), emissiveIntensity: 0.25 });
+    [-1, 1].forEach(s => { const pg = new THREE.Mesh(new THREE.BoxGeometry(2.5, 3.4, 0.1), pm); pg.position.set(s * 1.3, 1.95, 0.16); pg.rotation.y = -s * 0.22; G.add(pg);
+      for (let r = 0; r < 4; r++) { const ln = new THREE.Mesh(new THREE.BoxGeometry(1.7, 0.07, 0.02), std({ color: [0xff7ab0, 0x60a5fa, 0x86efac, 0xfacc15][r], roughness: 0.9 })); ln.position.set(s * 1.3, 2.9 - r * 0.55, 0.24 + 0.03); ln.rotation.y = -s * 0.22; G.add(ln); } });
+    const sp = new THREE.Mesh(new THREE.BoxGeometry(0.22, 3.9, 0.3), std({ color: 0x5b2ea6, roughness: 0.8 })); sp.position.set(0, 1.95, 0.1); G.add(sp);
+    return G;
+  }
+  function rocket595() {   // coloured-pencil rocket (fallback when the crayon sprite is unavailable)
+    const G = new THREE.Group(), m = c => std({ color: c, roughness: 0.85 });
+    const b = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.8, 1.1), m(0xf4ead4)); b.position.y = 1.9; G.add(b);
+    const n = new THREE.Mesh(new THREE.ConeGeometry(0.78, 1.1, 4), m(0xe0525a)); n.position.y = 3.85; n.rotation.y = Math.PI / 4; G.add(n);
+    [-1, 1].forEach(s => { const f = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.9, 0.2), m(0x60a5fa)); f.position.set(s * 0.75, 0.75, 0); G.add(f); });
+    const w = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.5, 0.05), m(0x7ad0ff)); w.position.set(0, 2.5, 0.58); G.add(w);
+    return G;
+  }
+  Object.assign(TALK5, {
+    sp_hi: [['narr59', '꾸꾸야, 들리니? 이야기꾼이란다. 색연필 로켓이 달에 무사히 내렸구나.'], ['narr59', '달은 중력이 약해서 둥실 높이 뛸 수 있단다. 크레이터에 빠지지 않게 조심하렴!'], ['haru', '좋아! 마지막 페이지를 꼭 되찾아 올게요!']],
+    sp_star: [['narr59', '하늘에서 유성이 쏟아지는구나! 그림자가 보이면 얼른 피하렴.'], ['haru', 'UFO가 정거장 너머로 날아가는 게 보여!']],
+    sp_boss: [['haru', '찾았다, 우주 해적! 그림책의 마지막 페이지를 돌려줘!'], ['narr59', 'UFO가 낮게 내려왔을 때 위를 밟으렴. 높이 떠 있을 땐 실드가 막는단다. 이게 마지막 결전이야!']]
+  });
+  {
+    const sp = STAGES.filter(d => d.wk === 'space');
+    if (sp[0] && !TALKS5[sp[0].id]) TALKS5[sp[0].id] = [{ x: 9, id: 'sp_hi' }];
+    if (sp[1] && !TALKS5[sp[1].id]) TALKS5[sp[1].id] = [{ x: 8, id: 'sp_star' }];
+    if (sp.length > 2 && !TALKS5[sp[sp.length - 1].id]) TALKS5[sp[sp.length - 1].id] = [{ x: 'arena', id: 'sp_boss' }];
+  }
+  Object.assign(CUTS5, {
+    gift595: { music: 'story', setup() {
+      cutWorld5({ theme: 'crayonb', w: 50, hero: 10 });
+      const bo = actor5('bori', CH5.bori.mk(), 7.5, 2, 1), vi = actor5('villager', CH5.villager.mk(), 5.6, 2, 1);
+      const rb = actor5('crobo', makeRobo58(), 22, 2, -1); rb.yaw = 0.2;
+      const bk = book595(); bk.visible = false; bk.position.set(31, 2, ZP - 1.2); W3.group.add(bk);
+      const gl = glowSprite(LIN(0xfff4c0), 4.2); gl.material.opacity = 0; gl.position.set(31, 4, ZP - 0.6); W3.group.add(gl);
+      CUT.cam0 = [16, 3.8, 10];
+      return [
+        { wait: 30 },
+        { say: 'crobo', text: '삐… 삐빅… 미안해. 크레용이 부러져서 너무 화가 났었어.' },
+        { say: 'haru', text: '괜찮아! 부러진 크레용도 다시 칠하면 되잖아.' },
+        { say: 'crobo', text: '고마워, 꾸꾸. 그럼 선물로… 세상에서 제일 커다란 그림책을 그려 줄게!' },
+        { cam: [26, 4.8, 12.5], t: 50, nb: 1 }, { walk: 'crobo', to: 26.5, sp: 0.05 },
+        { fn: () => { sfx58('draw'); spawnParts(31, 4, ZP, 0xff7ab0, NP(26), 0.15, 0.06); spawnParts(31, 5, ZP, 0x60a5fa, NP(26), 0.15, 0.06); } }, { wait: 40 },
+        { fn: () => { bk.visible = true; flashScreen(0.4, '#fff4c0'); sfx58('boing'); } }, { wait: 30 },
+        { say: 'villager', text: '우와! 책장이 저절로 넘어가! 종이 꽃 냄새가 나!' },
+        { say: 'crobo', text: '삐빅! 이 책 속에는 그림책 나라가 있어. 그런데 요즘 잉크 낙서가 번진대.' },
+        { say: 'bori', text: '그럼 우리가 들어가서 도와주자!' },
+        { walk: 'haru', to: 30, sp: 0.07, nb: 1 }, { walk: 'bori', to: 29.4, sp: 0.07, nb: 1 }, { walk: 'villager', to: 28.8, sp: 0.07 },
+        { tick: () => { gl.material.opacity = Math.min(0.95, gl.material.opacity + 0.03 * CUT.ff); return gl.material.opacity >= 0.95; } },
+        { fn: () => { player.visible = false; bo.g.visible = false; vi.g.visible = false; flashScreen(0.8, '#fbf3de'); sfxBk59('page'); } },
+        { fn: () => banner(WT595('book') + '로!', '크레용 로봇이 그려 준 그림책 속으로!', 2400) }, { wait: 80 }
+      ]; } },
+    sky595: { music: 'story', setup() {
+      cutWorld5({ theme: 'book3', w: 50, hero: 12 });
+      const to = actor5('toto59', makeBun59(), 15, 2, -1), ow = actor5('narr59', makeOwl59(), 18, 2, -1);
+      let u = null; try { u = makeUfo54(); u.scale.setScalar(0.5); u.position.set(40, 7.5, ZP - 2); const pg = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.25, 0.05), std({ color: 0xfbf3de, roughness: 0.9, emissive: LIN(0x403420), emissiveIntensity: 0.4 })); pg.position.set(0, -2.4, 0); pg.rotation.z = 0.25; u.add(pg); u.visible = false; W3.group.add(u); } catch (e) { u = null; }
+      let rk = null; try { rk = crAdd58('rocket', 26, 2, ZP - 0.6, 4.2, { jit: false }); } catch (e) { rk = null; }
+      if (!rk) { rk = rocket595(); rk.position.set(26, 2, ZP - 0.6); W3.group.add(rk); }
+      rk.visible = false; const fl = glowSprite(LIN(0xffa040), 2.4); fl.material.opacity = 0; fl.position.set(26, 2.2, ZP - 0.4); W3.group.add(fl);
+      let ry = 2, rv = 0;
+      CUT.cam0 = [16, 4, 11];
+      return [
+        { wait: 20 },
+        { say: 'toto59', text: '해냈다! 잉크 드래곤이 사라지고 페이지가 다시 알록달록해졌어!' },
+        { say: 'narr59', text: '고맙구나, 꼬마 영웅. 그런데… 이상하구나? 이 책의 마지막 페이지가 비어 있어.' },
+        { fn: () => { if (u) u.visible = true; sfx5('shield'); } }, { cam: [24, 5.6, 13], t: 60, nb: 1 },
+        { tick: () => { if (!u) return true; u.position.x -= 0.16 * CUT.ff; u.position.y += 0.035 * CUT.ff; return u.position.x < 6; } },
+        { fn: () => { if (u) u.visible = false; } }, { cam: [17, 4.2, 11.5], t: 40 },
+        { say: 'toto59', text: '저기 봐! 우주 해적 UFO가 마지막 페이지를 훔쳐서 달로 도망가!' },
+        { say: 'haru', text: '마지막 페이지가 없으면 이야기가 끝나지 않잖아! 쫓아가자!' },
+        { say: 'narr59', text: '그럼 이 이야기꾼이 색연필로 로켓을 그려 주마. 별 너머 달까지 날아갈 게다.' },
+        { cam: [22, 4.8, 12], t: 50, nb: 1 }, { walk: 'narr59', to: 22, sp: 0.05 },
+        { fn: () => { sfx58('draw'); spawnParts(26, 4, ZP, 0xe0525a, NP(26), 0.15, 0.06); spawnParts(26, 5, ZP, 0x60a5fa, NP(26), 0.15, 0.06); } }, { wait: 40 },
+        { fn: () => { rk.visible = true; flashScreen(0.4, '#fbf3de'); sfxBk59('chime'); } }, { wait: 30 },
+        { say: 'toto59', text: '깡총! 꾸꾸, 조심해! 우주는 이 그림책보다 훨씬 넓대!' },
+        { say: 'haru', text: '다녀올게! 마지막 페이지를 꼭 찾아올게!' },
+        { walk: 'haru', to: 26, sp: 0.07 },
+        { fn: () => { player.visible = false; sfx5('rocket'); cam.shake = 10; } },
+        { cam: [26, 7, 15], t: 80, nb: 1 },
+        { tick: () => { rv = Math.min(0.35, rv + 0.004 * CUT.ff); ry += rv * CUT.ff; rk.position.y = ry; fl.position.y = ry + 0.2; fl.material.opacity = 0.9; if (Math.random() < 0.5) spawnParts(26 + rnd(-0.5, 0.5), ry, ZP, Math.random() < 0.5 ? 0xffd25a : 0xff7a3a, 2, 0.08, 0.03); return ry > 22; } },
+        { fn: () => banner(WT595('space') + '로!', '마지막 페이지를 찾아 달로 출발!', 2600) }, { wait: 90 }
+      ]; } }
+  });
+  // ---- 4) credits follow the order ----
+  {
+    const lines = {}; CREDITS5.replace(/<h3>WORLD (\d+)<\/h3><div class="l">([^<]*)<\/div>/g, (m, n, t) => { lines[WLEG595[n]] = t; return m; });
+    const gen = WORLD_ORDER595.map((k, i) => '<h3>WORLD ' + (i + 1) + '</h3><div class="l">' + (lines[k] || STAGES.filter(d => d.wk === k).map(d => d.name).join(' · ')) + '</div>').join('\n');
+    CREDITS5 = CREDITS5.replace(/<h3>WORLD 1<\/h3>[\s\S]*?(?=<h3>MUSIC<\/h3>)/, gen + '\n');
+  }
+  // ---- 5) migrate this browser's save once STAGES is final ----
+  try { migrateWO595(save); wo595Stamp.ok = layout595(); WO595.done = true; if (save.unlocked > STAGES.length) save.unlocked = STAGES.length; if (typeof save.node === 'number' && save.node >= MAPN5.length) save.node = 0; saveSave(); } catch (e) { console.warn('wo595', e); }
+  function installDebug595() { window.__ba = window.__ba || {}; window.__ba.wo595 = () => ({ order: WORLD_ORDER595.slice(), ids: STAGES.map(d => d.id + ':' + d.uid595), nodes: MAPN5.map(n => n.s !== undefined ? 's' + n.s + '@' + n.x : n.k + '@' + n.x), last: lastFinal595(), save: JSON.parse(JSON.stringify(save)) }); window.__ba.wo595mig = o => migrateWO595(JSON.parse(JSON.stringify(o))); window.__ba.wo595open = k => worldOpen595(k); }
+  /* /W595 */
   return { ensure, setActive(v) { active = v; if (!v) { releaseKeys(); BGM.update(state, false); } else if (started && state === 'play') { /* resume input cleanly */ releaseKeys(); } } };
 })();
 
@@ -16628,7 +16927,7 @@ const SaveCode57 = (() => {
   }
   function summary(keys) {
     const r = { stages: 0, stars: 0, unlocked: 1, diff: '보통', board: 0, ending: false, keys: Object.keys(keys).length, best: [] };
-    try { const s = JSON.parse(keys.ba_stages_v1 || 'null'); if (s) { r.unlocked = s.unlocked || 1; const B = s.best || {};
+    try { const s = JSON.parse(keys.ba_stages_v1 || 'null'); if (s) { r.unlocked = s.unlocked || 1; const B0 = s.best || {}, B = s.wo ? B0 : Object.fromEntries(Object.keys(B0).map(k => [k[0] === '4' && k[1] === '-' ? '5' + k.slice(1) : k[0] === '5' && k[1] === '-' ? '4' + k.slice(1) : k, B0[k]]));
       Object.keys(B).forEach(id => { if (B[id] && B[id].clear) { r.stages++; r.best.push(id); } r.stars += (B[id] && B[id].stars) || 0; }); r.ending = !!(s.story && s.story.ending); r.wallet = s.shop && +s.shop.w || 0; } } catch (e) {}
     r.diff = { easy: '쉬움', normal: '보통', hard: '어려움' }[keys.ba_diff] || '보통';
     r.board = Object.keys(keys).filter(k => k.indexOf('minigames_v1_') === 0).length;
@@ -18474,6 +18773,86 @@ function buildArena(id,renderer){
 // Blocky night lot: asphalt slab + painted bays, voxel lamp posts / curb / back wall, block skyline with lit windows.
 // Parked cars (props only, faces hidden, blank plates): 하양이(Model X-style), 까망이/은빛이(Lexus-style) from 22_cars.js + the kit Cybertruck.
 // Heavy hits (trauma spike) → the nearest car blinks its hazards + a short alarm chirp. No signage, no text, no story.
+// ---- v5.9.3 parked-car refinement (props only; plates stay blank, no badges/logos): see-through tinted glass + cabin (seat backs,
+// headrests, dash, steering wheel, centre screen), panel shut lines / door handles / charge-or-fuel flap, projector headlamps, LED tail
+// segments, high-mount brake light, side markers, brake discs + calipers + lug nuts + tread grooves. Everything is merged into a few
+// vertex-coloured meshes per car (cabin 1, panels 1, lights 1, each wheel 1) so the stage only gains ~7 draw calls per car.
+function pkMerge(list,mat){let n=0;list.forEach(([g])=>{n+=(g.index?g.index.count:g.attributes.position.count);});if(!n)return null;
+  const P=new Float32Array(n*3),N=new Float32Array(n*3),Cc=new Float32Array(n*3);let o=0;const v=new THREE.Vector3(),nm=new THREE.Matrix3();
+  list.forEach(([g,col,M])=>{const gg=g.index?g.toNonIndexed():g;const p=gg.attributes.position,q=gg.attributes.normal;nm.getNormalMatrix(M);const c=col.isColor?col:LINc(col);
+    for(let i=0;i<p.count;i++){v.fromBufferAttribute(p,i).applyMatrix4(M);P[o*3]=v.x;P[o*3+1]=v.y;P[o*3+2]=v.z;v.fromBufferAttribute(q,i).applyMatrix3(nm).normalize();N[o*3]=v.x;N[o*3+1]=v.y;N[o*3+2]=v.z;Cc[o*3]=c.r;Cc[o*3+1]=c.g;Cc[o*3+2]=c.b;o++;}
+    if(gg!==g)gg.dispose();g.dispose();});
+  const G=new THREE.BufferGeometry();G.setAttribute('position',new THREE.BufferAttribute(P,3));G.setAttribute('normal',new THREE.BufferAttribute(N,3));G.setAttribute('color',new THREE.BufferAttribute(Cc,3));G.computeBoundingSphere();
+  const m=new THREE.Mesh(G,mat);m.userData.pkFine=1;return m;}
+function pkM4(x,y,z,rx,ry,rz,sx,sy,sz){const o=new THREE.Object3D();o.position.set(x,y,z);o.rotation.set(rx||0,ry||0,rz||0);o.scale.set(sx||1,sy||1,sz||1);o.updateMatrix();return o.matrix.clone();}
+const PKFM={};function pkMat(k,low){const key=k+(low?'L':'H');if(PKFM[key])return PKFM[key];let m;
+  if(k==='glow')m=new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});
+  else if(k==='metal')m=new THREE.MeshStandardMaterial({vertexColors:true,metalness:0.75,roughness:0.38,envMapIntensity:1.1});
+  else if(k==='panel')m=new THREE.MeshStandardMaterial({vertexColors:true,metalness:0.5,roughness:0.4,envMapIntensity:0.9,polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2});
+  else m=new THREE.MeshStandardMaterial({vertexColors:true,metalness:0.05,roughness:0.62,envMapIntensity:0.5});
+  m.name='pk_'+k;return PKFM[key]=m;}
+function pkRefine(car,kind,low){if(!car||car.userData.pkFine)return car;car.userData.pkFine=1;const u=car.userData;
+  try{if(kind==='cyber')pkRefineCyber(car,low);else pkRefineCar(car,kind,low);}catch(e){console.warn('[parking] refine',kind,e);}return car;}
+function pkSeat(L,x,y0,z,h,w,col,lean){const b=new THREE.BoxGeometry(0.075,h,w,1,2,1);L.push([b,col,pkM4(x,y0+h/2,z,0,0,lean)]);
+  L.push([new THREE.BoxGeometry(0.06,h*0.22,w*0.62),col,pkM4(x-Math.sin(lean)*h*1.05,y0+h*1.08,z,0,0,lean)]);
+  L.push([new THREE.BoxGeometry(0.03,h*0.5,0.03),col,pkM4(x+0.02,y0+h*0.45,z+w*0.52,0,0,lean)]);L.push([new THREE.BoxGeometry(0.03,h*0.5,0.03),col,pkM4(x+0.02,y0+h*0.45,z-w*0.52,0,0,lean)]);}
+function pkRefineCar(car,kind,low){const u=car.userData,H=u.H,CR=window.BFCARS||{},S=CR.SPEC2&&CR.SPEC2[kind],M=u.mats,body=u.body||car;if(!H||!S||!M)return;const G=S.gh;if(kind==='mx')body.traverse(o=>{const m=o.material;if(o.isMesh&&m&&!Array.isArray(m)&&m.map&&m.map.image&&m.map.image.width===64&&m.map.image.height===64&&m.alphaTest>0&&m.metalness>0.5)o.visible=false;});// v5.9.3: no letter-like badge
+  // glass: tinted, see-through so the cabin reads (falcon doors share the material)
+  if(M.glass){M.glass.transparent=true;M.glass.opacity=low?0.74:0.68;M.glass.depthWrite=false;M.glass.color.setRGB(0.012,0.016,0.022);}
+  car.traverse(o=>{if(o.isMesh&&o.material===M.glass)o.renderOrder=2;});
+  const inC=kind==='mx'?0xe4e1da:kind==='lb'?0x7a4a2c:0x232428,trimC=kind==='mx'?0x2a2b2f:0x16171a;
+  const cab=[],pan=[],glo=[];const belt=x=>H.gb(x),roof=x=>H.gr(x),zin=(x,y)=>Math.max(0.2,(H.zmax(x,y)||S.W/2)-0.1);
+  // seats: two fronts + rear bench (3 backs), backs rise above the belt line
+  const xf=G.x0-0.78,xr=xf-0.78;[[xf,[0.25,-0.25]],[xr,[0.3,0,-0.3]]].forEach(([x,zs],row)=>{const yb=belt(x)-0.2,top=roof(x-0.1)-0.1,h=Math.max(0.22,top-yb-0.06);
+    zs.forEach(z=>pkSeat(cab,x,yb,z*(zin(x,yb+0.1)/0.55),h*0.82,row?0.24:0.28,inC,0.2));});
+  // dashboard + instrument hood + centre console, steering wheel (driver on the left = -z)
+  const xd=G.x0-0.2,yd=belt(xd);const zd=zin(xd,yd-0.02);cab.push([new THREE.BoxGeometry(0.22,0.07,zd*2-0.04),trimC,pkM4(xd,yd-0.02,0)]);
+  cab.push([new THREE.BoxGeometry(0.08,0.035,0.3),trimC,pkM4(xd-0.05,yd+0.03,-zd*0.45)]);cab.push([new THREE.BoxGeometry(0.5,0.08,0.13),trimC,pkM4(xf+0.12,yd-0.12,0)]);
+  const sw=new THREE.TorusGeometry(0.085,0.012,6,low?14:22);cab.push([sw,0x101114,pkM4(xd-0.2,yd+0.03,-zd*0.48,0,Math.PI/2,0.45)]);
+  cab.push([new THREE.CylinderGeometry(0.015,0.015,0.16,6),0x101114,pkM4(xd-0.13,yd,-zd*0.48,0,0,Math.PI/2+0.45)]);
+  // centre screen (landscape on the X, portrait-ish on the Lexus) + headliner dome light
+  glo.push([new THREE.PlaneGeometry(kind==='mx'?0.2:0.14,kind==='mx'?0.11:0.08),0x2a4c7a,pkM4(xd-0.12,yd+0.07,0,0,-Math.PI/2+0.0,0,1,1,1).multiply(new THREE.Matrix4().makeRotationX(-0.5))]);
+  // ---- panels: hood / boot shut lines, bumper seams, door handles, charge or fuel flap ----
+  const yc=x=>(H.yb(x)+H.yt(x))/2;const pt=(x,th,o)=>{const p=H.ring(x,th,true);const n=new THREE.Vector3(0,p[1]-yc(x),p[2]).normalize();return new THREE.Vector3(p[0],p[1],p[2]).addScaledVector(n,o||0.004);};
+  const strip=(f,n,w,col)=>{const pos=[];for(let i=0;i<n;i++){const a=f(i/(n-1)),b=f(Math.min(1,(i+1)/(n-1)));if(i===n-1)break;const d=b.clone().sub(a),nn=a.clone().sub(new THREE.Vector3(a.x,0,0));const side=new THREE.Vector3().crossVectors(d,nn).normalize().multiplyScalar(w/2);
+      const A=a.clone().add(side),B=a.clone().sub(side),Cv=b.clone().add(side),D2=b.clone().sub(side);pos.push(A.x,A.y,A.z,B.x,B.y,B.z,Cv.x,Cv.y,Cv.z,B.x,B.y,B.z,D2.x,D2.y,D2.z,Cv.x,Cv.y,Cv.z);}
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.computeVertexNormals();pan.push([g,col,new THREE.Matrix4()]);};
+  const SEAM=0x08090b,xh=G.x0+0.1,xb=G.x1-0.02;
+  [0.42,Math.PI-0.42].forEach(th=>strip(t=>pt(xh+(S.xn-0.16-xh)*t,th),10,0.007,SEAM));
+  strip(t=>pt(S.xn-0.16,0.42+(Math.PI-0.84)*t),14,0.007,SEAM);strip(t=>pt(xh,0.42+(Math.PI-0.84)*t),14,0.006,SEAM);
+  strip(t=>pt(S.xn-0.08,-0.25+(-Math.PI+0.5)*t),18,0.006,SEAM);strip(t=>pt(S.xt+0.08,-0.25+(-Math.PI+0.5)*t),18,0.006,SEAM);
+  [0.5,Math.PI-0.5].forEach(th=>strip(t=>pt(S.xt+0.1+(xb-S.xt-0.1)*t,th),8,0.007,SEAM));
+  [1,-1].forEach(s=>{const th0=s>0?0.0:Math.PI;[-0.3,-1.0].forEach(x=>{if(kind==='mx'&&x<-0.9)return;const y=belt(x)-0.09,z=s*((H.zmax(x,y)||0.6)+0.004);
+      pan.push([new THREE.BoxGeometry(0.13,0.022,0.012),kind==='mx'?0x1d1e22:0xd8dadf,pkM4(x,y,z)]);});
+    // vertical door shut lines between the front and rear doors + rear door trailing edge
+    [-0.02,-0.72].forEach(x=>strip(t=>pt(x,(s>0?-0.48:Math.PI+0.48)+(s>0?0.48:-0.48)*t,0.0045),6,0.006,SEAM));});
+  {const s=kind==='mx'?-1:1,x=S.xt+0.45,y=belt(x)-0.12,z=s*((H.zmax(x,y)||0.6)+0.003);[[0,0.05],[0,-0.05]].forEach(([dx,dy])=>pan.push([new THREE.BoxGeometry(0.12,0.006,0.006),SEAM,pkM4(x+dx,y+dy,z)]));
+    [[0.06,0],[-0.06,0]].forEach(([dx])=>pan.push([new THREE.BoxGeometry(0.006,0.1,0.006),SEAM,pkM4(x+dx,y,z)]));}
+  // ---- lights: projector lenses in each headlamp, LED tail segments, high-mount stop lamp, amber side markers ----
+  const gy=kind==='mx'?0.555:kind==='lb'?0.565:0.465;const W=0xf0f6ff;
+  [1,-1].forEach(s=>{[0.36,0.45,0.53].forEach((zz,i)=>{const z=s*zz,x=H.frontX(gy-0.005,z,1);if(x===null)return;const g=new THREE.CylinderGeometry(0.022,0.022,0.012,low?8:12);
+      glo.push([g,new THREE.Color(W).convertSRGBToLinear().multiplyScalar(i===1?2.4:1.6),pkM4(x+0.004,gy-0.005,z,0,0,Math.PI/2)]);});
+    const xm=S.wb[0]+0.32,ym=S.R+0.18,zm=s*((H.zmax(xm,ym)||0.6)+0.003);glo.push([new THREE.BoxGeometry(0.07,0.02,0.006),new THREE.Color(0xffa030).convertSRGBToLinear().multiplyScalar(1.6),pkM4(xm,ym,zm)]);});
+  const ty=H.yt(S.xt+0.05)-0.07;for(let i=-6;i<=6;i++){if(Math.abs(i)<1)continue;const z=i*0.085,x=H.frontX(ty,z,-1);if(x===null)continue;
+    glo.push([new THREE.BoxGeometry(0.006,0.03,0.05),new THREE.Color(0xff2a30).convertSRGBToLinear().multiplyScalar(2.6),pkM4(x-0.006,ty,z)]);}
+  {const x=G.x1+0.05,y=roof(x)-0.03;glo.push([new THREE.BoxGeometry(0.02,0.018,0.32),new THREE.Color(0xff2028).convertSRGBToLinear().multiplyScalar(2.2),pkM4(x,y,0)]);}
+  [[cab,'cabin'],[pan,'panel'],[glo,'glow']].forEach(([L,k])=>{const m=pkMerge(L,pkMat(k,low));if(m){m.castShadow=false;m.receiveShadow=k!=='glow';m.name='pkFine_'+k;body.add(m);}});
+  pkWheels(u.wheels||[],S.R,S.tw,kind,low);}
+function pkWheels(ws,R,tw,kind,low){const rr=R*0.66,cal=kind==='mx'?0x6a6d72:kind==='lb'?0x8a1c1c:0x3a3c40;
+  ws.forEach(w=>{const side=w.position.z>=0?1:-1,L=[];
+    L.push([new THREE.CylinderGeometry(rr*0.8,rr*0.8,0.018,low?16:28),0x5d6066,pkM4(0,0,side*tw*0.14,Math.PI/2,0,0)]);
+    L.push([new THREE.CylinderGeometry(rr*0.3,rr*0.3,0.026,12),0x3a3c40,pkM4(0,0,side*tw*0.15,Math.PI/2,0,0)]);
+    L.push([new THREE.BoxGeometry(0.075,0.11,0.045),cal,pkM4(-rr*0.52,rr*0.42,side*tw*0.17,0,0,0.75)]);
+    for(let k=0;k<5;k++){const a=k/5*Math.PI*2;L.push([new THREE.CylinderGeometry(0.011,0.011,0.03,6),0xd0d3d8,pkM4(Math.cos(a)*R*0.2,Math.sin(a)*R*0.2,side*(tw*0.3+0.045),Math.PI/2,0,0)]);}
+    if(!low)[-0.18,0,0.18].forEach(f=>L.push([new THREE.TorusGeometry(R*0.996,0.006,4,40),0x070708,pkM4(0,0,f*tw)]));
+    const m=pkMerge(L,pkMat('metal',low));if(m){m.name='pkFine_wheel';w.add(m);}});}
+function pkRefineCyber(car,low){const body=car.children[0]||car,cab=[],glo=[];const C0=0x1e1f22,TR=0x101114;
+  // seats behind the triangular side glass; yoke + dash slab + centre screen
+  [[0.25,[0.27,-0.27],0.92],[-0.32,[0.3,0,-0.3],0.86]].forEach(([x,zs,top])=>zs.forEach(z=>pkSeat(cab,x,0.6,z,top-0.6-0.1,0.26,C0,0.18)));
+  cab.push([new THREE.BoxGeometry(0.2,0.06,1.0),TR,pkM4(0.74,0.71,0)]);
+  cab.push([new THREE.BoxGeometry(0.02,0.07,0.2),TR,pkM4(0.58,0.79,-0.28,0,0,0.4)]);cab.push([new THREE.BoxGeometry(0.03,0.02,0.24),TR,pkM4(0.58,0.83,-0.28,0,0,0.4)]);
+  glo.push([new THREE.PlaneGeometry(0.22,0.13),0x2a4c7a,pkM4(0.62,0.8,0.02,0,-Math.PI/2,0).multiply(new THREE.Matrix4().makeRotationX(-0.4))]);
+  [[cab,'cabin'],[glo,'glow']].forEach(([L,k])=>{const m=pkMerge(L,pkMat(k,low));if(m){m.name='pkFine_'+k;body.add(m);}});}
 function pkWindowsTex(seed){const c=D.createElement('canvas');c.width=32;c.height=64;const g=c.getContext('2d');g.fillStyle='#10131c';g.fillRect(0,0,32,64);
   let s=seed||1;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};
   for(let y=2;y<62;y+=4)for(let x=2;x<30;x+=4){const r=rnd();if(r<0.42){g.fillStyle=r<0.08?'#9fd0ff':r<0.3?'#ffd890':'#ffeec0';g.fillRect(x,y,2,2);}}
@@ -18520,6 +18899,7 @@ function buildParking(A,root,V,BM,renderer){
   spec.forEach(([k,x],i)=>{try{let c=null;
       if(k==='cyber'){if(K.makeCybertruck){c=K.makeCybertruck();const u=c.userData;['aura','arcs','streaks','beam'].forEach(q=>{const o=u[q];(Array.isArray(o)?o:[o]).forEach(z=>{if(z&&z.isObject3D)z.visible=false;});});}}
       else if(CARS&&CARS.make)c=hide(CARS.make(k,{}));
+      if(c&&window.__pkf!==0)pkRefine(c,k,low);
       if(c){put(c,x,BZ+0.1,-Math.PI/2+(i%2?0.06:-0.06),k==='cyber'?3.6:3.3);c.userData.kindP=k;}
     }catch(e){console.warn('[parking] car',k,e);}});
   // the empty middle bay gets a few traffic cones (blocky)
@@ -18704,10 +19084,14 @@ function crayonOutline(root,A){const mat=new THREE.MeshBasicMaterial({color:LINc
   const ws=new THREE.Vector3(),sz=new THREE.Vector3();
   root.traverse(o=>{if(!o.isMesh||o.userData.crOL||o.isSprite||!o.visible||!o.geometry)return;const mm=Array.isArray(o.material)?o.material[0]:o.material;if(mm&&(mm.transparent&&mm.opacity<0.9))return;
     o.geometry.computeBoundingBox&&o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox;if(!bb)return;bb.getSize(sz);o.getWorldScale(ws);
+    if(o.isSkinnedMesh&&o.skeleton){// v5.9.3: skinned (rsteve) -> skinned normal-pushed hull bound to the same skeleton, so it follows the pose
+      const sm=new THREE.MeshBasicMaterial({color:LINc(0x2a1a10),side:THREE.BackSide,toneMapped:false});sm.skinning=true;const U={th:{value:0.02/Math.max(1e-3,ws.x)}};sm.userData.crU=U;
+      sm.onBeforeCompile=sh=>{sh.uniforms.crTh=U.th;sh.vertexShader='uniform float crTh;\n'+sh.vertexShader.replace('#include <begin_vertex>','vec3 transformed = vec3( position ) + normalize( normal ) * crTh;');};
+      const ol=new THREE.SkinnedMesh(o.geometry,sm);ol.userData.crOL=1;ol.raycast=()=>{};ol.castShadow=false;ol.frustumCulled=false;ol.bindMode=o.bindMode;ol.bind(o.skeleton,o.bindMatrix);o.add(ol);list.push({ol,sk:U,t0:U.th.value});return;}
     const th=0.022,s=[1+th/Math.max(0.02,sz.x*ws.x),1+th/Math.max(0.02,sz.y*ws.y),1+th/Math.max(0.02,sz.z*ws.z)].map(v=>Math.min(1.5,v));
     const ol=new THREE.Mesh(o.geometry,mat);ol.userData.crOL=1;ol.raycast=()=>{};ol.castShadow=false;const c=new THREE.Vector3();bb.getCenter(c);
     ol.position.copy(c).multiplyScalar(1).sub(c.clone().multiply(new THREE.Vector3(s[0],s[1],s[2])));ol.scale.set(s[0],s[1],s[2]);o.add(ol);list.push({ol,s,c});});
-  if(A){let k=-1;A.upd.push(t=>{const f=Math.floor(t*8);if(f===k)return;k=f;list.forEach((L,i)=>{const h=Math.sin(f*7.13+i*3.7)*1000;const j=1+(h-Math.floor(h)-0.5)*0.35;const s=L.s.map(v=>1+(v-1)*j);L.ol.scale.set(s[0],s[1],s[2]);L.ol.position.copy(L.c).sub(L.c.clone().multiply(new THREE.Vector3(s[0],s[1],s[2])));});});}
+  if(A){let k=-1;A.upd.push(t=>{const f=Math.floor(t*8);if(f===k)return;k=f;list.forEach((L,i)=>{const h=Math.sin(f*7.13+i*3.7)*1000;const j=1+(h-Math.floor(h)-0.5)*0.35;if(L.sk){L.sk.th.value=L.t0*j;return;}const s=L.s.map(v=>1+(v-1)*j);L.ol.scale.set(s[0],s[1],s[2]);L.ol.position.copy(L.c).sub(L.c.clone().multiply(new THREE.Vector3(s[0],s[1],s[2])));});});}
   return list;}
 
 // ---------------------------------------------------------------- roster / rigs ----------------------------------------------------------------
@@ -18754,6 +19138,8 @@ function buildFighterModel(def){
   ['aura','eyeGlow','mouthGlow'].forEach(k=>{const o=ud[k];if(o&&o.isObject3D&&k==='aura')o.visible=false;});
   // v5.9.1 voxel detail dressing (rig_lib/BlockDetail + BLOCK_DETAILS): faces, seams, trim, plates, rivets, fur, accessories; merged per part
   if(typeof BlockDetail!=='undefined'){try{BlockDetail.apply(obj,rig,def.id,{low:typeof GQ!=='undefined'&&GQ.level==='low'});}catch(e){console.warn('detail',e);}}
+  // v5.9.3 fine voxels (BlockDetail.fine): re-sculpt big blocks from half-pixel cubes; GQ low keeps the classic mesh (LOD), window.__fv=0 disables
+  if(typeof BlockDetail!=='undefined'&&BlockDetail.fine&&window.__fv!==0&&!(typeof GQ!=='undefined'&&GQ.level==='low')){try{BlockDetail.fine(obj,rig,{res:(typeof GQ!=='undefined'&&GQ.level==='mid')?12:16});}catch(e){console.warn('fine',e);}}
   // per-fighter material clones (so flashes don't bleed into a mirror match)
   const mats=[];obj.traverse(o=>{if(o.isMesh){o.castShadow=!(o.userData&&o.userData.bdNoSh)&&!(o.userData&&o.userData.bd&&typeof GQ!=='undefined'&&GQ.level==='low');if(Array.isArray(o.material))o.material=o.material.map(m=>{const c=m.clone();mats.push(c);return c;});else if(o.material){o.material=o.material.clone();mats.push(o.material);}}});
   mats.forEach(m=>{m.userData.e0=m.emissive?m.emissive.clone():null;m.userData.ei0=m.emissiveIntensity||0;});
@@ -18782,7 +19168,7 @@ function poseFor(F,t){
   else if(st==='gstun'){P.aL=-1.3;P.aR=-1.2;P.aLz=-0.5;P.aRz=0.5;P.lean=-0.2;P.sy=0.9;P.sx=1.08;P.k=0.6;}
   else if(st==='dodge'){P.roll=(fr/F.dodgeLen)*Math.PI*2*(F.dodgeDir);P.sy=0.8;P.lL=-1.4;P.lR=-1.4;P.aL=-2;P.aR=-2;P.k=1;}
   else if(st==='hurt'||st==='tumble'){const s=Math.min(1,F.hitShake);P.lean=-0.45-s*0.2;P.aL=-2.4+Math.sin(t*20)*0.4;P.aR=-2.0-Math.sin(t*20)*0.4;P.aLz=0.6;P.aRz=-0.6;P.hd=-0.5;P.lL=-0.6;P.lR=0.4;if(st==='tumble'){P.roll=-F.spin;P.k=1;}}
-  else if(st==='down'){P.lean=-1.5;P.y=-0.05;P.aL=-2.8;P.aR=-2.6;P.lL=-0.2;P.lR=0.1;P.k=0.3;}
+  else if(st==='down'){P.lean=-1.5;P.y=0;P.aL=-2.8;P.aR=-2.6;P.lL=-0.2;P.lR=0.1;P.k=0.3;}
   else if(st==='getup'){P.lean=-0.6+fr/18*0.6;P.sy=0.9;}
   else if(st==='win'){P.aR=-3.0+Math.sin(t*9)*0.35;P.aRz=-0.35+Math.sin(t*9)*0.25;P.aL=0.1;P.lean=-0.08;P.hd=-0.2;P.y=Math.max(0,Math.sin(t*6))*0.15;}
   else if(st==='lose'){P.lean=0.5;P.hd=0.6;P.aL=0.2;P.aR=0.2;P.sy=0.92;}
@@ -18847,7 +19233,7 @@ function jointPose58(F,t,P,st,fr,mv){
   else if(st==='air'){const up=F.vy>0;P.kL=up?1.5:0.7;P.kR=up?0.9:0.5;P.eL=P.eR=up?-0.5:-0.9;}
   else if(st==='guard'||st==='gstun'){P.aL=-0.75;P.aR=-0.65;P.eL=-2.0;P.eR=-2.05;P.aLz=-0.25;P.aRz=0.25;P.kL=0.55;P.kR=0.6;P.ch=0.18;}
   else if(st==='hurt'||st==='tumble'){const s=Math.min(1,F.hitShake);P.ch=-0.45-s*0.25;P.cy=Math.sin(t*14)*0.15;P.eL=-0.25;P.eR=-0.35;P.kL=0.5+s*0.4;P.kR=0.25;}
-  else if(st==='down'){P.kL=0.9;P.kR=0.4;P.eL=-0.4;P.eR=-0.2;P.ch=-0.1;}
+  else if(st==='down'){P.kL=0.22;P.kR=0.1;P.eL=-0.4;P.eR=-0.2;P.ch=-0.1;}
   else if(st==='getup'){P.kL=P.kR=1.2*(1-fr/18);P.eL=P.eR=-0.9;}
   else if(st==='win'){P.eR=-0.25+Math.max(0,Math.sin(t*9))*-0.8;P.aL=-0.5;P.eL=-1.9;P.aLz=0.5;P.cy=Math.sin(t*3)*0.15;P.ch=-0.12;P.kL=P.kR=0.15;}
   else if(st==='lose'){P.eL=P.eR=-0.15;P.kL=P.kR=0.55;P.ch=0.35;}
@@ -19039,7 +19425,7 @@ const LegoRig=(function(){
       q.setXYZ(i,v[0]+c.x,v[1]+c.y,v[2]+c.z);
       let fu=nu.getX(i),fv=nu.getY(i);const r=t=>t<0.01?0:t>0.99?1:t<0.5?0.07:0.93;fu=r(fu);fv=r(fv);
       const C=fUV[f],A=[lerp(C[0][0],C[1][0],fu),lerp(C[0][1],C[1][1],fu)],B=[lerp(C[2][0],C[3][0],fu),lerp(C[2][1],C[3][1],fu)];nu.setXY(i,lerp(A[0],B[0],fv),lerp(A[1],B[1],fv));}
-    N.computeVertexNormals();N.userData.lego=1;return N;}
+    N.computeVertexNormals();N.userData.lego=1;N.userData.src=g;return N;}
   const geoCache=new WeakMap();
   function bevel(root,frac){let n=0;root.traverse(o=>{if(!o.isMesh||o.isInstancedMesh||(o.userData&&o.userData.lego))return;let G=geoCache.get(o.geometry);if(G===undefined){G=bevelGeometry(o.geometry,frac);geoCache.set(o.geometry,G);}if(G){o.geometry=G;n++;}});return n;}
   // ---------------------------------------------------------------- joint pins + grip hands
@@ -19160,7 +19546,7 @@ const BLOCK_DETAILS=(function(){
   // ------------------------------------------------ 스티브: hair voxels, sculpted brows/eyes/nose, collar, pocket, belt + buckle, jeans seams/pockets/cuffs, shoe soles
   {const hair=0x4b301d,hairD=0x35200f,skinD=0xa66c50,sh=0x33b8b3,shD=0x1f8584,pa=0x3c41b4,paD=0x2a2d86,gold=0xc9a24a;
   D.steve=[
-    ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.34,0.5,0.016,hair],['P','head','f',-0.5,-0.22,0.2,0.34,0.016,hair],['P','head','f',0.3,0.5,0.24,0.34,0.016,hairD],
+    ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.4,0.5,0.008,hair],['P','head','f',-0.5,-0.28,0.26,0.4,0.008,hair],['P','head','f',-0.12,0.1,0.31,0.4,0.007,hair],['P','head','f',0.32,0.5,0.28,0.4,0.008,hairD],
     ['P','head','l',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','r',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','l',0.28,0.5,-0.16,0.12,0.013,hairD],['P','head','r',0.28,0.5,-0.16,0.12,0.013,hairD],
     ['P','head','b',-0.5,0.5,-0.3,0.5,0.011,hair],['N','head','b',10,0.03,0.008,hairD,'c',4,[-0.5,0.5,-0.3,0.5]],['N','head','t',9,0.035,0.008,hairD,'c',5],
     ['P','head','f',-0.34,-0.06,0.015,0.085,0.013,0x3a2414],['P','head','f',0.06,0.34,0.015,0.085,0.013,0x3a2414],
@@ -19207,7 +19593,7 @@ const BLOCK_DETAILS=(function(){
   D.ttuttu=[
     ['S','head:5','t',-0.5,0.5,-0.32,-0.28,stD],['S','head:5','t',-0.5,0.5,0.28,0.32,stD],['S','head:5','t',-0.32,-0.28,-0.5,0.5,stD],['S','head:5','t',0.28,0.32,-0.5,0.5,stD],
     ['S','head:6','f',-0.5,0.5,-0.08,0.08,stD],['S','head:6','l',-0.5,0.5,-0.08,0.08,stD],['S','head:6','r',-0.5,0.5,-0.08,0.08,stD],['S','head:6','b',-0.5,0.5,-0.08,0.08,stD],
-    ['P','head:7','f',0.18,0.42,-2.2,2.2,0.02,0xffffff],['P','head:7','f',0.26,0.34,-1.0,1.0,0.03,0xf2c230,'g'],
+    ['P','head:7','f',0.14,0.24,-0.38,0.38,0.02,0xff6f9f],['P','head:7','f',0.36,0.46,-0.38,0.38,0.02,0xff6f9f],['P','head:7','f',0.24,0.36,0.22,0.5,0.02,0xff9cc0],['P','head:7','f',0.24,0.36,-0.5,-0.22,0.02,0xff9cc0],['P','head:7','f',0.46,0.56,-0.45,0.0,0.014,0x4c9a3a],['P','head:7','f',0.24,0.36,-0.22,0.22,0.03,0xf2c230,'g'],
     ['W','head:3',-0.5,-0.32,0.012,0xd0303a],['W','head:4',-0.5,-0.32,0.012,0xd0303a],['S','head:3','f',-0.5,0.5,0.0,0.06,0xa86010],['S','head:4','f',-0.5,0.5,0.0,0.06,0xa86010],
     ['S','head:3','f',-0.5,0.5,0.3,0.36,0xa86010],['S','head:4','f',-0.5,0.5,0.3,0.36,0xa86010],
     ['P','torso','f',-0.26,0.26,0.38,0.5,0.01,0xf8f6ee],['P','torso','t',-0.26,0.26,-0.5,0.5,0.008,0xf8f6ee],
@@ -19314,7 +19700,7 @@ const BLOCK_DETAILS=(function(){
   {const rb=0x6a4a2a,rD=0x4a2f18;
   D.villager=[
     ['P','head','f',-0.42,0.42,0.1,0.18,0.012,0x2a1a10],['P','head:1','d',-0.3,0.3,0.15,0.4,0.008,0x5a2a14],
-    ['P','torso','t',-0.3,0.3,-0.5,0.5,0.008,rD],['P','torso','f',-0.3,0.3,0.4,0.5,0.012,rD],['W','torso',-0.35,-0.25,0.01,0x3a2410],['P','torso','f',0.2,0.38,-0.5,-0.32,0.02,0x8a6a3a],
+    ['P','torso','t',-0.3,0.3,-0.5,0.5,0.008,rD],['P','torso','f',-0.3,0.3,0.4,0.5,0.012,rD],['W','torso',-0.35,-0.25,0.01,0x8a6238],['P','torso','f',0.2,0.38,-0.5,-0.32,0.02,0x8a6a3a],
     ['P','body:1','f',-0.5,-0.38,-0.5,0.5,0.01,rD],['P','body:1','f',0.38,0.5,-0.5,0.5,0.01,rD],['P','body:1','f',-0.38,0.38,-0.12,0.12,0.004,0x5a3a1c],
     
     ...shoe(0x2a1a0e,0x4a3220,0x8a6a40)];}
@@ -19368,6 +19754,7 @@ if(typeof window!=='undefined')window.BLOCK_DETAILS=BLOCK_DETAILS;
 // part: head torso hips | tents | armU* armF* hand* legU* legF* foot* (* = both sides, auto-mirrored) | legU4 legF4 (all four legs)
 //       | 'head:2' 'body:1' 'chest:0' = n-th direct mesh child of that group | 'tail' | 'wing*'
 // opt : {low, flat (all but glow/slime -> one matte mesh per part), only:['head','torso',..] (part-name whitelist; 'head' also admits 'head:1'), spec}
+// fine(obj,rig,opt): v5.9.3 fine voxel re-sculpt of every box part (see FINE VOXELS below)
 // mat : c matte (default)  m metal  g gloss  s slime (translucent)  e glow (unlit)
 var BlockDetail=(typeof window!=='undefined'&&window.BlockDetail)||(function(){
   const V3=()=>new THREE.Vector3();
@@ -19451,7 +19838,103 @@ var BlockDetail=(typeof window!=='undefined'&&window.BlockDetail)||(function(){
     const out=[];let boxes=0;accs.forEach(A=>{if(!A.nb)return;const mesh=new THREE.Mesh(geo(A),M[A.mt]||M.c);mesh.name='bdDetail';mesh.userData.bd=1;mesh.userData.bdNoSh=A.nb<4;
       mesh.castShadow=!low&&A.nb>=4;mesh.receiveShadow=false;if(A.mt==='s')mesh.renderOrder=2;A.m.add(mesh);out.push(mesh);boxes+=A.nb;});
     obj.userData.bd={meshes:out.length,boxes};return obj.userData.bd;}
-  return {apply,parts,mats,box,version:1};
+  // ================================================================ v5.9.3 FINE VOXELS — re-sculpt every big body block from small cubes
+  // fine(obj, rig, opt): each axis-aligned box part (head/torso/limbs/hands/feet/big accessories) is rebuilt as ONE merged mesh of sub-voxels
+  // (default 16 across the head = half a Minecraft pixel): 1-voxel stepped chamfer on every edge, dark texels (eyes, mouth, seams, nostrils)
+  // carved one voxel deep, per-voxel shade jitter so the grid reads, colours sampled from the part's own texture (vertex colours, greedy-merged
+  // quads). The original block keeps its bounds (drawRange 0 -> no draw call), so hit boxes / height normalisation / crowd far-LOD are unchanged.
+  // opt: {res (voxels across the head, default 16), jit (shade jitter, default 0.05), carve (default true), maxCells, skip:[part names]}
+  const FVMAT=new Map(),FVGEO=new Map(),FVHID=new WeakMap(),IMGD=new WeakMap();
+  function texData(t){if(!t||!t.image)return null;const im=t.image;if(IMGD.has(im))return IMGD.get(im);const w=im.naturalWidth||im.width,h=im.naturalHeight||im.height;
+    if(!w||!h||(im.complete===false))return null;let D=null;try{const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(im,0,0);D={w,h,d:g.getImageData(0,0,w,h).data};}catch(e){D=null;}
+    IMGD.set(im,D);return D;}
+  const s2l=v=>v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);
+  function fvMat(m){const em=m.emissive?m.emissive.getHex():0;const key=m.type+'|'+(m.roughness!==undefined?m.roughness.toFixed(2):'')+'|'+(m.metalness!==undefined?m.metalness.toFixed(2):'')+'|'+em+'|'+(m.emissiveIntensity||1)+'|'+(m.shininess||0)+'|'+(m.flatShading?1:0)+'|'+(m.side||0);
+    let M=FVMAT.get(key);if(M)return M;const P={vertexColors:true,emissive:em,emissiveIntensity:m.emissiveIntensity||1,side:m.side||0,flatShading:!!m.flatShading};
+    if(m.isMeshLambertMaterial)M=new THREE.MeshLambertMaterial(P);else if(m.isMeshPhongMaterial)M=new THREE.MeshPhongMaterial(Object.assign(P,{shininess:m.shininess,specular:m.specular}));
+    else M=new THREE.MeshStandardMaterial(Object.assign(P,{roughness:m.roughness!==undefined?m.roughness:0.85,metalness:m.metalness||0}));
+    if(m.envMapIntensity!==undefined&&M.envMapIntensity!==undefined)M.envMapIntensity=m.envMapIntensity;M.name='bd_fv';M.userData.bd=1;FVMAT.set(key,M);return M;}
+  // source box faces: dir index (0 +x,1 -x,2 +y,3 -y,4 +z,5 -z) -> {o,a,b,ua,ub,uv0,uv1,uv2,mat}
+  function boxFaces(g,mats){const P=g.attributes.position,N=g.attributes.normal,U=g.attributes.uv;if(!P||!N||!U||P.count!==24)return null;const F=[];
+    for(let f=0;f<6;f++){const k=f*4,nx=N.getX(k),ny=N.getY(k),nz=N.getZ(k);const ax=Math.abs(nx)>0.9?0:Math.abs(ny)>0.9?1:Math.abs(nz)>0.9?2:-1;if(ax<0)return null;const sg=(ax===0?nx:ax===1?ny:nz)>0?0:1;
+      const p=i=>[P.getX(i),P.getY(i),P.getZ(i)],p0=p(k),p1=p(k+1),p2=p(k+2);let A=-1,B=-1;for(let q=0;q<3;q++){if(Math.abs(p1[q]-p0[q])>1e-6)A=q;if(Math.abs(p2[q]-p0[q])>1e-6)B=q;}if(A<0||B<0)return null;
+      let mi=0;if(g.groups&&g.groups.length){const ix=g.index?g.index.array:null;for(const gr of g.groups){const s0=gr.start,s1=gr.start+gr.count;let hit=false;for(let t=s0;t<s1;t++){const v=ix?ix[t]:t;if(v>=k&&v<k+4){hit=true;break;}}if(hit){mi=gr.materialIndex||0;break;}}}
+      const mat=Array.isArray(mats)?mats[mi]||mats[0]:mats;F[ax*2+sg]={p0,A,B,dA:p1[A]-p0[A],dB:p2[B]-p0[B],uv0:[U.getX(k),U.getY(k)],uv1:[U.getX(k+1),U.getY(k+1)],uv2:[U.getX(k+2),U.getY(k+2)],mat};}
+    return F.length===6&&F.every(Boolean)?F:null;}
+  // any box-like geometry (rounded bevelBox, segmented BoxGeometry, rig58 limb pieces): per axis face, least-squares fit uv=f(A,B) on its flat verts
+  function boxFacesG(g,mats){const P=g.attributes.position,N=g.attributes.normal,U=g.attributes.uv;if(!P||!N||!U||P.count>4000)return null;if(!g.boundingBox)g.computeBoundingBox();
+    const bb=g.boundingBox,mn=[bb.min.x,bb.min.y,bb.min.z],mx=[bb.max.x,bb.max.y,bb.max.z];const vm=new Int16Array(P.count).fill(-1);
+    if(g.groups&&g.groups.length){const ix=g.index;for(const gr of g.groups){for(let t=gr.start;t<gr.start+gr.count;t++){const v=ix?ix.getX(t):t;if(v<P.count)vm[v]=gr.materialIndex||0;}}}
+    const F=[];for(let f=0;f<6;f++){const ax=f>>1,sg=f&1,A=ax===0?2:0,B=ax===1?2:1;const nv=sg?-1:1;let S=[0,0,0,0,0,0,0,0,0],Su=[0,0,0],Sv=[0,0,0],cnt=0;const mc={};
+      for(let i=0;i<P.count;i++){const nn=[N.getX(i),N.getY(i),N.getZ(i)];if(nn[ax]*nv<0.97)continue;const p=[P.getX(i),P.getY(i),P.getZ(i)];const ext=mx[ax]-mn[ax];if(Math.abs(p[ax]-(sg?mn[ax]:mx[ax]))>ext*0.05+1e-5)continue;
+        const x=[1,p[A],p[B]],u=U.getX(i),v=U.getY(i);for(let r=0;r<3;r++){for(let c=0;c<3;c++)S[r*3+c]+=x[r]*x[c];Su[r]+=x[r]*u;Sv[r]+=x[r]*v;}cnt++;const mi=vm[i]<0?0:vm[i];mc[mi]=(mc[mi]||0)+1;}
+      if(cnt<3)return null;const det=m=>m[0]*(m[4]*m[8]-m[5]*m[7])-m[1]*(m[3]*m[8]-m[5]*m[6])+m[2]*(m[3]*m[7]-m[4]*m[6]);const D0=det(S);if(Math.abs(D0)<1e-14)return null;
+      const sol=y=>[0,1,2].map(c=>{const m=S.slice();for(let r=0;r<3;r++)m[r*3+c]=y[r];return det(m)/D0;});const cu=sol(Su),cv=sol(Sv);const at=(a,b)=>[cu[0]+cu[1]*a+cu[2]*b,cv[0]+cv[1]*a+cv[2]*b];
+      let mi=0,best=-1;for(const k in mc)if(mc[k]>best){best=mc[k];mi=+k;}const mat=Array.isArray(mats)?mats[mi]||mats[0]:mats;
+      const p0=[0,0,0];p0[ax]=sg?mn[ax]:mx[ax];p0[A]=mn[A];p0[B]=mn[B];const dA=mx[A]-mn[A],dB=mx[B]-mn[B];if(dA<1e-6||dB<1e-6)return null;
+      F[ax*2+sg]={p0,A,B,dA,dB,uv0:at(mn[A],mn[B]),uv1:at(mx[A],mn[B]),uv2:at(mn[A],mx[B]),mat};}
+    return F;}
+  function sampler(F){const t=F.mat.map,D=t?texData(t):null;if(t&&!D)return null;const mc=F.mat.color||new THREE.Color(1,1,1),lin=t&&THREE.sRGBEncoding&&t.encoding===THREE.sRGBEncoding;
+    if(t&&t.matrixAutoUpdate)t.updateMatrix();const me=t?t.matrix.elements:null;
+    return p=>{const fa=(p[F.A]-F.p0[F.A])/F.dA,fb=(p[F.B]-F.p0[F.B])/F.dB;let r=mc.r,g=mc.g,b=mc.b,a=1;
+      if(D){let u=F.uv0[0]+(F.uv1[0]-F.uv0[0])*fa+(F.uv2[0]-F.uv0[0])*fb,v=F.uv0[1]+(F.uv1[1]-F.uv0[1])*fa+(F.uv2[1]-F.uv0[1])*fb;
+        if(me){const u2=me[0]*u+me[3]*v+me[6],v2=me[1]*u+me[4]*v+me[7];u=u2;v=v2;}u-=Math.floor(u);v-=Math.floor(v);
+        const px=Math.min(D.w-1,Math.floor(u*D.w)),py=Math.min(D.h-1,Math.floor((t.flipY!==false?1-v:v)*D.h));const o=(py*D.w+px)*4;
+        let tr=D.d[o]/255,tg=D.d[o+1]/255,tb=D.d[o+2]/255;a=D.d[o+3]/255;if(lin){tr=s2l(tr);tg=s2l(tg);tb=s2l(tb);}r*=tr;g*=tg;b*=tb;}
+      return [r,g,b,a];};}
+  function fineGeo(src,mats,n,o){
+    const F=src.attributes.position.count===24?boxFaces(src,mats):boxFacesG(src,mats);if(!F)return null;const S=F.map(sampler);if(S.some(x=>!x))return null;
+    if(!src.boundingBox)src.computeBoundingBox();const bb=src.boundingBox,mn=[bb.min.x,bb.min.y,bb.min.z],sz=[bb.max.x-bb.min.x,bb.max.y-bb.min.y,bb.max.z-bb.min.z],cs=[sz[0]/n[0],sz[1]/n[1],sz[2]/n[2]];
+    const [nx,ny,nz]=n,id=(i,j,l)=>(l*ny+j)*nx+i,occ=new Uint8Array(nx*ny*nz).fill(1),dd=(i,a)=>Math.min(i,n[a]-1-i);
+    const surfP=(f,i,j,l)=>{const ax=f>>1,c=[mn[0]+(i+0.5)*cs[0],mn[1]+(j+0.5)*cs[1],mn[2]+(l+0.5)*cs[2]];c[ax]=(f&1)?mn[ax]:mn[ax]+sz[ax];return c;};
+    // chamfer: drop every cell that sits on two (or three) outer faces of a thick-enough axis pair
+    for(let l=0;l<nz;l++)for(let j=0;j<ny;j++)for(let i=0;i<nx;i++){const d=[dd(i,0),dd(j,1),dd(l,2)];let e=0;for(let a=0;a<3;a++)if(d[a]===0&&n[a]>=4)e++;if(e>=2)occ[id(i,j,l)]=0;}
+    // carve dark texels one voxel deep (eyes, mouths, seams, gaps) + drop transparent texels
+    if(o.carve!==false){for(let f=0;f<6;f++){const ax=f>>1;if(n[ax]<4)continue;const u=(ax+1)%3,w=(ax+2)%3;const L=[],cells=[];
+      for(let q=0;q<n[w];q++)for(let p=0;p<n[u];p++){const c=[0,0,0];c[u]=p;c[w]=q;c[ax]=(f&1)?0:n[ax]-1;const k=id(c[0],c[1],c[2]);if(!occ[k])continue;const col=S[f](surfP(f,c[0],c[1],c[2]));const lu=0.2126*col[0]+0.7152*col[1]+0.0722*col[2];L.push(lu);cells.push([k,lu,col[3]]);}
+      if(!L.length)continue;const so=L.slice().sort((a,b)=>a-b),med=so[so.length>>1];
+      for(const [k,lu,al] of cells){if(al<0.4||(lu<med*0.42&&lu<0.09&&med>0.02))occ[k]=0;}}}
+    const nearF=(i,j,l)=>{const c=[i,j,l];let best=0,bv=1e9;for(let a=0;a<3;a++){const lo=c[a]+0.5,hi=n[a]-c[a]-0.5,s=sz[a]>0?1/n[a]:1;if(lo*s<bv){bv=lo*s;best=a*2+1;}if(hi*s<bv){bv=hi*s;best=a*2;}}return best;};
+    const jit=o.jit!==undefined?o.jit:0.05;const hsh=(i,j,l)=>{let h=(i*73856093)^(j*19349663)^(l*83492791);h=(h^(h>>>13))*1274126177;return ((h^(h>>>16))>>>0)%3;};
+    const pos=[],nor=[],colA=[],idx=[];let quads=0;
+    const qz=v=>Math.round(Math.sqrt(Math.max(0,Math.min(1,v)))*63);
+    for(let f=0;f<6;f++){const ax=f>>1,sg=(f&1)?-1:1,u=(ax+1)%3,w=(ax+2)%3,nu=n[u],nw=n[w];const key=new Int32Array(nu*nw),CL=[];
+      for(let s=0;s<n[ax];s++){key.fill(-1);CL.length=0;let any=false;
+        for(let q=0;q<nw;q++)for(let p=0;p<nu;p++){const c=[0,0,0];c[ax]=s;c[u]=p;c[w]=q;if(!occ[id(c[0],c[1],c[2])])continue;const nb=c.slice();nb[ax]+=sg;
+          if(nb[ax]>=0&&nb[ax]<n[ax]&&occ[id(nb[0],nb[1],nb[2])])continue;
+          const dax=(f&1)?s:n[ax]-1-s;const sf=dax<=1?f:nearF(c[0],c[1],c[2]);const col=S[sf](surfP(sf,c[0],c[1],c[2]));const k=1+(jit?(hsh(c[0],c[1],c[2])-1)*jit:0)*(1);
+          const r=qz(col[0]*k),g=qz(col[1]*k),b=qz(col[2]*k);key[q*nu+p]=(r<<12)|(g<<6)|b;any=true;}
+        if(!any)continue;
+        for(let q=0;q<nw;q++)for(let p=0;p<nu;){const kk=key[q*nu+p];if(kk<0){p++;continue;}let W=1;while(p+W<nu&&key[q*nu+p+W]===kk)W++;let H=1,ok=true;
+          while(q+H<nw&&ok){for(let t=0;t<W;t++)if(key[(q+H)*nu+p+t]!==kk){ok=false;break;}if(ok)H++;}
+          for(let h2=0;h2<H;h2++)for(let t=0;t<W;t++)key[(q+h2)*nu+p+t]=-1;
+          const plane=mn[ax]+(sg>0?(s+1):s)*cs[ax],u0=mn[u]+p*cs[u],u1=mn[u]+(p+W)*cs[u],w0=mn[w]+q*cs[w],w1=mn[w]+(q+H)*cs[w];
+          const b0=pos.length/3,cr=((kk>>12)&63)/63,cg=((kk>>6)&63)/63,cb=(kk&63)/63;const V=[[u0,w0],[u1,w0],[u1,w1],[u0,w1]];
+          for(const [a1,a2] of V){const P3=[0,0,0];P3[ax]=plane;P3[u]=a1;P3[w]=a2;pos.push(P3[0],P3[1],P3[2]);const N3=[0,0,0];N3[ax]=sg;nor.push(N3[0],N3[1],N3[2]);colA.push(cr*cr,cg*cg,cb*cb);}
+          if(sg>0)idx.push(b0,b0+1,b0+2,b0,b0+2,b0+3);else idx.push(b0,b0+2,b0+1,b0,b0+3,b0+2);quads++;p+=W;}}}
+    if(!quads)return null;const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(nor,3));
+    g.setAttribute('color',new THREE.Float32BufferAttribute(colA,3));g.setIndex(pos.length/3>65535?new THREE.Uint32BufferAttribute(idx,1):idx);g.computeBoundingBox();g.computeBoundingSphere();g.userData.bd=1;g.userData.fvQuads=quads;
+    return {g,mat:fvMat(F[4].mat)};}
+  // box-like = bbox faces are flat: every vertex lies on/near the bbox shell (rounded edges allowed)
+  function boxy(g){if(g.userData.fvBoxy!==undefined)return g.userData.fvBoxy;let ok=false;try{const P=g.attributes.position;if(P&&P.count<=4000&&g.attributes.uv&&g.attributes.normal){if(!g.boundingBox)g.computeBoundingBox();const bb=g.boundingBox,mn=bb.min.toArray(),mx=bb.max.toArray();const e=[0,1,2].map(a=>mx[a]-mn[a]);
+      if(Math.min(e[0],e[1],e[2])>1e-4){ok=true;const tol=Math.min(e[0],e[1],e[2])*0.3;for(let i=0;i<P.count&&ok;i++){const p=[P.getX(i),P.getY(i),P.getZ(i)];let dmin=1e9;for(let a=0;a<3;a++)dmin=Math.min(dmin,p[a]-mn[a],mx[a]-p[a]);if(dmin>tol)ok=false;}}}}catch(e){ok=false;}
+    g.userData.fvBoxy=ok;return ok;}
+  function fine(obj,rig,opt){opt=opt||{};if(!obj||(obj.userData&&obj.userData.fvDone))return null;obj.userData.fvDone=1;obj.updateMatrixWorld(true);
+    const P=parts(obj,rig||{}),os=V3(),ws=V3();obj.getWorldScale(os);const skip=new Set();(opt.skip||[]).forEach(nm=>resolve(P,nm).forEach(m=>skip.add(m)));
+    const wsz=m=>{const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const s=V3();g.boundingBox.getSize(s);m.getWorldScale(ws);return [s.x*ws.x/os.x,s.y*ws.y/os.y,s.z*ws.z/os.z];};
+    const ref=P.head||P.torso;if(!ref)return null;const rs=wsz(ref),res=opt.res||16;const st=Math.max(rs[0],rs[1],rs[2])/(P.head?res:res*0.75),maxC=opt.maxCells||30000;
+    const why={};const W_=k=>{why[k]=(why[k]||0)+1;};const list=[];obj.traverse(o=>{if(isPart(o)&&!o.isSkinnedMesh&&!o.isInstancedMesh&&!skip.has(o))list.push(o);});let parts_=0,tris=0;
+    for(const m of list){const ms=Array.isArray(m.material)?m.material:[m.material];if(ms.some(x=>!x||x.transparent||x.alphaTest>0||x.isMeshBasicMaterial||x.emissiveMap||x.isShaderMaterial||x.wireframe)){W_('mat');continue;}
+      const src=m.geometry.userData&&m.geometry.userData.src?m.geometry.userData.src:m.geometry;if(!src.attributes||!src.attributes.position||(src.attributes.position.count!==24&&!boxy(src))){W_('v'+(src.attributes&&src.attributes.position?src.attributes.position.count:0));continue;}
+      const w=wsz(m),n=w.map(v=>Math.max(1,Math.min(40,Math.round(Math.abs(v)/st))));if(Math.max(n[0],n[1],n[2])<3||n[0]*n[1]*n[2]>maxC){W_('size');continue;}
+      const key=src.uuid+'|'+ms.map(x=>x.uuid).join(',')+'|'+n.join('x')+'|'+(opt.jit!==undefined?opt.jit:'d')+(opt.carve===false?'n':'');let R=FVGEO.get(key);
+      if(R===undefined){R=fineGeo(src,m.material,n,opt);if(R)FVGEO.set(key,R);}if(!R){W_('geo');continue;}
+      // the fine shell is built in the source box's frame; bevelled copies are centred the same way
+      const fm=new THREE.Mesh(R.g,R.mat);fm.name='bdDetail';fm.userData.bd=1;fm.userData.fv=1;fm.castShadow=m.castShadow!==false;fm.receiveShadow=m.receiveShadow;m.add(fm);
+      let H=FVHID.get(m.geometry);if(!H){H=m.geometry.clone();H.setDrawRange(0,0);if(H.groups)H.groups.forEach(gr=>gr.count=0);H.userData.fvHidden=1;FVHID.set(m.geometry,H);}m.geometry=H;
+      parts_++;tris+=R.g.index.count/3;}
+    obj.userData.fv={parts:parts_,tris,step:st,why};return obj.userData.fv;}
+  return {apply,fine,parts,mats,box,version:2};
 })();
 if(typeof window!=='undefined')window.BlockDetail=BlockDetail;
 
@@ -20688,7 +21171,9 @@ function make(Q) {
     ex: 1, ez: (u, th) => { const z = 0.66 - 0.06 * sm(0.4, 0.55, u) + 0.04 * sm(0.55, 0.75, u); return Math.sin(th) > 0 ? z * (1 + 0.06 * sm(0.6, 0.8, u)) : z * 0.95; },
     disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th); // pecs, shoulder blades, shirt folds, glutes
       return 0.025 * sm(0.62, 0.72, u) * (1 - sm(0.8, 0.9, u)) * Math.max(0, s) * Math.pow(Math.abs(c) + 0.2, 0.6)
-        + 0.004 * Math.sin(th * 9 + u * 30) * sm(0.35, 0.45, u) + 0.05 * sm(0.04, 0.12, u) * (1 - sm(0.18, 0.28, u)) * Math.max(0, -s); },
+        + 0.004 * Math.sin(th * 9 + u * 30) * sm(0.35, 0.45, u) + 0.05 * sm(0.04, 0.12, u) * (1 - sm(0.18, 0.28, u)) * Math.max(0, -s)
+        + 0.006 * Math.sin(u * 160 + Math.sin(th * 3) * 2) * sm(0.3, 0.34, u) * (1 - sm(0.4, 0.46, u)) + 0.005 * Math.max(0, Math.sin(th * 13 + u * 18)) * sm(0.66, 0.76, u) * (1 - sm(0.84, 0.88, u)) * Math.pow(Math.abs(c), 3)
+        + 0.012 * Math.exp(-Math.pow((u - 0.905) / 0.012, 2)); },   // v5.9.3 waist tuck wrinkles, armpit drag folds, collar ridge
     col: (u, th, p) => { if (p.y < 1.005) return COL.pants; if (p.y < 1.02) return mix(COL.pants, COL.pantsD, 0.6); // belt line
       const fold = 0.12 * (0.5 + 0.5 * Math.sin(th * 9 + u * 30)) * sm(0.35, 0.45, u); return p.y > 1.49 ? COL.skin : mix(COL.shirt, COL.shirtD, fold + (p.y > 1.47 ? 0.4 : 0)); },
     w: (u, p) => { const y = p.y; if (y < 1.0) return [['hips', 1]]; if (y < 1.16) { const t = sm(1.0, 1.16, y); return [['hips', 1 - t], ['spine', t]]; }
@@ -20701,7 +21186,7 @@ function make(Q) {
   const headC = V3(0, 1.73, 0.012);
   const HPROF = [[0, 0], [0.04, 0.042], [0.12, 0.074], [0.25, 0.094], [0.42, 0.105], [0.58, 0.11], [0.72, 0.108], [0.85, 0.094], [0.94, 0.062], [1, 0]], HA = V3(0, 1.565, 0.025), HB = V3(0, 1.875, 0.0);
   const HEZ = (u, th) => (Math.sin(th) > 0 ? 1.1 + 0.05 * sm(0.0, 0.25, u) * (1 - sm(0.3, 0.45, u)) : 1.08 + 0.05 * sm(0.6, 0.9, u));
-  loft({ a: HA, b: HB, prof: HPROF, ns: 48, na: 56,
+  loft({ a: HA, b: HB, prof: HPROF, ns: 60, na: 72,
     ex: 1, ez: HEZ,
     disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th); // cheekbones, eye sockets, brow ridge
       return 0.03 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.5) / 0.08, 2)) * Math.pow(Math.abs(c), 2) - 0.035 * Math.max(0, s) * Math.exp(-Math.pow((u - 0.56) / 0.04, 2)) * Math.exp(-Math.pow((Math.abs(c) - 0.36) / 0.16, 2))
@@ -20711,12 +21196,12 @@ function make(Q) {
       return mix(mix(COL.skin, COL.skinD, 0.15 * (1 - s)), COL.stub, Math.min(0.85, st + mus)); },
     w: () => [['head', 1]] });
   // ---- hair: a second loft over the head profile; pushed out where there is hair, tucked inside elsewhere; sculpted clumps
-  loft({ a: HA.clone().add(V3(0, 0.0, 0)), b: HB.clone().add(V3(0, 0.012, -0.004)), prof: HPROF, ns: 48, na: 72, ex: 1, ez: HEZ,
+  loft({ a: HA.clone().add(V3(0, 0.0, 0)), b: HB.clone().add(V3(0, 0.012, -0.004)), prof: HPROF, ns: 64, na: 104, ex: 1, ez: HEZ,
     disp: (u, th) => { const s = Math.sin(th), c = Math.cos(th), y = 1.565 + u * 0.31;
       const hl = s > 0.35 ? 1.79 - 0.012 * Math.abs(c) : s > -0.3 ? 1.745 + (Math.abs(c) > 0.85 ? 0.012 : 0.03) * (s > -0.1 ? 1 : 0.4) : 1.66 + 0.06 * (s + 0.3);
-      const has = sm(hl - 0.004, hl + 0.008, y), clump = 0.05 * Math.sin(th * 14 + u * 20) * Math.sin(u * 40 + th * 3) + 0.03 * Math.sin(th * 31 + u * 57);
+      const has = sm(hl - 0.004, hl + 0.008, y), clump = 0.05 * Math.sin(th * 14 + u * 20) * Math.sin(u * 40 + th * 3) + 0.03 * Math.sin(th * 31 + u * 57) + 0.014 * Math.sin(th * 61 + u * 23) + 0.008 * Math.sin(th * 97 - u * 41);
       return has * (0.09 + clump * 0.5 + 0.04 * sm(0.75, 0.9, u)) - (1 - has) * 0.05; },
-    col: (u, th) => { const sh = 0.75 + 0.5 * (0.5 + 0.5 * Math.sin(th * 14 + u * 20)); return [COL.hair[0] * sh, COL.hair[1] * sh, COL.hair[2] * sh]; }, w: () => [['head', 1]] });
+    col: (u, th) => { const sh = 0.7 + 0.42 * (0.5 + 0.5 * Math.sin(th * 14 + u * 20)) + 0.14 * Math.sin(th * 61 + u * 23); return [COL.hair[0] * sh, COL.hair[1] * sh, COL.hair[2] * sh]; }, w: () => [['head', 1]] });
   // ---- arms: shoulder → wrist, short cyan sleeve, smooth elbow
   function arm(sd) { const S = sd > 0 ? 'L' : 'R', a = J('arm' + S).clone().add(V3(-0.03 * sd, 0.0, 0)), e = J('fore' + S), w = J('hand' + S);
     const Lu = a.distanceTo(e), Lf = e.distanceTo(w), L = Lu + Lf, ue = Lu / L;
@@ -20728,12 +21213,21 @@ function make(Q) {
       w: (u, p) => { const sh = 1 - sm(0.0, 0.12, u), t = sm(ue - 0.05, ue + 0.05, u), h = sm(0.95, 1.0, u); return [['chest', sh * 0.45], ['arm' + S, (1 - sh * 0.45) * (1 - t)], ['fore' + S, t * (1 - h)], ['hand' + S, h]]; } }); }
   arm(1); arm(-1);
   // ---- hands: a soft fist (palm block + knuckle roll + thumb)
-  function hand(sd) { const S = sd > 0 ? 'L' : 'R', w = J('hand' + S), dir = w.clone().sub(J('fore' + S)).normalize(), end = w.clone().add(dir.clone().multiplyScalar(0.095));
+  function hand(sd) { const S = sd > 0 ? 'L' : 'R', w = J('hand' + S), dir = w.clone().sub(J('fore' + S)).normalize(), end = w.clone().add(dir.clone().multiplyScalar(0.082));
     loft({ a: w.clone().sub(dir.clone().multiplyScalar(0.012)), b: end, side: V3(sd, 0, 0), ns: 24, na: 28, prof: [[0, 0.028], [0.3, 0.042], [0.65, 0.047], [0.85, 0.04], [1, 0.02]],
       ex: 0.75, ez: 1.08, disp: (u, th) => 0.06 * sm(0.55, 0.8, u) * Math.max(0, Math.cos(th * 4 + 0.6)) * Math.max(0, Math.sin(th)) * 0.5,
       col: (u, th) => mix(COL.skin, COL.skinD, 0.2 * sm(0.6, 0.95, u)), w: () => [['hand' + S, 1]] });
     const tb = w.clone().add(dir.clone().multiplyScalar(0.035)).add(V3(0, 0, 0.035));
-    loft({ a: tb, b: tb.clone().add(dir.clone().multiplyScalar(0.035)).add(V3(-0.018 * sd, 0, 0.012)), ns: 12, na: 16, prof: [[0, 0.016], [0.5, 0.015], [1, 0.011]], col: () => COL.skin, w: () => [['hand' + S, 1]] }); }
+    const t1 = tb.clone().add(dir.clone().multiplyScalar(0.03)).add(V3(-0.014 * sd, 0, 0.014));
+    loft({ a: tb, b: t1, ns: 12, na: 16, prof: [[0, 0.016], [0.5, 0.0155], [1, 0.0135]], col: () => COL.skin, w: () => [['hand' + S, 1]] });
+    loft({ a: t1, b: t1.clone().add(dir.clone().multiplyScalar(0.012)).add(V3(-0.02 * sd, 0, -0.004)), ns: 10, na: 14, prof: [[0, 0.0135], [0.6, 0.012], [1, 0.006]], col: (u) => mix(COL.skin, [0.86, 0.66, 0.58], sm(0.6, 1, u) * 0.5), w: () => [['hand' + S, 1]] });
+    // v5.9.3 fingers: four curled fingers (proximal + distal phalanx), knuckle ridge, nail tint on the tips
+    const inw = V3(-sd, 0, 0);
+    [[-0.026, 0.0092, 0.9], [-0.009, 0.0102, 1], [0.008, 0.0104, 1.04], [0.024, 0.0098, 0.96]].forEach(([dz, r, l]) => {
+      const k = w.clone().add(dir.clone().multiplyScalar(0.07)).add(V3(0.006 * sd, 0, dz)), m = k.clone().add(dir.clone().multiplyScalar(0.03 * l)).add(inw.clone().multiplyScalar(0.012));
+      const tip = m.clone().add(inw.clone().multiplyScalar(0.028 * l)).add(dir.clone().multiplyScalar(-0.012));
+      loft({ a: k, b: m, ns: 10, na: 14, prof: [[0, r * 1.08], [0.3, r * 1.15], [0.7, r], [1, r * 0.95]], col: (u) => mix(COL.skin, COL.skinD, 0.25 * Math.exp(-Math.pow((u - 0.12) / 0.1, 2))), w: () => [['hand' + S, 1]] });
+      loft({ a: m.clone().add(dir.clone().multiplyScalar(-0.002)), b: tip, ns: 10, na: 14, prof: [[0, r * 0.98], [0.5, r * 0.92], [0.85, r * 0.8], [1, r * 0.4]], col: (u, th) => u > 0.62 && Math.cos(th) * sd < -0.3 ? [0.88, 0.7, 0.62] : mix(COL.skin, COL.skinD, 0.2 * Math.exp(-Math.pow(u / 0.12, 2))), w: () => [['hand' + S, 1]] }); }); }
   hand(1); hand(-1);
   // ---- legs: hip → ankle, pants, knee, slight hem
   function leg(sd) { const S = sd > 0 ? 'L' : 'R', a = J('thigh' + S).clone().add(V3(-0.004 * sd, 0.04, 0)), k = J('shin' + S), f = J('foot' + S);
@@ -20741,14 +21235,14 @@ function make(Q) {
     loft({ a, b: f.clone().add(V3(0, -0.02, 0)), side: V3(1, 0, 0), ns: 64, na: 36,
       prof: [[0, 0.075], [0.08, 0.09], [0.2, 0.086], [0.35, 0.075], [uk - 0.03, 0.062], [uk, 0.061], [uk + 0.05, 0.062], [uk + 0.15, 0.066], [0.85, 0.052], [0.95, 0.054], [1, 0.05]],
       ez: (u, th) => (Math.sin(th) < 0 && u > uk && u < 0.85 ? 1.08 : 0.95),
-      disp: (u, th) => 0.012 * Math.sin(th * 7 + u * 22) * sm(uk - 0.04, uk, u) * (1 - sm(uk + 0.02, uk + 0.06, u)) + 0.006 * Math.sin(th * 3 + u * 12),
-      col: (u, th) => mix(COL.pants, COL.pantsD, 0.25 * (0.5 + 0.5 * Math.sin(th * 7 + u * 22)) * sm(uk - 0.06, uk, u) * (1 - sm(uk + 0.02, uk + 0.08, u)) + (u > 0.95 ? 0.3 : 0)),
+      disp: (u, th) => 0.012 * Math.sin(th * 7 + u * 22) * sm(uk - 0.04, uk, u) * (1 - sm(uk + 0.02, uk + 0.06, u)) + 0.006 * Math.sin(th * 3 + u * 12) + 0.004 * Math.sin(u * 140 + th * 2) * sm(0.86, 0.9, u) + (Math.abs(Math.cos(th)) > 0.985 ? 0.012 : 0),
+      col: (u, th) => mix(COL.pants, COL.pantsD, (Math.abs(Math.cos(th)) > 0.985 ? 0.55 : 0) + (u < 0.14 && Math.sin(th) > 0.4 && Math.abs(Math.abs(Math.cos(th)) - 0.55 + u * 1.2) < 0.03 ? 0.6 : 0) + 0.25 * (0.5 + 0.5 * Math.sin(th * 7 + u * 22)) * sm(uk - 0.06, uk, u) * (1 - sm(uk + 0.02, uk + 0.08, u)) + (u > 0.95 ? 0.3 : 0)),
       w: (u, p) => { const hp = 1 - sm(0.0, 0.14, u), t = sm(uk - 0.05, uk + 0.05, u); return [['hips', hp * 0.6], ['thigh' + S, (1 - hp * 0.6) * (1 - t)], ['shin' + S, t]]; } });
     // shoe: heel → toe
     const hb = f.clone().add(V3(0, -0.035, -0.06)), toe = V3(f.x + 0.008 * sd, 0.035, 0.17);
     loft({ a: hb, b: toe, side: V3(0, 1, 0), ns: 28, na: 32, prof: [[0, 0.045], [0.12, 0.058], [0.45, 0.056], [0.75, 0.054], [0.92, 0.043], [1, 0.02]], ex: 0.78, ez: 1.15,
       warp: (p, u) => { if (p.y < 0.008) p.y = 0.008 + (p.y - 0.008) * 0.15; },
-      col: (u, th, p) => p.y < 0.03 ? COL.sole : mix(COL.shoe, COL.sole, 0.15 * Math.max(0, Math.sin(th * 2))), w: (u) => { const t = sm(0.0, 0.25, u); return [['shin' + S, (1 - t) * 0.4], ['foot' + S, 1 - (1 - t) * 0.4]]; } }); }
+      col: (u, th, p) => p.y < 0.03 ? COL.sole : (Math.sin(th) * sd > -2 && Math.cos(th) > 0.72 && u > 0.35 && u < 0.72 && Math.sin(u * 70) > 0.4) ? [0.82, 0.82, 0.8] : (Math.abs(u - 0.78) < 0.012 ? COL.sole : mix(COL.shoe, COL.sole, 0.15 * Math.max(0, Math.sin(th * 2)))), w: (u) => { const t = sm(0.0, 0.25, u); return [['shin' + S, (1 - t) * 0.4], ['foot' + S, 1 - (1 - t) * 0.4]]; } }); }
   leg(1); leg(-1);
   // ---------------- assemble
   function build() {
@@ -20783,6 +21277,11 @@ function make(Q) {
       const br = add(new T.Mesh(bg, brow), ex, 1.766, 0.121); br.rotation.set(0.2, -0.25 * sd, 0.12 * sd); br.scale.set(1, 1, 0.7);
       // ear
       const ear = add(new T.Mesh(SG(0.026, 24, 16), skinM), 0.108 * sd, 1.72, -0.005); ear.scale.set(0.35, 1.05, 0.7);
+      // v5.9.3 lower lid, lash line, inner ear bowl
+      const lo = add(new T.Mesh(SG(0.0198, 24, 8, 0, Math.PI * 2, Math.PI * 0.62, Math.PI * 0.3), skinM), ex, ey, ez); lo.rotation.x = 0.35;
+      const lash = add(new T.Mesh(new T.TorusGeometry(0.0196, 0.0016, 6, 24, Math.PI), brow), ex, ey + 0.0015, ez + 0.002); lash.rotation.set(-0.62 + Math.PI / 2 - 0.25, 0, 0); lash.rotation.order = 'YXZ'; lash.scale.set(1, 1, 0.85);
+      const ie = add(new T.Mesh(SG(0.014, 16, 10), phys([0.62, 0.42, 0.33], 0.7)), 0.111 * sd, 1.72, -0.002); ie.scale.set(0.2, 0.75, 0.45);
+      add(new T.Mesh(SG(0.0042, 10, 8), phys([0.2, 0.1, 0.08], 0.9)), 0.0075 * sd, 1.687, 0.128).scale.set(1.2, 0.7, 0.8);
     });
     // nose: small loft-ish (sphere + bridge)
     const nb = add(new T.Mesh(new T.CylinderGeometry(0.008, 0.012, 0.045, 16), skinM), 0, 1.714, 0.12); nb.rotation.x = -0.35;
@@ -20820,7 +21319,7 @@ function make(Q) {
   // every per-character table falls back to Steve's entry (same moveset, strings, personality, win/lose lists)
   [typeof XP!=='undefined'&&XP.ID,typeof XP!=='undefined'&&XP.WINS,typeof LEGO_CHARS!=='undefined'&&LEGO_CHARS,typeof DP_STR!=='undefined'&&DP_STR,typeof SD!=='undefined'&&SD].forEach(T_=>{if(T_&&T_.steve&&!T_.rsteve)T_.rsteve=T_.steve;});
 })();
-const RSQ=()=>{const l=(typeof GQ!=='undefined'&&GQ.level)||'high';return l==='ultra'?1:l==='high'?0.75:l==='mid'?0.5:0.4;};
+const RSQ=()=>{const l=(typeof GQ!=='undefined'&&GQ.level)||'high';return l==='ultra'?1.5:l==='high'?1.15:l==='mid'?0.7:0.45;};  // v5.9.3 finer mesh LOD (was 1/0.75/0.5/0.4)
 // retarget map: blocky rig joint → real bone, matched by side (world x sign at rest) so L/R never swap
 function rsAttach(V,def){
   const R=RealSteveLib.make(RSQ()).build(),mesh=R.mesh;
@@ -21088,10 +21587,18 @@ function simFrame(){
   if(M.phase==='ko'){M.pf++;const V=a.koed?a:b;if(M.pf>=FEEL.koSlowF+40||(V.grounded&&V.st==='down'&&M.pf>FEEL.koSlowF)){G.camFocus=null;const w=a.koed?1:0;if(!(G.wins[w]>=1&&DP.replayStart(w)))endRound(w);}}
   if(M.phase==='roundEnd'){M.pf++;if(M.pf===30&&M.rw>=0)UI.banner(G.f[M.rw].def.name+' 승리!','win');if(M.pf===30&&M.rw<0)UI.banner('무승부','win');if(typeof WL!=='undefined')WL.tick(G,M);if(M.pf>=(M.reLen||150)){if(typeof WL!=='undefined')WL.clear(G);afterRound();}}
 }
+// v5.9.3: ground-penetration guard — lowest visible part (bbox corners; skinned meshes use bone positions) after the pose; lift the root so nothing sinks below the floor
+const FV_C=[0,0,0,0,0,0,0,0].map(()=>new THREE.Vector3()),FV_W=new THREE.Vector3();
+function fvMinY(V){V.root.updateMatrixWorld(true);if(!V.flList){const L=[];V.root.traverse(o=>{if(!o.isMesh||!o.geometry||o.userData.crOL||o.isInstancedMesh)return;const mm=Array.isArray(o.material)?o.material[0]:o.material;if(mm&&(mm.transparent&&mm.opacity<0.6||mm.blending===THREE.AdditiveBlending))return;if(o===V.shadow)return;L.push(o);});V.flList=L;}
+  let mn=Infinity;for(const o of V.flList){let p=o,vis=true;while(p&&p!==V.root){if(p.visible===false){vis=false;break;}p=p.parent;}if(!vis)continue;
+    if(o.isSkinnedMesh&&o.skeleton){for(const b of o.skeleton.bones){b.getWorldPosition(FV_W);if(FV_W.y<mn)mn=FV_W.y;}continue;}
+    const g=o.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;if(!b||b.isEmpty())continue;let k=0;for(let i=0;i<8;i++){FV_C[i].set(i&1?b.max.x:b.min.x,i&2?b.max.y:b.min.y,i&4?b.max.z:b.min.z).applyMatrix4(o.matrixWorld);if(FV_C[i].y<mn)mn=FV_C[i].y;}}
+  return mn;}
 function syncViews(t){
   G.f.forEach(F=>{const V=F.V;let jx=0;if(G.hs>0&&V.hitShake){jx=(Math.random()-0.5)*0.12;}
     V.root.position.set(F.x+jx,F.y,F.z||0);V.root.visible=!F.cineHide;V.shadow.visible=!F.cineHide;V.shadow.position.set(F.x,(F.onPlat?F.y:0)+0.02,F.z||0);const sc=Math.max(0.3,1-F.y*0.15);V.shadow.scale.setScalar(sc*F.big);
     applyPose(V,DP.pose(F,poseFor(F,t)),F.face);
+    if(!F.cineHide&&!F.noFloor&&window.__nofloor!==1){const fl=(F.onPlat||F.grounded)?F.y:Math.min(F.y,0);const mn=fvMinY(V);if(mn<fl-0.004){V.root.position.y+=fl-mn;V.root.updateMatrixWorld(true);V.floorLift=fl-mn;}else V.floorLift=0;}
     if(F.flash>0)flashV(V,F.flash/FEEL.flashF,{r:1,g:1,b:1});else if(F.inv>0&&F.st==='getup')flashV(V,(G.frame%8<4)?0.25:0,{r:1,g:1,b:1});else if(F.meter>=100)flashV(V,0.18+Math.sin(t*10)*0.12,LINc(F.def.col));else if(F.rage===1)flashV(V,0.14+Math.sin(t*9)*0.07,{r:1,g:0.12,b:0.08});else flashV(V,0);
     if(G.hs>0)V.hitShake=0;});
   DP.trTick();
@@ -21262,9 +21769,39 @@ const BFCeremony=(()=>{
   const easeOut=x=>1-Math.pow(1-clamp(x,0,1),3);
   function cleanup(){if(!S)return;try{if(S.grp&&S.grp.parent)S.grp.parent.remove(S.grp);S.grp&&S.grp.traverse(o=>{if(o.geometry&&o.geometry.dispose&&o.userData.bfOwn)o.geometry.dispose();});}catch(e){}
     try{UI.el.bfCer.classList.remove('show','arrive');}catch(e){}S=null;}
+  const TSC=2.1;
+  // world-space bbox of a fighter view, expressed in truck-local units
+  const _bb=new THREE.Box3(),_iv=new THREE.Matrix4(),_v=new THREE.Vector3();
+  function bedBox(V,tr){_bb.makeEmpty();_iv.copy(tr.matrixWorld).invert();V.root.updateMatrixWorld(true);V.root.traverse(o=>{if(!o.isMesh||!o.visible||!o.geometry||o.userData.crOL)return;let p=o.parent,vis=true;while(p&&p!==V.root){if(p.visible===false){vis=false;break;}p=p.parent;}if(!vis)return;
+      if(o.isSkinnedMesh&&o.skeleton){o.skeleton.bones.forEach(b=>{b.getWorldPosition(_v).applyMatrix4(_iv);_bb.expandByPoint(_v);});return;}
+      const g=o.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;if(!b||b.isEmpty())return;for(let i=0;i<8;i++){_v.set(i&1?b.max.x:b.min.x,i&2?b.max.y:b.min.y,i&4?b.max.z:b.min.z).applyMatrix4(o.matrixWorld).applyMatrix4(_iv);_bb.expandByPoint(_v);}});
+    return _bb;}
+  // hide the stainless tonneau cover behind the cab, add a bed floor / liner walls / bulkhead / rolled-up cover canister
+  function openBed(tr,u){const P=u.prof||{},Wd=P.Wd||1.22,tail=(P.tail||[-1.5,0.74]),apex=(P.peak||[0.46,1.0]);
+    const x0=tail[0]+0.05,x1=-0.5,fy=0.56,hw=Wd/2-0.035;const roofY=x=>apex[1]+(x-apex[0])*(tail[1]-apex[1])/(tail[0]-apex[0]);
+    const body=u.body||tr;body.updateMatrixWorld(true);const kill=[];
+    body.children.forEach(m=>{if(!m.isMesh||!m.geometry)return;const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;if(b.max.z-b.min.z>Wd*0.9&&b.min.y>tail[1]-0.03&&b.min.x<tail[0]+0.1&&b.max.x>x1&&!(m.material&&m.material.transparent))kill.push(m);});
+    kill.forEach(m=>{m.visible=false;});
+    const steelM=kill[0]&&kill[0].material;
+    const liner=new THREE.MeshStandardMaterial({color:LINc(0x2c2e33),roughness:0.85,metalness:0.1,side:THREE.DoubleSide});
+    const grp=new THREE.Group();grp.name='cerBed';body.add(grp);
+    const box=(w,h,d,x,y,z,m)=>{const g=new THREE.BoxGeometry(w,h,d);g.userData.bfOwn=1;const o=new THREE.Mesh(g,m||liner);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;grp.add(o);return o;};
+    const lx=x1-x0,cx=(x0+x1)/2;
+    box(lx,0.04,hw*2,cx,fy-0.02,0);                                                        // bed floor
+    for(let i=0;i<5;i++)box(lx*0.96,0.012,0.03,cx,fy+0.006,-hw*0.8+i*hw*0.4,new THREE.MeshStandardMaterial({color:LINc(0x3a3c42),roughness:0.7}));   // floor ribs
+    {const lh=tail[1]-fy-0.01;[1,-1].forEach(s=>{box(lx,lh,0.02,cx,fy+lh/2,s*hw,null);});}                          // side liners (inside the stainless sides)
+    const bh=roofY(x1)-fy;box(0.03,bh,hw*2,x1+0.015,fy+bh/2,0,null);                        // cab bulkhead
+    box(0.03,tail[1]-fy-0.02,hw*2,x0-0.015,(fy+tail[1]-0.02)/2,0,null);                     // tailgate inner face
+    // cab roof stub (the cover now ends at the canister) + rolled-up canister
+    const ry=roofY(x1);const st=steelM||new THREE.MeshStandardMaterial({color:LINc(0xd6d8db),metalness:0.9,roughness:0.35});
+    const rp=box(0.55,0.012,Wd,x1+0.27,roofY(x1+0.27)-0.004,0,st);rp.rotation.z=Math.atan2(tail[1]-apex[1],tail[0]-apex[0])+Math.PI;
+    const cg=new THREE.CylinderGeometry(0.05,0.05,Wd*0.96,16);cg.rotateX(Math.PI/2);cg.userData.bfOwn=1;const can=new THREE.Mesh(cg,st);can.position.set(x1-0.04,ry-0.04,0);grp.add(can);
+    // rails along the top of the sides
+    [1,-1].forEach(s=>{const rl=box(lx,0.02,0.05,cx,roofY(cx)-0.01,s*(Wd/2-0.02),st);rl.rotation.z=Math.atan2(tail[1]-apex[1],tail[0]-apex[0])+Math.PI;});
+    return {x0,x1,cx,fy,lx,lz:hw*2,grp};}
   function run(F,done){
     cleanup();if(!G.scene||!K||!K.makeCybertruck){done&&done();return;}
-    M.phase='ceremony';G.locked=true;
+    M.phase='ceremony';G.locked=true;try{if(typeof VF!=='undefined'&&VF.introEnd)VF.introEnd();}catch(e){}
     const grp=new THREE.Group();G.scene.add(grp);
     G.f.forEach(f=>{f.V.root.visible=false;if(f.V.shadow)f.V.shadow.visible=false;});G.clearProj&&G.clearProj();G.FX&&G.FX.clear&&G.FX.clear();
     // truck
@@ -21273,10 +21810,15 @@ const BFCeremony=(()=>{
     tr.scale.setScalar(TS);tr.position.set(-24,0,0);tr.traverse(o=>{if(o.isMesh){o.castShadow=true;}});grp.add(tr);
     // light-bar glow sprites along the nose LED
     const glows=[];if(K.glowSprite){for(let i=0;i<3;i++){const s=K.glowSprite(LINc(i===1?0xffffff:0xd8e8ff),1.6);s.material.opacity=0.0;s.material.fog=false;s.position.set(1.56,0.58,(i-1)*0.4);s.scale.set(0.9,0.22,1);tr.add(s);glows.push(s);}}
-    // winner leaning out of the side window, waving
-    const def=F.def,V=makeFighterView(def);const H=def.H||1.8;const wh=Math.min(1.35,H*1.0);
-    V.root.scale.setScalar(wh/H/TS);V.root.position.set(0.3,0.42,(u.prof&&u.prof.Wd?u.prof.Wd/2:0.61)-0.08);V.root.rotation.x=0.5;
+    // v5.9.3: open the tonneau (retracted into a canister behind the cab) and stand the winner on the bed floor
+    const BED=openBed(tr,u);
+    const def=F.def,V=makeFighterView(def);const H=def.H||1.8;let wh=Math.min(1.55,H*1.0);
+    V.root.scale.setScalar(wh/H/TS);V.root.position.set(BED.cx,BED.fy,0);V.root.rotation.y=-0.35;
     if(V.shadow)V.shadow.visible=false;tr.add(V.root);
+    // fit the footprint inside the bed walls (big / wide characters shrink a little)
+    {const wf0={st:'win',fr:0,side:0,def};for(let j=0;j<8;j++)applyPose(V,poseFor(wf0,0.3),1);V.pivot.rotation.y=0;tr.updateMatrixWorld(true);
+     const bb=bedBox(V,tr);const sx=(bb.max.x-bb.min.x),sz=(bb.max.z-bb.min.z);const f=Math.min(1,BED.lx*0.92/Math.max(1e-3,sx),BED.lz*0.9/Math.max(1e-3,sz));
+     if(f<1){V.root.scale.multiplyScalar(f);}}
     // confetti
     const N=GQ.n?GQ.n(260):200;const cg=new THREE.PlaneGeometry(0.12,0.07);cg.userData.bfOwn=1;
     const cm=new THREE.MeshBasicMaterial({side:THREE.DoubleSide,toneMapped:false,fog:false});
@@ -21284,7 +21826,7 @@ const BFCeremony=(()=>{
     const cols=[0xff4d6d,0xffd166,0x06d6a0,0x4cc9f0,0xb5179e,0xffffff,0xf77f00].map(c=>LINc(c));
     const P=[];for(let i=0;i<N;i++){P.push({x:R(-7,7),y:R(6,14),z:R(-3,5),vx:R(-0.4,0.4),vy:R(-1.6,-0.7),rx:R(0,TAU),ry:R(0,TAU),sx:R(-6,6),sy:R(-6,6)});conf.setColorAt(i,cols[i%cols.length]);}
     if(conf.instanceColor)conf.instanceColor.needsUpdate=true;
-    S={F,done,grp,tr,u,V,glows,conf,P,t:0,phase:0,fin:false,dm:new THREE.Object3D(),wf:{st:'win',fr:0,side:0,def},cam0:G.cam.position.clone()};
+    S={F,done,grp,tr,u,V,bed:BED,glows,conf,P,t:0,phase:0,fin:false,dm:new THREE.Object3D(),wf:{st:'win',fr:0,side:0,def},cam0:G.cam.position.clone()};
     UI.show('cer');const E=UI.el.bfCer;E.querySelector('.cer-win').innerHTML=`<b>${def.name}</b> 우승!`+(M.mode==='arcade'?' · 아케이드 클리어':'');
     E.classList.remove('show','arrive');snd('wind');
   }
@@ -21300,19 +21842,24 @@ const BFCeremony=(()=>{
     // LED light bar pulse
     const glow=0.55+0.35*Math.sin(T*6);S.glows.forEach((g,i)=>{g.material.opacity=glow*(i===1?1:0.7);});if(u.fGlow&&u.fGlow.material)u.fGlow.material.opacity=0.45+0.4*glow;
     // winner wave (lean out a bit more once parked)
-    S.wf.fr++;applyPose(S.V,poseFor(S.wf,T),1);S.V.pivot.rotation.y=0;S.V.root.rotation.x=lerp(S.V.root.rotation.x,S.phase?0.55+Math.sin(T*3)*0.05:0.35,0.1);
+    S.wf.fr++;applyPose(S.V,poseFor(S.wf,T),1);S.V.pivot.rotation.y=0;S.V.root.position.y=S.bed.fy;tr.updateMatrixWorld(true);{const bb=bedBox(S.V,tr);if(bb.min.y<S.bed.fy)S.V.root.position.y+=S.bed.fy-bb.min.y;const cx=(bb.min.x+bb.max.x)/2-S.V.root.position.x;S.V.root.position.x=clamp(S.bed.cx,S.bed.x0-bb.min.x+S.V.root.position.x+0.02,S.bed.x1-bb.max.x+S.V.root.position.x-0.02);}
     // confetti
     if(S.phase){const c=S.conf,d=S.dm;S.P.forEach((p,i)=>{p.x+=(p.vx+Math.sin(T*2+i)*0.5)*dt;p.y+=p.vy*dt;p.rx+=p.sx*dt;p.ry+=p.sy*dt;if(p.y<-0.2){p.y=R(8,12);p.x=R(-7,7);}
       d.position.set(p.x,p.y,p.z);d.rotation.set(p.rx,p.ry,0);d.updateMatrix();c.setMatrixAt(i,d.matrix);});c.instanceMatrix.needsUpdate=true;}
     // camera: follow in, then orbit from the side (+z) toward the front (+x)
-    const cam=G.cam;let a,rad,cy;if(S.phase===0){a=-0.15;rad=13;cy=2.8;}else{const q=T-S.tArr;a=-0.15+0.95*(1-Math.exp(-q*0.45))+Math.sin(q*0.5)*0.05;rad=lerp(13,11.2,Math.min(1,q/2));cy=2.6+Math.sin(q*0.6)*0.3;}
-    const tx=S.phase?0:x*0.6;cam.position.set(tx+Math.sin(a)*rad,cy,Math.cos(a)*rad);cam.lookAt(tx,1.7,0);
+    // v5.9.3 camera: follow in, then swing to a raised rear-quarter view looking into the open bed
+    const cam=G.cam,asp=cam.aspect||1.6,pf=asp<1?Math.min(1.75,1.05/asp):1;let a,rad,cy,tx,ty;
+    const bx=tr.position.x+S.bed.cx*TSC,by=(S.bed.fy+0.42)*TSC;
+    if(S.phase===0){a=-0.15;rad=13*Math.min(pf,1.3);cy=2.8;tx=x*0.6;ty=1.7;}
+    else{const q=T-S.tArr,e=1-Math.exp(-q*0.9);a=lerp(-0.15,-0.62,e)+Math.sin(q*0.5)*0.04;rad=lerp(13,6.4*pf,Math.min(1,e*1.1));cy=lerp(2.8,3.7,e)+Math.sin(q*0.6)*0.15;tx=lerp(0,bx,e);ty=lerp(1.7,by,e);}
+    cam.position.set(tx+Math.sin(a)*rad,cy,Math.cos(a)*rad);cam.lookAt(tx,ty,0);if(S.phase&&typeof VF!=='undefined'&&VF){VF.ko=null;VF.dofTo=0;VF.focus=rad;}
     if(S.phase&&T-S.tArr>7.4&&!S.fin)finish();
   }
   function finish(){if(!S||S.fin)return;S.fin=true;const d=S.done;UI.el.bfCer.classList.remove('show');d&&d();}
   function skip(){if(!S)return;if(S.phase===0){S.t=2.6;update(0,0);}finish();}
   function abort(){AU.truck(false);cleanup();}
-  return {run,update,skip,abort,get alive(){return !!S;},get phase(){return S?S.phase:-1;},get tArr(){return S&&S.phase?S.t-S.tArr:-1;}};
+  function dbg(){if(!S)return null;const b=bedBox(S.V,S.tr),B=S.bed;return {pen:+(B.fy-b.min.y).toFixed(3),fx:+(B.x0-b.min.x).toFixed(3),bx:+(b.max.x-B.x1).toFixed(3),sz:+(b.max.z-b.min.z-B.lz).toFixed(3),h:+(b.max.y-b.min.y).toFixed(2),sc:+S.V.root.scale.x.toFixed(3)};}
+  return {run,update,skip,abort,dbg,get alive(){return !!S;},get phase(){return S?S.phase:-1;},get tArr(){return S&&S.phase?S.t-S.tArr:-1;}};
 })();
 
 // ---------------------------------------------------------------- boot / launcher integration ----------------------------------------------------------------
@@ -21346,7 +21893,7 @@ function boot(){
   D.addEventListener('visibilitychange',()=>{if(D.hidden&&BF.on&&M.running&&M.mode!=='demo'&&M.phase==='fight'&&!M.paused)UI.togglePause(true);});
 }
 window.BlockFighter={BF,UI,M,G,ROSTER,ARENAS,FEEL,CINE,DP,MV,SUP,XP,WL,CAMF,ceremony:BFCeremony,
-  _test:{vDown,vUp,startMatch,stopMatch,RBY,makeFighterView,applyPose,poseFor}};
+  _test:{vDown,vUp,startMatch,stopMatch,RBY,makeFighterView,applyPose,poseFor,syncViews,fvMinY,MV:typeof MV!=="undefined"?MV:null,SUPMV:typeof SUPMV!=="undefined"?SUPMV:null}};
 if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 
