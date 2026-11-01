@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.9.2">
+<meta name="ba-version" content="v5.9.2.1">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -8193,6 +8193,61 @@ const BlockAction = (() => {
       T.BR = bars; T.nb = bars.length;
       T.D = DR[T.drums || 'none']; T.Pc = PERC[T.perc || ''];
     }
+    /* MUS24 tunes: per-world variants, boss/pre-boss, results/game-over loops, Block Fighter themes (keyed by name, not stage index) */
+    { const V = (b, o) => Object.assign({}, TR[b], o);
+      Object.assign(TR, {
+        golem: { bpm: 156, key: 38, mode: 'hmin', sw: 0, lead: ['brass', 'sq'], harm: 'brass', bass: 'drive', comp: ['stab'], drums: 'gallop', perc: 'wood', rev: 0.2, hits: 1, form: 'AB',
+          A: { ch: ['0m', '0m', '10M', '10M', '8M', '8M', '7M', '7M7'], seq: 0,
+            h: '1 . 1+1 5 . 4 3 2 1 . 1+1 5 . 6 5 .', h2: '8 . 8+8 7 . 6 5 4 3 . 3+4 5 . 2 7_ .', c: '4 . 4+4 3 . 2 1 7_ 5_ . 7_ 2 4 . 7 .' },
+          B: { ch: ['5m', '5m', '3M', '3M', '8M', '10M', '7M', '7M7'], seq: 0,
+            h: '4 . 4 5 6 . 5 4 3 . 3 4 5 . 3 1', h2: '6 . 6 7 8 . 7 6 5 . 6 7 8 - 7 .', c: '2 . 2 3 4 . 5 6 7 - 5 - 7_ - 2 .' } },
+        crayonpre: V('crayonboss', { bpm: 138, lead: ['sq', 'mar'], harm: 'mar', bass: 'walk', comp: ['skank'], drums: 'shuf', perc: 'bongo', hits: 0, rev: 0.26 }),
+        bookpre: V('bookboss', { bpm: 122, lead: ['whis', 'bell'], harm: 'bell', bass: 'walk', comp: ['pad'], drums: 'swing', perc: '', hits: 0, sw: 0.6, rev: 0.34, dly: 0.22 }),
+        space3: V('spaceboss', { bpm: 140, lead: ['bell', 'mar'], harm: 'bell', bass: 'pump', comp: ['arp'], drums: 'pop', perc: 'shak', hits: 0, rev: 0.3, dly: 0.2 }),
+        map_nether: V('nwaste', { bpm: 116, lead: ['mar', 'bell'], harm: 'bell', bass: 'walk', comp: ['skank'], drums: 'shuf', perc: 'bongo', hits: 0, rev: 0.28 }),
+        map_crayon: V('crayon1', { bpm: 120, lead: ['mar', 'bell'], harm: 'mar', bass: 'walk', comp: ['skank'], drums: 'shuf', perc: 'bongo', hits: 0, sw: 0.6 }),
+        map_space: V('space1', { bpm: 122, lead: ['bell', 'whis'], harm: 'bell', bass: 'walk', comp: ['arp'], drums: 'soft', perc: 'shak', hits: 0, rev: 0.36, dly: 0.25 }),
+        map_book: V('book1', { bpm: 116, lead: ['mar', 'whis'], harm: 'pluck', bass: 'walk', comp: ['skank'], drums: 'shuf', perc: 'bongo', hits: 0, sw: 0.6 }),
+        story_nether: V('nforest', { bpm: 102, half: 1, lead: ['whis', 'bell'], harm: 'bell', bass: 'oom', comp: ['pad'], drums: 'soft', perc: '', hits: 0, rev: 0.4, dly: 0.25 }),
+        story_crayon: V('crayon2', { bpm: 104, half: 1, lead: ['bell', 'mar'], harm: 'pluck', bass: 'oom', comp: ['pad'], drums: 'soft', perc: '', hits: 0, rev: 0.34 }),
+        story_space: V('space1', { bpm: 100, half: 1, lead: ['bell', 'whis'], harm: 'bell', bass: 'oom', comp: ['pad', 'arp'], drums: 'soft', perc: '', hits: 0, rev: 0.42, dly: 0.32 }),
+        story_book: V('book2', { bpm: 92, half: 1, lead: ['bell', 'whis'], harm: 'pluck', bass: 'oom', comp: ['pad'], drums: 'soft', perc: '', hits: 0, rev: 0.36 }),
+        results: { bpm: 112, key: 43, mode: 'maj', sw: 0.6, half: 1, lead: ['bell', 'mar'], harm: 'pluck', bass: 'oom', comp: ['pad'], drums: 'soft', perc: 'wood', rev: 0.3, dly: 0.18, form: 'AB',
+          A: { ch: ['0M', '0M', '5M', '5M', '9m', '7M', '5M', '7M7'], seq: 0,
+            h: '3 - 5 - 8 - 7 5 6 - 5 - 3 - - .', h2: '3 - 5 - 8 - 9 10 9 - 8 - 6 - - .', c: '6 - 5 - 4 - 3 2 2 - 4 - 7_ - - .' },
+          B: { ch: ['5M', '5M', '4m', '4m', '0M', '9m', '2m7', '7M7'], seq: 0,
+            h: '6 - 5 - 4 - 6 - 6 - 5 - 4 - 2 .', h2: '5 - 3 - 1 - 3 - 6 - 5 - 3 - - .', c: '4 - 6 - 8 - 6 - 5 - 4 - 2 - 5 .' } },
+        overloop: { bpm: 80, key: 45, mode: 'min', sw: 0, half: 1, lead: ['bell'], harm: 'bell', bass: 'oom', comp: ['pad'], drums: 'none', perc: '', rev: 0.45, dly: 0.3, form: 'A',
+          A: { ch: ['0m', '0m', '8M', '8M', '5m', '5m', '7M', '7M7'], seq: 0,
+            h: '5 - - . 3 - - . 1 - - . 3 - - .', h2: '3 - - . 1 - - . 6_ - - . 1 - - .', c: '7_ - - . 2 - - . 5_ - - - - - - .' } },
+        clear_nether: V('clear', { key: 45, lead: ['brass', 'sq'], harm: 'sq', sw: 0 }),
+        clear_crayon: V('clear', { key: 52, bpm: 156, lead: ['mar', 'bell'], harm: 'mar', comp: ['skank'] }),
+        clear_space: V('clear', { key: 46, sw: 0, lead: ['syn', 'bell'], harm: 'bell', comp: ['arp'], rev: 0.42, dly: 0.2 }),
+        clear_book: V('clear', { key: 53, bpm: 140, lead: ['bell', 'whis'], harm: 'pluck' }),
+        gameover_nether: V('gameover', { key: 40, lead: ['brass', 'sq'] }),
+        gameover_crayon: V('gameover', { key: 52, lead: ['mar', 'bell'] }),
+        gameover_space: V('gameover', { key: 42, lead: ['syn', 'bell'], rev: 0.48, dly: 0.3 }),
+        gameover_book: V('gameover', { key: 46, lead: ['whis', 'bell'] }),
+        fmenu: V('title', { bpm: 144, key: 43, sw: 0, lead: ['syn', 'sq'], harm: 'brass', bass: 'pump', comp: ['stab', 'arp'], drums: 'pop', perc: 'shak', hits: 1, rev: 0.22 }),
+        f_plains: V('field', { bpm: 168, sw: 0, lead: ['sq', 'brass'], harm: 'brass', bass: 'drive', comp: ['stab'], drums: 'gallop', hits: 1 }),
+        f_nether: V('fortress', { bpm: 166, sw: 0, lead: ['brass', 'syn'], bass: 'drive', drums: 'boss', hits: 1 }),
+        f_space: V('space1', { bpm: 162, sw: 0, lead: ['syn', 'sq'], harm: 'brass', bass: 'drive', comp: ['arp', 'stab'], drums: 'gallop', hits: 1 }),
+        f_crayon: V('crayon3', { bpm: 164, sw: 0, lead: ['sq', 'bell'], bass: 'drive', comp: ['stab'], drums: 'pop', hits: 1 }),
+        f_seaside: { bpm: 160, key: 50, mode: 'maj', sw: 0, lead: ['whis', 'mar'], harm: 'mar', bass: 'pump', comp: ['skank'], drums: 'pop', perc: 'bongo', rev: 0.26, dly: 0.16, hits: 1, form: 'AABA',
+          A: { ch: ['0M', '5M', '9m', '7M', '0M', '5M', '2m7', '7M7'],
+            h: '5 . 6 8 . 6 5 3 4 . 3 4 6 . 5 .', s: '3 . 5 6 . 5 3 2 1 . 2 3 2 - 7_ .', h2: '5 . 6 8 . 6 5 3 4 . 6 8 9 . 8 .', c: '9 . 8 6 8 . 6 5 4 . 3 2 5 - - .' },
+          B: { ch: ['5M', '5M', '4m', '4m', '2m7', '7M7', '0M', '7M7'], seq: 0,
+            h: '6 . 6 5 6 8 . 6 5 . 5 4 3 . 1 .', h2: '6 . 6 5 6 8 . 10 9 . 8 7 6 . 5 .', c: '4 . 6 8 7 . 5 4 3 . 2 . 5 - 7_ .' } },
+        f_boss: V('boss', { bpm: 172, lead: ['syn', 'brass'], harm: 'brass', comp: ['stab', 'pad'], drums: 'gallop' }),
+        f_lose: V('death', { key: 45, bpm: 112, lead: ['brass', 'sq'], sw: 0 }),
+        f_win: V('clear', { bpm: 166, sw: 0, lead: ['brass', 'sq'] }),
+        f_super: V('power', { key: 43, lead: ['brass', 'syn'] })
+      });
+      Object.assign(TR, {
+        f_cont: V('overloop', { bpm: 100, lead: ['bell', 'whis'], bass: 'walk', drums: 'soft', perc: 'wood', rev: 0.35 }),
+        f_results: V('results', { bpm: 124, sw: 0.6, half: 0, comp: ['skank'], drums: 'shuf' })
+      }); }
+    /* /MUS24 tunes */
     for (const k in TR) compile(TR[k]);
 
     // ------------------------------------------------------------- synth (works on a live AudioContext or an OfflineAudioContext) -------------------------------------------------------------
@@ -8322,6 +8377,7 @@ const BlockAction = (() => {
     }
     // per-tune loudness trims (calibrated from offline renders, see music_preview)
     const TRIM = {title: 0.98, map: 1.17, field: 1.14, cave: 1.21, wall: 1.26, castle: 1.24, boss: 1.44, dragon: 1.45, wither: 1.44, nwaste: 1.18, nforest: 1.03, fortress: 1.44, bastion: 1.19, truck: 1.32, story: 1.32, ending: 1.18, space1: 1.59, space2: 1.57, spaceboss: 1.4, crayon1: 1.4, crayon2: 1.45, crayon3: 1.4, crayonboss: 1.38, book1: 1.42, book2: 1.5, book3: 1.36, bookboss: 1.38, power: 1.56, clear: 1.22, death: 1.6, gameover: 1.64};   // per-track loudness trims (measured offline, gated RMS ~ -15 dB)
+    Object.assign(TRIM, {"golem": 1.38, "crayonpre": 1.22, "bookpre": 1.1, "space3": 1.43, "map_nether": 1.21, "map_crayon": 1.29, "map_space": 1.13, "map_book": 1.14, "story_nether": 1.09, "story_crayon": 1.58, "story_space": 1.33, "story_book": 1.43, "results": 1.37, "overloop": 1.4, "clear_nether": 1.26, "clear_crayon": 1.2, "clear_space": 1.26, "clear_book": 1.1, "gameover_nether": 1.72, "gameover_crayon": 1.65, "gameover_space": 1.79, "gameover_book": 1.2, "fmenu": 1.51, "f_plains": 1.33, "f_nether": 1.4, "f_space": 1.42, "f_crayon": 1.54, "f_seaside": 0.99, "f_boss": 1.35, "f_lose": 1.72, "f_win": 1.22, "f_super": 1.51, "f_cont": 0.94, "f_results": 1.37});   /* MUS24 trims (offline gated RMS match) */
     // ------------------------------------------------------------- live player -------------------------------------------------------------
     let ctx = null, S = null, cur = null, step = 0, nextT = 0, timer = null, paused = false, jing = null, duckG = null, lowQ = false, synG572 = null, setupN572 = 0;
     let musicOn = true, level = 0.4; try { const v = localStorage.getItem('ba_music'); if (v === '0') musicOn = false; const l = parseFloat(localStorage.getItem('ba_music_vol2')); if (l >= 0 && l <= 1) level = l; } catch (e) {}
@@ -8392,12 +8448,47 @@ const BlockAction = (() => {
     function applyFx(T) { if (!S || !T) return; S.setFx(T.rev || 0.2, T.dly || 0, 60 / T.bpm / 4); S.trim.gain.setValueAtTime(TRIM[T.id] || 1, ctx.currentTime); }
     const want = () => musicOn && AFX.on();
     function applyVol() { if (!ctx) return; AFX.musBus().gain.setTargetAtTime(want() && !paused ? level : 0, ctx.currentTime, 0.08); }
+    /* MUS24 runtime: world detection (by world key / theme, never by stage index), follow-up queue, external player for Block Fighter */
+    let next24 = null, lastW24 = 'ow';
+    const WK24 = { field: 'ow', ow: 'ow', nether: 'nether', crayon: 'crayon', book: 'book', space: 'space' };
+    const CUTW24 = { intro: 'ow', portal: 'nether', crayon: 'crayon', rocket58: 'space', gift595: 'book', book59: 'book', bookend59: 'book', sky595: 'space' };
+    const STAGE24 = { crayonb: 'crayonpre', bookb: 'bookpre', spaceb: 'space3' };
+    function wkTheme24(th) { th = String(th || ''); if (/^(nwaste|nforest|fortress|bastion)$/.test(th)) return 'nether'; if (/^crayon/.test(th)) return 'crayon'; if (/^space/.test(th)) return 'space'; if (/^book/.test(th)) return 'book'; return 'ow'; }
+    function wkDef24(d) { return d ? (WK24[d.wk] || wkTheme24(d.theme)) : 'ow'; }
+    function wkNow24() { try { if (typeof L !== 'undefined' && L && L.def) lastW24 = wkDef24(L.def); } catch (e) {} return lastW24; }
+    function mapW24() {
+      try { const n = MAPN5[MAP.at]; if (!n) return 'ow'; if (n.s !== undefined && STAGES[n.s]) return wkDef24(STAGES[n.s]);
+        return WK24[n.gw595] || WK24[{ village: 'ow', portal: 'nether', crayon: 'crayon', rocket: 'space', book: 'book' }[n.k]] || 'ow'; } catch (e) { return 'ow'; }
+    }
+    const TW24 = (b, w) => (w && w !== 'ow' && TR[b + '_' + w]) ? b + '_' + w : b;
+    function cutMus24(id, m) { if (m && m !== 'story') return m; return TW24('story', CUTW24[id] || wkNow24()); }
+    function ext24(c, dest) {   // standalone procedural player (own synth + scheduler) used by Block Fighter on its own AudioContext
+      const fad = c.createGain(); fad.gain.value = 0.0001; fad.connect(dest);
+      let Sx = null, lo = null, k = null, st = 0, nt = 0, tm = null, q = null;
+      const ramp = (to, d) => { const t = c.currentTime; fad.gain.cancelScheduledValues(t); fad.gain.setValueAtTime(Math.max(0.0001, fad.gain.value), t); fad.gain.linearRampToValueAtTime(Math.max(0.0001, to), t + d); };
+      function go(n) {
+        const l = isLow(); if (!Sx || lo !== l) { if (Sx) try { Sx.out && Sx.out.disconnect(); } catch (e) {} lo = l; Sx = makeSynth(c, fad, l); }
+        const T = TR[n]; k = n; st = 0; nt = c.currentTime + 0.06; Sx.setFx(T.rev || 0.2, T.dly || 0, 60 / T.bpm / 4); Sx.trim.gain.setValueAtTime(TRIM[n] || 1, c.currentTime); ramp(1, 0.05);
+        if (!tm) tm = setInterval(tick, 25);
+      }
+      function tick() {
+        if (!k || c.state !== 'running') return; const T = TR[k], spb = 60 / T.bpm / 4, ahead = c.currentTime + 0.18;
+        if (nt < c.currentTime - 0.2) nt = c.currentTime + 0.03;
+        while (nt < ahead) { if (T.once && st >= T.nb * 16) { const n = q; q = null; k = null; if (n) go(n); return; } playStep(Sx, T, st, nt, spb, Sx.low); st++; nt += spb; }
+      }
+      return { has: n => !!TR[n], cur: () => k, queued: () => q,
+        play(n, then) { if (!TR[n]) return false; q = then && TR[then] ? then : null; if (n === k && !TR[n].once) return true; go(n); return true; },
+        stop(f) { k = null; q = null; ramp(0.0001, f || 0.3); },
+        duck(to, dur) { if (!k) return; const t = c.currentTime; ramp(to, 0.06); fad.gain.setValueAtTime(Math.max(0.0001, to), t + 0.06 + dur * 0.5); fad.gain.linearRampToValueAtTime(1, t + 0.06 + dur); },
+        kill() { this.stop(0.05); if (tm) { clearInterval(tm); tm = null; } } };
+    }
+    /* /MUS24 runtime */
     function sched() {
       if (!ctx || paused) return; if (lowQ !== isLow()) setup();
       const ahead = ctx.currentTime + 0.16, low = lowQ;
       if (cur) { const T = TR[cur], spb = 60 / T.bpm / 4;
         if (nextT < ctx.currentTime - 0.2) nextT = ctx.currentTime + 0.03;
-        while (nextT < ahead) { if (T.once && step >= T.nb * 16) { cur = null; break; } if (want()) playStep(S, T, step, nextT, spb, low); step++; nextT += spb; } }
+        while (nextT < ahead) { if (T.once && step >= T.nb * 16) { cur = null; if (next24 && TR[next24]) { const q = next24; next24 = null; lastTrack = q; play(q); } break; } if (want()) playStep(S, T, step, nextT, spb, low); step++; nextT += spb; } }
       if (jing) { const T = TR[jing.k], spb = 60 / T.bpm / 4; while (jing && jing.t < ahead) { if (jing.s >= T.nb * 16) { jing = null; duckG.gain.setTargetAtTime(1, ctx.currentTime, 0.2); break; } if (want()) playStep(S, T, jing.s, jing.t, spb, true); jing.s++; jing.t += spb; } }
     }
     function synFade572(to, tc) { if (!synG572 || !ctx) return; const t = ctx.currentTime; synG572.gain.cancelScheduledValues(t); synG572.gain.setValueAtTime(Math.max(0.0001, synG572.gain.value), t); synG572.gain.linearRampToValueAtTime(Math.max(0.0001, to), t + tc); if (window.__BA_DEBUG) (window.__sf572 = window.__sf572 || []).push([+t.toFixed(3), to, tc, new Error().stack.split('\n')[2] || '']); }
@@ -8421,13 +8512,14 @@ const BlockAction = (() => {
       if (st === 'pause') { setPaused(true); AFX.hum(0); lastState = st; return; }
       setPaused(false);
       if (st !== 'play') AFX.hum(0);
-      let k = cur;
+      let k = cur; const w24 = wkNow24();   /* MUS24 */
+      if (st !== 'over' && st !== 'clear') next24 = null;
       if (st === 'select' || st === 'boot') k = 'title';
-      else if (st === 'map') k = 'map';
+      else if (st === 'map') k = TW24('map', mapW24());
       else if (st === 'cut') k = MUS5.cut || 'story';
       else if (st === 'play' || st === 'intro' || st === 'talk') {
-        const th = L && L.def && L.def.theme; k = (L && L.def && L.def.music) || STAGE_T[th] || 'field';
-        if (boss && boss.active && boss.alive && (boss.kind === 'boss' || boss.kind === 'golem')) k = L.def.theme === 'spaceb' ? 'spaceboss' : 'boss';
+        const th = L && L.def && L.def.theme; k = STAGE24[th] || (L && L.def && L.def.music) || STAGE_T[th] || 'field';
+        if (boss && boss.active && boss.alive && (boss.kind === 'boss' || boss.kind === 'golem')) k = th === 'spaceb' ? 'spaceboss' : 'golem';
         if (L && L.def && L.def.dragon && (dragon || (L.dragonT > 0))) k = 'dragon';
         if (boss && boss.kind === 'wither' && boss.active && boss.alive) k = 'wither';
         if (boss && boss.kind === 'ufo' && boss.active && boss.alive) k = 'spaceboss';
@@ -8436,8 +8528,12 @@ const BlockAction = (() => {
         if (pl && pl.truck) k = 'truck';
       }
       else if (st === 'dying' && lastState !== 'dying') k = 'death';
-      else if (st === 'clear' && lastState !== 'clear') k = 'clear';
-      else if (st === 'over' && lastState !== 'over') k = (G && G.lives <= 0) ? 'gameover' : (cur === 'death' ? 'death' : null);
+      else if (st === 'clear' && lastState !== 'clear') k = TW24('clear', w24);
+      else if (st === 'over' && lastState !== 'over') {
+        if (G && G.lives <= 0) { k = TW24('gameover', w24); next24 = 'overloop'; }
+        else if (cur && TR[cur] && TR[cur].once) { next24 = cur === 'death' ? 'overloop' : 'results'; k = lastTrack; }   // let the clear fanfare / death sting finish, then loop
+        else k = (lastState === 'dying' || lastTrack === 'death') ? 'overloop' : 'results';
+      }
       lastState = st;
       if (k !== lastTrack) { lastTrack = k; play(k); }
     }
@@ -8451,7 +8547,7 @@ const BlockAction = (() => {
       return oc.startRendering().then(b => { const L = b.getChannelData(0), R = b.getChannelData(1); let pk = 0, ss = 0; for (let i = 0; i < L.length; i++) { const a = Math.abs(L[i]), c = Math.abs(R[i]); if (a > pk) pk = a; if (c > pk) pk = c; ss += L[i] * L[i] + R[i] * R[i]; } return { L, R, sr, peak: pk, rms: Math.sqrt(ss / (2 * L.length)), bars: T.nb, bpm: T.bpm }; });
     }
     return {
-      update, play, current: () => cur, tracks: () => Object.keys(TR),
+      update, play, current: () => cur, tracks: () => Object.keys(TR), ext24, cutMus24, next24: () => next24, world24: () => [wkNow24(), mapW24()],
       jingle(k) { if (!setup() || !TR[k] || !want()) return; jing = { k, s: 0, t: ctx.currentTime + 0.02 }; duckG.gain.setTargetAtTime(0.3, ctx.currentTime, 0.03); },
       duck(to, dur) { if (!ctx || !duckG) return; const t = ctx.currentTime; duckG.gain.cancelScheduledValues(t); duckG.gain.setTargetAtTime(to, t, 0.02); duckG.gain.setTargetAtTime(1, t + dur * 0.4, dur * 0.35); },
       toggle() { musicOn = !musicOn; try { localStorage.setItem('ba_music', musicOn ? '1' : '0'); } catch (e) {} applyVol(); TT572.refreshExt(); return musicOn; },
@@ -11306,7 +11402,7 @@ const BlockAction = (() => {
   function playCut5(id, after) {
     const S = CUTS5[id]; if (!S) { if (after) after(); return; }
     hideOverlays(); releaseKeys(); dom5();
-    cam.ov = null; MUS5.cut = S.music || 'story';
+    cam.ov = null; MUS5.cut = (BGM.cutMus24 ? BGM.cutMus24(id, S.music) : (S.music || 'story'));
     Object.assign(CUT, { on: true, id, steps: null, i: 0, t: 0, wait: 0, after, ff: 1, par: [] });
     state = 'cut'; cine5(true);
     CUT.steps = S.setup();
@@ -19414,6 +19510,40 @@ const AU={ctx:null,master:null,sfx:null,mus:null,cur:null,bufs:{},tracks:{},
   truck(on){const T=window.__truckTheme;if(T&&typeof T.play==='function'){try{on?T.play():T.stop();}catch(e){}if(on)this.stopMusic(0.5);this.extTruck=on;return;}
     if(on)this.music('truck',1.6);else if(this.curK==='truck')this.stopMusic(0.8);}
 };
+/* MUS24: Block Fighter music director: menu theme, per-arena fight themes (procedural via the BA engine copy in K.BGM), arcade boss, lose/continue, ladder results, super sting */
+const MUS24=(()=>{
+  const ST={plains:['f_plains','배틀 테마 · 평원'],nether:['f_nether','배틀 테마 · 네더'],space:['f_space','배틀 테마 · 우주'],crayon:['f_crayon','배틀 테마 · 크레용'],seaside:['f_seaside','배틀 테마 · 바닷가'],parking:['tt572','1억5천만원만 준비해']};
+  const FB={f_plains:'fight1',f_nether:'fight2',f_space:'fight2',f_crayon:'fight1',f_seaside:'fight1',f_boss:'fight2',tt572:'fight2'};
+  let pm=null,ps=null,lost=false;
+  const kit=()=>{try{return (K&&K.BGM&&K.BGM.ext24)||null;}catch(e){return null;}};
+  const hasMp3=k=>{try{return !!(window.__BF_AUD&&window.__BF_AUD[k]);}catch(e){return false;}};
+  function proc(){if(pm)return pm;const X=kit();if(!X||!AU.init())return null;try{pm=X(AU.ctx,AU.mus);}catch(e){console.warn(e);pm=null;}return pm;}
+  const _m=AU.music.bind(AU),_s=AU.stopMusic.bind(AU),_t=AU.truck.bind(AU);
+  AU.music=function(k,fade,then){
+    if(k==='tt572'){try{const A=window.__BF_AUD;if(A&&!A.tt572&&window.__TT572_B64)A.tt572=window.__TT572_B64;}catch(e){}}
+    if(k&&!hasMp3(k)){const P=proc();
+      if(P&&P.has(k)){this.resume();if(this.curK===k&&this._pk===k&&P.cur())return;if(this.cur)_s(0.4);this.curK=k;this._pk=k;P.play(k,then);this.applyVol();return;}
+      k=FB[k]||'fight1';if(!hasMp3(k))return;}
+    if(this._pk&&pm){pm.stop(0.4);this._pk=null;}
+    return _m(k,fade);
+  };
+  AU.stopMusic=function(f){if(this._pk&&pm){pm.stop(f||0.3);this._pk=null;this.curK=null;}return _s(f);};
+  AU.truck=function(on){if(on&&lost)return;return _t(on);};
+  AU.hold=function(to){if(!this.ctx||!this.mus)return;const t=this.ctx.currentTime,g=this.mus.gain;g.cancelScheduledValues(t);g.setValueAtTime(g.value,t);g.linearRampToValueAtTime(this.musVol()*to,t+0.15);};
+  const D={
+    get lost(){return lost;},
+    fight(A,boss){lost=false;let s=boss?['f_boss','보스 테마 · 최종 결전']:ST[M.arena];if(!s)s=[A&&A.track===2?'fight2':'fight1',A&&A.track===2?'배틀 테마 Ⅱ':'배틀 테마 Ⅰ'];AU.music(s[0],1.2);UI.songTitle(s[1]);},
+    screen(w){if(w==='menu'||w==='sel'){lost=false;AU.music('fmenu',0.8);}},
+    keepMenu(){return AU.curK==='fmenu'&&(UI.cur==='menu'||UI.cur==='sel');},
+    over(w){const human=M.mode==='2p'||M.mode==='training'||w===0;AU.stopMusic(0.8);
+      if(!human){lost=true;setTimeout(()=>{if(lost&&M.phase!=='idle')AU.music('f_lose',0.05,'f_cont');},300);return;}
+      const fin=M.mode!=='arcade'||M.li>=M.ladder.length-1;if(!fin)setTimeout(()=>{if(M.phase!=='idle')AU.music('f_win',0.05,'f_results');},300);},
+    sting(){if(M.mode==='demo')return;const X=kit(),c=AU.ctx;if(!X||!c||c.state!=='running')return;try{if(!ps)ps=X(c,AU.mus);ps.play('f_super');if(pm&&AU._pk)pm.duck(0.35,1.6);}catch(e){}},
+    state(){return {curK:AU.curK||null,proc:pm?pm.cur():null,queued:pm?pm.queued():null,sting:ps?ps.cur():null,mp3:!!AU.cur,lost,ui:(typeof UI!=='undefined'&&UI.cur)||null,mode:(typeof M!=='undefined'&&M.mode)||null,mus:AU.mus?+AU.mus.gain.value.toFixed(3):null,truck:(()=>{try{return !!(window.__truckTheme&&window.__truckTheme.state&&window.__truckTheme.state().on);}catch(e){return null;}})()};}
+  };
+  window.__bfMus=D;return D;
+})();
+/* /MUS24 */
 function snd(k){try{if(typeof M!=='undefined'&&M.mode==='demo')return;K&&K.snd&&K.snd(k);}catch(e){}}
 // ---------------------------------------------------------------- FX pools ----------------------------------------------------------------
 const FXK=()=>(typeof VF!=='undefined'&&VF.T()>=1)?((typeof G!=='undefined'&&G.slow<1)?0.4:0.68):1;
@@ -20787,7 +20917,7 @@ const G={frame:0,scene:null,cam:null,renderer:null,arena:null,f:[],proj:[],locke
   ko(A,V){V.koed=true;this.locked=true;A.koWinner=true;this.slow=FEEL.koSlow;this.slowT=FEEL.koSlowF;this.camFocus=V;UI.flash(0.6);AU.play('ko');AU.duck(0.25,2.5);this.hs=Math.max(this.hs,14);
     this.koAt=this.frame;UI.banner('K.O.!','ko');if(typeof VF!=='undefined')VF.onKO(this,A,V);},
   tryGrab(A,V){if(V.inv>0||!V.grounded||V.st==='tumble'||V.st==='down'||V.koed)return;A.held=V;V.setSt('grabbed');V.mv=null;AU.play('grab');this.hs=4;this.FX.glow((A.x+V.x)/2,V.y+1,0,1,0xffffff,8);},
-  superFlash(F){AU.play('super');this.hs=Math.max(this.hs,26);UI.superCut(F);this.FX.ring(F.x,F.y+F.H*0.5,0,3,F.def.col,26);this.FX.glow(F.x,F.y+F.H*0.5,0,4,F.def.col,30);this.shake(0.1);},
+  superFlash(F){AU.play('super');try{MUS24.sting();}catch(_){}this.hs=Math.max(this.hs,26);UI.superCut(F);this.FX.ring(F.x,F.y+F.H*0.5,0,3,F.def.col,26);this.FX.glow(F.x,F.y+F.H*0.5,0,4,F.def.col,30);this.shake(0.1);},
   boomFx(F,noSelf){const x=F.x,y=F.y+F.H*0.5;this.FX.glow(x,y,0,7,0xfff0c0,26);this.FX.ring(x,y,0,4.2,0xffffff,18);this.FX.ring(x,0.05,0,4.6,0xffd080,20,true);for(let i=0;i<4;i++)this.FX.burst(x+R(-1,1),y+R(-0.6,0.8),0,2.4);
     this.FX.chips(x,y,0,26,[0x5cbf3c,0x3f9a2a,0x9a9a9a,0xffe070],1.8,0);AU.play('ko');snd('boom');this.shake(0.5);UI.flash(0.5);if(!noSelf)F.hp=Math.max(1,F.hp-(SIGS.boom.self||0));},
   // projectiles
@@ -20909,7 +21039,7 @@ function startMatch(o){
   try{if(A.crayon)G.f.forEach(F=>crayonOutline(F.V.root,A));}catch(e){console.warn(e);}
   G.f.forEach(F=>{F.meter=0;});G.wins=[0,0];G.round=1;M.stats={maxCombo:[0,0],dmg:[0,0],t0:performance.now()};
   G.camX=0;G.camZ=12;G.camY=3.2;G.camFocus=null;G.camOverride=null;G.trauma=0;
-  if(M.mode!=='demo'){AU.resume();AU.music(A.track===2?'fight2':'fight1',1.2);UI.songTitle(A.track===2?'배틀 테마 Ⅱ':'배틀 테마 Ⅰ');}
+  if(M.mode!=='demo'){AU.resume();MUS24.fight(A,boss);}
   UI.setupHud();startRound();M.running=true;M.paused=false;M.last=performance.now();M.acc=0;loop();
 }
 function startRound(){
@@ -20932,9 +21062,9 @@ function afterRound(){
 function matchOver(w){
   if(M.mode==='demo'){M.phase='over';G.locked=true;clearTimeout(M._dt);M._dt=setTimeout(()=>{if(M.mode==='demo'&&M.phase==='over')BF.attract();},1600);return;}
   M.phase='over';M.winner=w;M.running=true;G.locked=true;AU.duck(0.15,1.2);
-  clearTimeout(M._dt);M._dt=setTimeout(()=>{if(M.phase!=='over')return;AU.stopMusic(0.8);const cer=!(M.mode==='arcade'&&!(w===0&&M.li>=M.ladder.length-1));if(cer)BFCeremony.run(G.f[w],()=>UI.results(w));else UI.results(w);},900);
+  clearTimeout(M._dt);M._dt=setTimeout(()=>{if(M.phase!=='over')return;MUS24.over(w);const cer=!(M.mode==='arcade'&&!(w===0&&M.li>=M.ladder.length-1));if(cer)BFCeremony.run(G.f[w],()=>UI.results(w));else UI.results(w);},900);
 }
-function stopMatch(){CINE.abort();if(typeof WL!=='undefined')WL.clear(G);if(typeof DP!=='undefined')DP.abort();clearTimeout(M._dt);M.running=false;M.paused=false;try{UI.el.bfPause.classList.add('bf-hide');}catch(e){}M.phase='idle';cancelAnimationFrame(M.raf);AU.stopMusic(0.4);AU.truck(false);BFCeremony.abort();G.locked=true;}
+function stopMatch(){CINE.abort();if(typeof WL!=='undefined')WL.clear(G);if(typeof DP!=='undefined')DP.abort();clearTimeout(M._dt);M.running=false;M.paused=false;try{UI.el.bfPause.classList.add('bf-hide');}catch(e){}M.phase='idle';cancelAnimationFrame(M.raf);if(!MUS24.keepMenu())AU.stopMusic(0.4);AU.truck(false);BFCeremony.abort();G.locked=true;}
 // ---- per-frame
 function simFrame(){
   G.frame++;const [a,b]=G.f;
@@ -21051,7 +21181,7 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
   },
   syncMenu(){const d=LS.get('diff','normal');this.root.querySelectorAll('#bfDiff button').forEach(b=>b.classList.toggle('on',b.dataset.d===d));
     const on=LS.get('music','1')==='1';const mb=this.root.querySelector('#bfMus');mb.textContent=on?'🎵 켜짐':'🔇 꺼짐';mb.classList.toggle('on',on);this.root.querySelector('#bfVol').value=LS.get('vol','0.6');},
-  show(w){const E=this.el;try{document.documentElement.classList.toggle('bf-fight',w==='hud'||w==='cer');document.documentElement.classList.toggle('bf-sel',w==='sel');}catch(_){}const vis={menu:E.bfMenu,sel:E.bfSel,res:E.bfRes,cer:E.bfCer};for(const k in vis)vis[k].classList.toggle('bf-hide',k!==w);
+  show(w){const E=this.el;try{MUS24.screen(w);}catch(_){}try{document.documentElement.classList.toggle('bf-fight',w==='hud'||w==='cer');document.documentElement.classList.toggle('bf-sel',w==='sel');}catch(_){}const vis={menu:E.bfMenu,sel:E.bfSel,res:E.bfRes,cer:E.bfCer};for(const k in vis)vis[k].classList.toggle('bf-hide',k!==w);
     E.bfHud.classList.toggle('bf-hide',w!=='hud');E.bfTouch.classList.toggle('bf-hide',!(w==='hud'&&this.touch));this.root.classList.toggle('bf-inmenu',w==='menu'||w==='sel'||w==='res');
     if(w!=='hud'){E.bfCombo0.className='bf-combo';E.bfCombo1.className='bf-combo r';}this.cur=w;},
   toMenu(){this.show('menu');BF.attract();},
@@ -21109,7 +21239,7 @@ const UI={touch:false,el:{},por:{},sel:{slot:0,p:['steve','zombie'],arena:'rando
   superCut(F){if(M.mode==='demo')return;const c=this.el.bfCut;this._cutId=F.def.id;c.querySelector('img').src=this.img(F.def.id);c.querySelector('b').textContent=F.def.su+'!';c.querySelector('small').textContent=F.def.name+' 슈퍼 필살기';
     c.style.setProperty('--c','#'+F.def.col.toString(16).padStart(6,'0'));c.className=F.side?'r':'';void c.offsetWidth;c.className='show'+(F.side?' r':'');clearTimeout(c._t);c._t=setTimeout(()=>c.className=F.side?'r':'',900);},
   songTitle(t){if(M.mode==='demo')return;const s=this.el.bfSong;s.textContent='♪ '+t;s.className='';void s.offsetWidth;s.className='show';clearTimeout(s._t);s._t=setTimeout(()=>s.className='',2600);},
-  togglePause(v){if(M.phase==='ceremony'||M.mode==='demo'||!M.running)return;M.paused=v===undefined?!M.paused:v;this.el.bfPause.classList.toggle('bf-hide',!M.paused);if(M.paused){AU.duck(0.3,0.01);}else{AU.applyVol();M.last=performance.now();}},
+  togglePause(v){if(M.phase==='ceremony'||M.mode==='demo'||!M.running)return;M.paused=v===undefined?!M.paused:v;this.el.bfPause.classList.toggle('bf-hide',!M.paused);if(M.paused){AU.hold(0.3);}else{AU.applyVol();M.last=performance.now();}},
   results(w){M.phase='results';const E=this.el.bfRes,W=G.f[w],L=G.f[1-w],st=M.stats,arc=M.mode==='arcade';
     const youWin=M.mode==='2p'||w===0;let title=M.mode==='2p'?`P${w+1} 승리!`:(w===0?'승리!':'패배…');let extra='';
     if(arc){if(w===0&&M.li>=M.ladder.length-1){title='아케이드 클리어!';extra='<div class="arc">🏆 5연승! 우주의 챔피언!</div>';}
