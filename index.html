@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v5.9">
+<meta name="ba-version" content="v5.9.1">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>미니 게임 모음 — 마인크래프트 마리오·마인크래프트 파이터·체스·오목·장기</title>
@@ -18309,8 +18309,10 @@ function buildFighterModel(def){
   // v5.8.5 LEGO articulation (rig_lib/LegoRig): chamfered blocks, joint pins at shoulders/elbows/wrists/hips/knees/ankles/neck/tentacles, grip hands
   if(typeof LegoRig!=='undefined'){try{LegoRig.bevel(obj,0.08);LegoRig.decorate(rig,{low:typeof GQ!=='undefined'&&GQ.level==='low'});}catch(e){console.warn('lego',e);}}
   ['aura','eyeGlow','mouthGlow'].forEach(k=>{const o=ud[k];if(o&&o.isObject3D&&k==='aura')o.visible=false;});
+  // v5.9.1 voxel detail dressing (rig_lib/BlockDetail + BLOCK_DETAILS): faces, seams, trim, plates, rivets, fur, accessories; merged per part
+  if(typeof BlockDetail!=='undefined'){try{BlockDetail.apply(obj,rig,def.id,{low:typeof GQ!=='undefined'&&GQ.level==='low'});}catch(e){console.warn('detail',e);}}
   // per-fighter material clones (so flashes don't bleed into a mirror match)
-  const mats=[];obj.traverse(o=>{if(o.isMesh){o.castShadow=true;if(Array.isArray(o.material))o.material=o.material.map(m=>{const c=m.clone();mats.push(c);return c;});else if(o.material){o.material=o.material.clone();mats.push(o.material);}}});
+  const mats=[];obj.traverse(o=>{if(o.isMesh){o.castShadow=!(o.userData&&o.userData.bdNoSh)&&!(o.userData&&o.userData.bd&&typeof GQ!=='undefined'&&GQ.level==='low');if(Array.isArray(o.material))o.material=o.material.map(m=>{const c=m.clone();mats.push(c);return c;});else if(o.material){o.material=o.material.clone();mats.push(o.material);}}});
   mats.forEach(m=>{m.userData.e0=m.emissive?m.emissive.clone():null;m.userData.ei0=m.emissiveIntensity||0;});
   // normalize height
   obj.updateMatrixWorld(true);const bb=meshBox(obj),h=Math.max(0.3,bb.max.y-bb.min.y);
@@ -18704,6 +18706,301 @@ const LegoRig=(function(){
 })();
 if(typeof window!=='undefined')window.LegoRig=LegoRig;
 
+// ================================================================ BLOCK_DETAILS — per-character voxel detail specs for BlockDetail (rig_lib/block_detail.js)
+// Pure data. Op syntax is documented at the top of block_detail.js. Specs are written for the +x (right) limb; '*' parts mirror automatically.
+// Faces: f front(+z) b back t top d bottom l(-x) r(+x) o outer i inner.  Colours are sRGB hex.
+const BLOCK_DETAILS=(function(){
+  // shared sub-specs (reused by 마인크래프트 마리오 heroes/mobs)
+  const thumb=(c)=>[['B','hand*',-0.62,-0.4,-0.28,0.12,0.05,0.42,c],['P','hand*','f',-0.42,0.46,0.12,0.2,0.006,c]];
+  const shoe=(sole,cap,lace)=>[['W','foot*',-0.5,-0.3,0.008,sole],['P','foot*','f',-0.5,0.5,-0.3,0.12,0.01,cap],['S','foot*','f',-0.26,0.26,0.24,0.3,lace],['S','foot*','f',-0.26,0.26,0.4,0.46,lace]];
+  const D={};
+  // ------------------------------------------------ 스티브: hair voxels, sculpted brows/eyes/nose, collar, pocket, belt + buckle, jeans seams/pockets/cuffs, shoe soles
+  {const hair=0x4b301d,hairD=0x35200f,skinD=0xa66c50,sh=0x33b8b3,shD=0x1f8584,pa=0x3c41b4,paD=0x2a2d86,gold=0xc9a24a;
+  D.steve=[
+    ['P','head','t',-0.5,0.5,-0.5,0.5,0.013,hair],['P','head','f',-0.5,0.5,0.34,0.5,0.016,hair],['P','head','f',-0.5,-0.22,0.2,0.34,0.016,hair],['P','head','f',0.3,0.5,0.24,0.34,0.016,hairD],
+    ['P','head','l',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','r',-0.5,0.5,0.16,0.5,0.01,hair],['P','head','l',0.28,0.5,-0.16,0.12,0.013,hairD],['P','head','r',0.28,0.5,-0.16,0.12,0.013,hairD],
+    ['P','head','b',-0.5,0.5,-0.3,0.5,0.011,hair],['N','head','b',10,0.03,0.008,hairD,'c',4,[-0.5,0.5,-0.3,0.5]],['N','head','t',9,0.035,0.008,hairD,'c',5],
+    ['P','head','f',-0.34,-0.06,0.015,0.085,0.013,0x3a2414],['P','head','f',0.06,0.34,0.015,0.085,0.013,0x3a2414],
+    ['P','head','f',-0.31,-0.08,-0.125,-0.005,0.005,0xf4f4f0,'g'],['P','head','f',0.08,0.31,-0.125,-0.005,0.005,0xf4f4f0,'g'],
+    ['P','head','f',-0.19,-0.08,-0.125,-0.005,0.008,0x2e5bd0,'g'],['P','head','f',0.08,0.19,-0.125,-0.005,0.008,0x2e5bd0,'g'],
+    ['P','head','f',-0.16,-0.1,-0.1,-0.03,0.0105,0x0c1430,'g'],['P','head','f',0.1,0.16,-0.1,-0.03,0.0105,0x0c1430,'g'],
+    ['R','head','f',[[-0.17,-0.035],[0.11,-0.035]],0.012,0xffffff,'e'],
+    ['P','head','f',-0.075,0.075,-0.21,-0.12,0.032,skinD],['P','head','f',-0.05,0.05,-0.21,-0.18,0.036,0x8a5440],
+    ['P','head','f',-0.2,0.2,-0.3,-0.25,0.007,0x6b3222],
+    ['P','torso','t',-0.28,0.28,-0.5,0.5,0.006,shD],['P','torso','f',-0.2,0.2,0.36,0.5,0.008,shD],['P','torso','f',-0.13,0.13,0.4,0.5,0.009,0xc69072],
+    ['W','torso',-0.5,-0.4,0.008,shD],['S','torso','l',-0.04,0.04,-0.5,0.5,shD],['S','torso','r',-0.04,0.04,-0.5,0.5,shD],
+    ['P','torso','f',0.12,0.38,0.0,0.24,0.007,0x2aa9a4],['P','torso','f',0.1,0.4,0.2,0.29,0.012,shD],['R','torso','f',[[0.25,0.245]],0.016,0xe8e8e8,'g'],
+    ['S','torso','b',-0.45,0.45,0.28,0.32,shD],
+    ['W','armU*',-0.5,-0.36,0.008,shD],['S','armU*','o',-0.5,0.5,0.38,0.43,shD],
+    ...thumb(0xc08a6c),
+    ['W','hips',0.3,0.5,0.011,0x5b3a21],['P','hips','f',-0.1,0.1,0.22,0.55,0.022,0xcfcfcf,'m'],['P','hips','f',-0.045,0.045,0.31,0.46,0.026,0x5b3a21],
+    ['P','hips','f',-0.36,-0.28,0.22,0.55,0.016,0x4a2f1a],['P','hips','f',0.28,0.36,0.22,0.55,0.016,0x4a2f1a],['P','hips','b',-0.06,0.06,0.22,0.55,0.016,0x4a2f1a],
+    ['P','hips','f',-0.48,-0.2,-0.2,0.24,0.006,paD],['P','hips','f',0.2,0.48,-0.2,0.24,0.006,paD],['S','hips','f',-0.01,0.01,-0.5,0.2,gold],
+    ['P','hips','b',-0.42,-0.12,-0.4,0.12,0.007,paD],['P','hips','b',0.12,0.42,-0.4,0.12,0.007,paD],['R','hips','b',[[-0.27,0.0],[0.27,0.0]],0.014,gold],
+    ['S','legU*','o',-0.02,0.02,-0.5,0.5,gold],['S','legF*','o',-0.02,0.02,-0.5,0.5,gold],['P','legF*','f',-0.34,0.34,0.12,0.46,0.006,paD],
+    ['W','legF*',-0.5,-0.36,0.009,0x5960d0],
+    ...shoe(0x2e2e2e,0x7a7a7a,0xe6e6e6)];}
+
+  // ------------------------------------------------ 꾸꾸: cap button/seams/emblem, brows, button placket, chest pockets + collar, belt, cargo seams, work boots
+  {const cap=0x2f56c8,capD=0x203c92,sk=0x7a4c30,sh=0x3d63d6,shD=0x2a46a0,pa=0x27306c,paD=0x1b2250,bt=0x5a3a22;
+  D.kkukku=[
+    ['B','head',-0.06,0.06,0.5,0.56,-0.06,0.06,cap],['S','head','t',-0.012,0.012,-0.5,0.5,capD],['S','head','t',-0.5,0.5,-0.012,0.012,capD],
+    ['W','head',0.2,0.26,0.007,capD],['P','head','f',-0.09,0.09,0.27,0.43,0.008,0xf2c230,'g'],['P','head','f',-0.045,0.045,0.31,0.39,0.011,0xffffff],
+    ['P','head','f',-0.3,-0.08,0.05,0.1,0.01,0x2a1a10],['P','head','f',0.08,0.3,0.05,0.1,0.01,0x2a1a10],['P','head','f',-0.05,0.05,-0.16,-0.08,0.022,sk],
+    ['P','head','l',0.25,0.5,-0.1,0.2,0.009,0x24160c],['P','head','r',0.25,0.5,-0.1,0.2,0.009,0x24160c],
+    ['P','torso','f',-0.055,0.055,-0.5,0.4,0.006,shD],['R','torso','f',[[0,0.28],[0,0.06],[0,-0.16],[0,-0.38]],0.017,0xf0f0f0,'g'],
+    ['P','torso','f',-0.34,-0.08,0.38,0.5,0.012,0x5a7ee6],['P','torso','f',0.08,0.34,0.38,0.5,0.012,0x5a7ee6],
+    ['P','torso','f',-0.42,-0.14,0.0,0.24,0.006,shD],['P','torso','f',-0.44,-0.12,0.2,0.28,0.011,shD],['P','torso','f',0.14,0.42,0.0,0.24,0.006,shD],['P','torso','f',0.12,0.44,0.2,0.28,0.011,shD],
+    ['R','torso','f',[[-0.28,0.24],[0.28,0.24]],0.013,0xf0f0f0,'g'],['W','torso',-0.5,-0.42,0.007,shD],['S','torso','b',-0.45,0.45,0.25,0.29,shD],
+    ['W','armU*',-0.5,-0.34,0.009,shD],['P','armU*','t',-0.5,0.5,-0.3,0.3,0.008,shD],['R','armU*','t',[[0.25,0]],0.014,0xf0f0f0,'g'],
+    ...thumb(0x6d4128),
+    ['W','hips',0.32,0.5,0.011,bt],['P','hips','f',-0.09,0.09,0.24,0.56,0.02,0xd8b04a,'m'],['P','hips','f',-0.04,0.04,0.32,0.46,0.024,bt],
+    ['P','hips','f',-0.48,-0.24,-0.25,0.2,0.006,paD],['P','hips','f',0.24,0.48,-0.25,0.2,0.006,paD],['S','hips','f',-0.01,0.01,-0.5,0.2,0x6a78c0],
+    ['P','legU*','o',-0.4,0.4,-0.35,0.25,0.008,paD],['P','legU*','o',-0.42,0.42,0.18,0.28,0.011,paD],['S','legF*','o',-0.02,0.02,-0.5,0.5,0x6a78c0],
+    ['P','legF*','f',-0.34,0.34,0.15,0.45,0.006,paD],['W','legF*',-0.5,-0.38,0.008,0x343e86],
+    ...shoe(0x2a1a0e,0x6a4426,0xd8c090),['P','foot*','t',-0.5,0.5,-0.5,0.5,0.004,bt]];}
+  // ------------------------------------------------ 뚜뚜: woven straw hat + ribbon flower, braid ties, white collar, apron with pocket + straps, sash, skirt hem, boots
+  {const st=0xd9b04a,stD=0xa8812e,gr=0x3f9a3a,grD=0x2c6e2a,ap=0xf2ecd6;
+  D.ttuttu=[
+    ['S','head:5','t',-0.5,0.5,-0.32,-0.28,stD],['S','head:5','t',-0.5,0.5,0.28,0.32,stD],['S','head:5','t',-0.32,-0.28,-0.5,0.5,stD],['S','head:5','t',0.28,0.32,-0.5,0.5,stD],
+    ['S','head:6','f',-0.5,0.5,-0.08,0.08,stD],['S','head:6','l',-0.5,0.5,-0.08,0.08,stD],['S','head:6','r',-0.5,0.5,-0.08,0.08,stD],['S','head:6','b',-0.5,0.5,-0.08,0.08,stD],
+    ['P','head:7','f',0.18,0.42,-2.2,2.2,0.02,0xffffff],['P','head:7','f',0.26,0.34,-1.0,1.0,0.03,0xf2c230,'g'],
+    ['W','head:3',-0.5,-0.32,0.012,0xd0303a],['W','head:4',-0.5,-0.32,0.012,0xd0303a],['S','head:3','f',-0.5,0.5,0.0,0.06,0xa86010],['S','head:4','f',-0.5,0.5,0.0,0.06,0xa86010],
+    ['S','head:3','f',-0.5,0.5,0.3,0.36,0xa86010],['S','head:4','f',-0.5,0.5,0.3,0.36,0xa86010],
+    ['P','torso','f',-0.26,0.26,0.38,0.5,0.01,0xf8f6ee],['P','torso','t',-0.26,0.26,-0.5,0.5,0.008,0xf8f6ee],
+    ['P','torso','f',-0.32,0.32,-0.5,0.08,0.008,ap],['P','torso','f',-0.16,0.16,-0.38,-0.12,0.012,0xe4dcc0],['S','torso','f',-0.16,0.16,-0.16,-0.12,0xc0b090],
+    ['P','torso','f',-0.32,-0.2,0.08,0.38,0.008,ap],['P','torso','f',0.2,0.32,0.08,0.38,0.008,ap],['R','torso','f',[[-0.26,0.32],[0.26,0.32]],0.02,0xf2c230,'g'],
+    ['P','torso','b',-0.32,-0.2,-0.5,0.38,0.008,ap],['P','torso','b',0.2,0.32,-0.5,0.38,0.008,ap],
+    ['W','hips',0.3,0.5,0.012,0xd0303a],['P','hips','b',-0.12,0.12,0.0,0.5,0.02,0xd0303a],['W','hips',-0.5,-0.36,0.012,grD],['S','hips','f',-0.5,0.5,-0.3,-0.27,0xf2c230],
+    ['W','armU*',-0.5,-0.32,0.012,0xf8f6ee],
+    ...shoe(0x3a2412,0x6a4426,0xd8c090)];}
+  // ------------------------------------------------ 골렘 왕: glowing magma cracks, rock chunks, heavy brow + jaw, royal gold belt with rubies, gold knee guards
+  {const rk=0x7a3424,rkD=0x55201a,lv=0xff8a2a,gd=0xe0a020;
+  D.golemk=[
+    ['P','torso','f',-0.32,-0.27,-0.15,0.32,0.004,lv,'e'],['P','torso','f',-0.27,-0.1,-0.15,-0.1,0.004,lv,'e'],['P','torso','f',0.16,0.21,-0.42,0.05,0.004,lv,'e'],['P','torso','f',0.21,0.38,0.0,0.05,0.004,lv,'e'],
+    ['P','torso','l',-0.2,-0.15,-0.4,0.3,0.004,lv,'e'],['P','torso','r',0.1,0.15,-0.3,0.4,0.004,lv,'e'],['P','torso','b',-0.1,-0.05,-0.45,0.4,0.004,lv,'e'],
+    ['N','torso','f',7,0.07,0.02,rkD,'c',11,[-0.45,0.45,0.1,0.48]],['N','torso','t',6,0.08,0.02,rkD,'c',12],['N','torso','b',8,0.07,0.02,rkD,'c',13],
+    ['W','torso',-0.34,-0.2,0.012,gd,'m'],['R','torso','f',[[-0.25,-0.27],[0,-0.27],[0.25,-0.27]],0.03,0xff2a5a,'g'],
+    ['P','chest:0','f',-0.48,0.48,0.18,0.32,0.03,rkD],['P','chest:0','f',-0.38,0.38,-0.5,-0.3,0.02,rkD],['N','chest:0','t',5,0.07,0.016,rkD,'c',14],
+    ['P','armU*','t',-0.5,0.5,-0.5,0.5,0.02,rkD],['N','armU*','o',3,0.06,0.016,rkD,'c',15],['P','armF*','d',-0.5,0.5,-0.5,0.5,0.012,rkD],['P','armF*','o',-0.1,-0.05,-0.4,0.3,0.003,lv,'e'],
+    ['P','legF*','f',-0.45,0.45,-0.1,0.5,0.012,gd,'m'],['R','legF*','f',[[0,0.2]],0.025,0xff2a5a,'g'],['W','foot*',-0.5,-0.3,0.008,rkD]];}
+  // ------------------------------------------------ 철 골렘: riveted chest plates, belly band, shoulder pauldrons, forearm bands, knuckle plates, brow ridge, moss tufts
+  {const ir=0xd8d3ca,irD=0xa9a49b,rv=0x8a857c,ms=0x4a8a2a;
+  D.iron=[
+    ['P','torso','f',-0.44,-0.04,0.02,0.44,0.012,ir,'m'],['P','torso','f',0.04,0.44,0.02,0.44,0.012,ir,'m'],
+    ['R','torso','f',[[-0.4,0.4],[-0.08,0.4],[-0.4,0.06],[-0.08,0.06],[0.08,0.4],[0.4,0.4],[0.08,0.06],[0.4,0.06]],0.035,rv],
+    ['W','torso',-0.5,-0.36,0.014,irD,'m'],['R','torso','f',[[-0.3,-0.43],[0,-0.43],[0.3,-0.43]],0.035,rv],['S','torso','b',-0.01,0.01,-0.5,0.5,irD],
+    ['N','torso','f',5,0.06,0.012,ms,'c',21,[-0.45,0.45,-0.35,0.0]],['N','torso','t',4,0.07,0.012,ms,'c',22],
+    ['P','head','f',-0.5,0.5,0.15,0.25,0.022,irD],['W','hips',0.3,0.5,0.01,irD,'m'],['R','hips','f',[[-0.35,0],[0.35,0]],0.03,rv],
+    ['P','armU*','t',-0.5,0.5,-0.5,0.5,0.03,ir,'m'],['P','armU*','o',-0.5,0.5,0.25,0.5,0.03,ir,'m'],['R','armU*','o',[[-0.3,0.35],[0.3,0.35]],0.03,rv],
+    ['W','armF*',0.2,0.32,0.012,irD,'m'],['W','armF*',-0.18,-0.06,0.012,irD,'m'],['P','armF*','f',-0.45,0.45,-0.5,-0.32,0.016,irD],['S','armF*','f',-0.45,0.45,-0.42,-0.4,rv],
+    ['N','armF*','o',3,0.05,0.01,ms,'c',23],
+    ['P','legU*','f',-0.45,0.45,-0.2,0.45,0.012,ir,'m'],['R','legU*','f',[[-0.3,0.3],[0.3,0.3]],0.03,rv],['W','foot*',-0.5,-0.3,0.01,irD,'m']];}
+  // ------------------------------------------------ 좀비: rot patches, sunken brow, torn shirt hem + holes, ripped trousers, ragged sleeves
+  {const zg=0x4f8a3a,zgD=0x2f5a26,sh=0x1fa0a0,shD=0x146a6a,pa=0x3a3a9a;
+  D.zombie=[
+    ['N','head','f',6,0.05,0.008,zgD,'c',31,[-0.45,0.45,0.25,0.48]],['N','head','l',6,0.05,0.008,zgD,'c',32],['N','head','r',6,0.05,0.008,zgD,'c',33],['N','head','t',6,0.06,0.008,zgD,'c',34],
+    ['P','head','f',-0.34,-0.06,0.13,0.19,0.014,zgD],['P','head','f',0.06,0.34,0.13,0.19,0.014,zgD],['P','head','f',-0.22,0.22,-0.24,-0.2,0.006,0x1a3014],
+    ['N','torso','f',7,0.05,0.008,shD,'c',35,[-0.45,0.45,-0.5,-0.3]],['P','torso','f',0.1,0.24,-0.1,0.06,0.006,zgD],['P','torso','f',-0.3,-0.2,0.15,0.3,0.006,zgD],['P','torso','b',-0.2,0.0,-0.3,-0.1,0.006,zgD],
+    ['W','torso',-0.5,-0.44,0.006,shD],['P','torso','t',-0.26,0.26,-0.5,0.5,0.006,shD],
+    ['N','armU*','f',3,0.05,0.01,shD,'c',36,[-0.5,0.5,-0.5,-0.3]],['W','armU*',-0.5,-0.4,0.006,shD],['N','armF*','o',3,0.05,0.008,zgD,'c',37],
+    ['W','hips',0.32,0.5,0.009,0x3a2a1a],['P','hips','f',-0.08,0.08,0.28,0.56,0.016,0x9a9a9a,'m'],
+    ['P','legF*','f',-0.3,0.2,-0.1,0.25,0.006,zg],['S','legU*','o',-0.02,0.02,-0.5,0.5,0x2a2a7a],['N','legF*','f',3,0.04,0.006,0x2a2a7a,'c',38,[-0.5,0.5,-0.5,-0.3]],
+    ...shoe(0x1a1a1a,0x3a3a3a,0x6a6a6a)];}
+  // ------------------------------------------------ 그락 족장: tusks, bristly brows, gold ear rings, fur collar, medallion with gem, robe trim, cape edge, gold bracers
+  {const gd=0xe8b020,gdD=0xa87a10,fur=0x4a2e1c,rb=0x8a1020;
+  D.grak=[
+    ['B','head:1',0.5,0.64,-0.5,0.55,0.0,0.5,0xf2ead4],['B','head:1',-0.64,-0.5,-0.5,0.55,0.0,0.5,0xf2ead4],
+    ['P','head','f',-0.38,-0.1,0.18,0.25,0.012,0xa04840],['P','head','f',0.1,0.38,0.18,0.25,0.012,0xa04840],
+    ['W','head:2',-0.42,-0.26,0.012,gd,'m'],['W','head:3',-0.42,-0.26,0.012,gd,'m'],['N','head','t',4,0.06,0.01,0xc06058,'c',41],
+    ['W','torso',0.38,0.5,0.022,fur],['N','torso','t',10,0.06,0.02,0x6a4630,'c',42],['N','torso','f',5,0.05,0.018,0x6a4630,'c',43,[-0.5,0.5,0.38,0.5]],
+    ['P','torso','f',-0.09,0.09,0.06,0.26,0.016,gd,'m'],['R','torso','f',[[0,0.16]],0.04,0x30d0e0,'g'],['P','torso','f',-0.02,0.02,0.26,0.4,0.01,gdD,'m'],
+    ['P','torso','f',-0.06,0.06,-0.5,0.0,0.006,gd,'m'],['P','torso','f',-0.5,-0.42,-0.5,0.38,0.006,gd,'m'],['P','torso','f',0.42,0.5,-0.5,0.38,0.006,gd,'m'],
+    ['R','body:1','f',[[-0.3,0],[-0.1,0],[0.1,0],[0.3,0]],0.03,gdD],['P','body:2','b',-0.5,0.5,-0.5,-0.42,0.006,gd,'m'],['P','body:2','b',-0.06,0.06,-0.42,0.5,0.004,gdD,'m'],
+    ['W','armF*',-0.5,-0.3,0.014,gd,'m'],['R','armF*','o',[[0,-0.4]],0.03,0x30d0e0,'g'],['P','armU*','t',-0.5,0.5,-0.5,0.5,0.018,fur],['N','armU*','t',3,0.05,0.016,0x6a4630,'c',44],
+    ['W','hips',0.3,0.5,0.008,0x3a2410],...shoe(0x2a1a0e,0x4a3220,0x8a6a40)];}
+  // ------------------------------------------------ 위더 스켈레톤: raised rib bars + spine, jaw teeth, cheek ridges, iron pauldrons with rivets, bone knee knobs
+  {const bn=0x3a3a40,bnL=0x55555e,ir=0x2a2a30;
+  D.wskel=[
+    ['P','torso','f',-0.4,-0.06,0.28,0.36,0.016,bnL],['P','torso','f',0.06,0.4,0.28,0.36,0.016,bnL],['P','torso','f',-0.36,-0.06,0.08,0.16,0.016,bnL],['P','torso','f',0.06,0.36,0.08,0.16,0.016,bnL],
+    ['P','torso','f',-0.3,-0.06,-0.12,-0.04,0.016,bnL],['P','torso','f',0.06,0.3,-0.12,-0.04,0.016,bnL],['P','torso','f',-0.05,0.05,-0.5,0.46,0.02,bn],
+    ['P','torso','b',-0.06,0.06,-0.5,0.5,0.024,bnL],['R','torso','b',[[0,0.35],[0,0.1],[0,-0.15],[0,-0.4]],0.035,bnL,'c'],
+    ['P','head','f',-0.3,0.3,-0.4,-0.33,0.008,0x8a8a92],['S','head','f',-0.3,0.3,-0.37,-0.36,0x1a1a1e],
+    ['P','head','f',-0.44,-0.3,-0.12,-0.02,0.014,bnL],['P','head','f',0.3,0.44,-0.12,-0.02,0.014,bnL],['P','head','f',-0.4,0.4,0.16,0.22,0.012,bn],
+    ['P','armU*','t',-0.5,0.5,-0.5,0.5,0.03,ir,'m'],['P','armU*','o',-0.5,0.5,0.1,0.5,0.03,ir,'m'],['R','armU*','o',[[-0.28,0.32],[0.28,0.32]],0.03,0x6a6a72],
+    ['W','armF*',0.3,0.42,0.012,bnL],['P','legF*','f',-0.3,0.3,0.32,0.5,0.02,bnL],['P','legU*','f',-0.3,0.3,0.3,0.5,0.015,bnL],
+    ['W','hips',0.2,0.5,0.012,0x2a1a10],['P','hips','f',-0.1,0.1,0.15,0.55,0.02,0x6a6a72,'m']];}
+  // ------------------------------------------------ 크리퍼: voxel leaf texture (raised light/dark plates), toe claws
+  {const cl=0x6ad050,cd=0x2e7a24;
+  D.creeper=[
+    ['N','head','l',8,0.055,0.006,cl,'c',51],['N','head','r',8,0.055,0.006,cd,'c',52],['N','head','t',9,0.055,0.006,cl,'c',53],['N','head','b',8,0.055,0.006,cd,'c',54],
+    ['N','head','f',4,0.05,0.005,cl,'c',55,[-0.45,0.45,0.32,0.48]],
+    ['N','torso','f',8,0.05,0.006,cl,'c',56],['N','torso','b',8,0.05,0.006,cd,'c',57],['N','torso','l',6,0.05,0.006,cd,'c',58],['N','torso','r',6,0.05,0.006,cl,'c',59],
+    ['N','hips','f',4,0.05,0.006,cd,'c',60],['N','hips','b',4,0.05,0.006,cl,'c',61],
+    ['P','legU4','f',-0.42,-0.16,-0.5,-0.36,0.016,0x1e4a18],['P','legU4','f',0.16,0.42,-0.5,-0.36,0.016,0x1e4a18],['N','legU4','o',2,0.05,0.006,cl,'c',62]];}
+  // ------------------------------------------------ 무시룸: leather collar + gold bell, nostrils, hooves, back ridge, udder shine
+  {D.moosh=[
+    ['W','head',-0.5,-0.36,0.012,0x5a3418],['B','head',-0.1,0.1,-0.75,-0.5,0.5,0.66,0xf2c230,'m'],['B','head',-0.04,0.04,-0.82,-0.74,0.54,0.62,0x5a3a10],
+    ['P','head:1','f',-0.35,-0.15,-0.2,0.15,0.008,0x5a2a2a],['P','head:1','f',0.15,0.35,-0.2,0.15,0.008,0x5a2a2a],
+    ['P','head','f',-0.38,-0.12,0.22,0.3,0.01,0x6a1010],['P','head','f',0.12,0.38,0.22,0.3,0.01,0x6a1010],
+    ['W','legF4',-0.5,-0.32,0.012,0x2a2020],['S','legF4','f',-0.03,0.03,-0.5,-0.32,0x0a0a0a],
+    ['N','torso','t',10,0.06,0.012,0x9a1818,'c',71],['N','torso','l',6,0.06,0.01,0x9a1818,'c',72],['N','torso','r',6,0.06,0.01,0x9a1818,'c',73],
+    ['P','body:1','d',-0.4,0.4,-0.4,0.4,0.006,0xffc0c8,'g']];}
+  // ------------------------------------------------ 엔더 드래곤: dorsal spike row, belly scale plates, scale noise, leg claws, wing-bone claws
+  {const sp=0x3a3048,bl=0x4a3a5c;const spikes=[];for(let x=-0.42;x<=0.42;x+=0.12)spikes.push(['B','torso',x-0.025,x+0.025,0.5,0.66,-0.05,0.05,sp]);
+  D.dragon=[...spikes,
+    ['P','torso','d',-0.45,0.45,-0.35,0.35,0.012,bl],['S','torso','d',-0.45,0.45,-0.02,0.02,0x1a1420],['S','torso','d',-0.2,-0.18,-0.35,0.35,0x1a1420],['S','torso','d',0.18,0.2,-0.35,0.35,0x1a1420],
+    ['N','torso','f',8,0.12,0.02,0x2a2234,'c',81],['N','torso','b',8,0.12,0.02,0x2a2234,'c',82],
+    ['P','legF4','f',-0.42,-0.18,-0.5,-0.4,0.04,0xc0b8d0],['P','legF4','f',0.18,0.42,-0.5,-0.4,0.04,0xc0b8d0],['W','legU4',0.3,0.42,0.014,sp],
+    ['B','wing*',0.3,0.7,-0.2,0.6,0.42,0.5,0xc0b8d0]];}
+  // ------------------------------------------------ 가스트: soft voxel shading on the cube, tear streaks, tentacle rings
+  {D.ghast=[
+    ['N','torso','t',5,0.12,0.006,0xf2f2f2,'c',91],
+    ['P','torso','f',-0.22,-0.18,-0.3,-0.04,0.006,0xb8b8c0,'g'],['P','torso','f',0.18,0.22,-0.3,-0.04,0.006,0xb8b8c0,'g'],['P','torso','d',-0.45,0.45,-0.45,0.45,0.01,0xd0d0d0],
+    ['W','tents',0.2,0.28,0.01,0xb0b0b0],['W','tents',-0.2,-0.12,0.01,0xb0b0b0]];}
+  // ------------------------------------------------ 보리 (byeol): star hairpin, raised unibrow, nostrils, robe trim + collar, sash, sleeve cuffs, hem, shoes
+  {const rb=0x7a4a2a,tr=0xe8c040;
+  D.byeol=[
+    ['B','head',0.22,0.42,0.5,0.56,0.0,0.12,tr,'g'],['B','head',0.29,0.35,0.5,0.62,-0.06,0.18,tr,'g'],['R','head','t',[[0.32,0.06]],0.03,0xffffff,'e'],
+    ['P','head','f',-0.4,0.4,0.1,0.18,0.012,0x3a2414],['P','head:1','d',-0.3,0.3,0.15,0.4,0.008,0x8a5a40],
+    ['P','torso','f',-0.06,0.06,-0.5,0.5,0.008,tr],['P','torso','t',-0.3,0.3,-0.5,0.5,0.008,0x5a3418],['P','torso','f',-0.3,0.3,0.4,0.5,0.012,0x5a3418],
+    ['P','chest:1','f',-0.5,-0.38,-0.5,0.5,0.01,0x5a3418],['P','chest:1','f',0.38,0.5,-0.5,0.5,0.01,0x5a3418],['P','chest:1','f',-0.38,0.38,-0.12,0.12,0.004,0x6a4022],
+    ['W','hips',0.32,0.5,0.01,0xb88a2a],['P','hips','f',-0.07,0.07,0.0,0.5,0.014,0xb88a2a],['W','hips',-0.5,-0.38,0.01,0x5a3418],['R','hips','f',[[0,0.38]],0.03,0xff6080,'g'],
+    ...shoe(0x2a1a0e,0x4a3220,0x8a6a40)];}
+  // ------------------------------------------------ 주민: raised unibrow, nostrils, robe centre trim + collar, belt + pouch, crossed-arm cuffs, hood back
+  {const rb=0x6a4a2a,rD=0x4a2f18;
+  D.villager=[
+    ['P','head','f',-0.42,0.42,0.1,0.18,0.012,0x2a1a10],['P','head:1','d',-0.3,0.3,0.15,0.4,0.008,0x5a2a14],
+    ['P','torso','t',-0.3,0.3,-0.5,0.5,0.008,rD],['P','torso','f',-0.3,0.3,0.4,0.5,0.012,rD],['W','torso',-0.35,-0.25,0.01,0x3a2410],['P','torso','f',0.2,0.38,-0.5,-0.32,0.02,0x8a6a3a],
+    ['P','body:1','f',-0.5,-0.38,-0.5,0.5,0.01,rD],['P','body:1','f',0.38,0.5,-0.5,0.5,0.01,rD],['P','body:1','f',-0.38,0.38,-0.12,0.12,0.004,0x5a3a1c],
+    
+    ...shoe(0x2a1a0e,0x4a3220,0x8a6a40)];}
+  // ------------------------------------------------ 약탈자: heavy brow, leather vest with buckles, bolt bandolier, shoulder pad, bracers, belt + knife sheath, boots
+  {const lt=0x4a3020,ltD=0x2e1c10,mt=0x8a8f98;
+  D.pillager=[
+    ['P','head','f',-0.42,0.42,0.12,0.2,0.012,0x1a1418],['P','head','t',-0.5,0.5,-0.5,0.5,0.008,0x2a2420],
+    ['P','torso','f',-0.5,-0.18,-0.5,0.5,0.01,lt],['P','torso','f',0.18,0.5,-0.5,0.5,0.01,lt],['R','torso','f',[[-0.22,0.2],[-0.22,-0.15],[0.22,0.2],[0.22,-0.15]],0.025,mt],
+    ['B','torso',-0.45,-0.25,0.28,0.44,0.5,0.56,ltD],['B','torso',-0.25,-0.05,0.12,0.28,0.5,0.56,ltD],['B','torso',-0.05,0.15,-0.04,0.12,0.5,0.56,ltD],['B','torso',0.15,0.35,-0.2,-0.04,0.5,0.56,ltD],
+    ['R','torso','f',[[-0.35,0.36],[-0.15,0.2],[0.05,0.04]],0.022,mt],['P','torso','b',-0.5,0.5,-0.5,0.5,0.008,lt],
+    ['P','armU*','t',-0.5,0.5,-0.5,0.5,0.018,lt],['P','armU*','o',-0.5,0.5,0.2,0.5,0.018,lt],['R','armU*','o',[[0,0.35]],0.022,mt],
+    ['W','armF*',-0.5,-0.2,0.012,lt],['S','armF*','o',-0.5,0.5,-0.36,-0.33,ltD],
+    ['W','hips',0.3,0.5,0.012,ltD],['P','hips','f',-0.09,0.09,0.24,0.56,0.02,mt,'m'],['B','hips',0.3,0.46,-0.6,0.2,0.5,0.66,ltD],['B','hips',0.34,0.42,-0.8,-0.6,0.52,0.64,mt,'m'],
+    ['S','legU*','o',-0.02,0.02,-0.5,0.5,0x1a2a44],...shoe(0x1a1410,0x3a2c20,0x6a5a40),['W','legF*',-0.5,-0.3,0.012,ltD]];}
+  // ------------------------------------------------ 아홀로틀: wet translucent slime sheen, darker spots, tail fin edge, eye shine, mouth line, toes
+  {D.axo=[
+    ['P','torso','t',-0.5,0.5,-0.5,0.5,0.008,0xffd0e8,'s'],['P','head','t',-0.5,0.5,-0.5,0.5,0.008,0xffd0e8,'s'],['P','torso','l',-0.5,0.5,-0.2,0.5,0.006,0xffd0e8,'s'],['P','torso','r',-0.5,0.5,-0.2,0.5,0.006,0xffd0e8,'s'],
+    ['N','torso','t',8,0.035,0.005,0xd86a9a,'c',111],['N','head','t',4,0.035,0.005,0xd86a9a,'c',112],
+    ['P','tail','t',-0.5,0.5,-0.5,0.5,0.012,0xff9ac8,'s'],['S','head','f',-0.25,0.25,-0.3,-0.26,0x9a3a5a],
+    ['P','legU4','f',-0.5,-0.1,-0.5,-0.3,0.012,0xffb8d8],['P','legU4','f',0.1,0.5,-0.5,-0.3,0.012,0xffb8d8]];}
+  // ------------------------------------------------ 아르마딜로: bony scute ridges + studs on every shell band, rim plates, ear tips, claws, tail rings
+  {const sc=0xd88a7a,scD=0x9a5a4a,bn=0xe8c0a8;const shell=[];for(let i=0;i<4;i++){const b='body:'+i;
+    shell.push(['P',b,'t',-0.5,0.5,0.38,0.5,0.014,scD],['P',b,'t',-0.5,0.5,-0.5,-0.38,0.014,scD],['R',b,'t',[[-0.3,0],[0,0],[0.3,0]],0.03,bn,'c'],['P',b,'l',-0.5,0.5,-0.5,-0.36,0.012,scD],['P',b,'r',-0.5,0.5,-0.5,-0.36,0.012,scD],['N',b,'l',2,0.04,0.008,bn,'c',120+i],['N',b,'r',2,0.04,0.008,bn,'c',130+i]);}
+  D.armad=[...shell,['P','legU4','f',-0.45,0.45,-0.5,-0.35,0.012,0x5a3a30],['P','head','f',-0.2,0.2,-0.42,-0.22,0.012,0xb05a50],['W','body:9',-0.1,0.1,0.006,scD]];}
+  return D;})();
+if(typeof window!=='undefined')window.BLOCK_DETAILS=BLOCK_DETAILS;
+
+// ================================================================ BlockDetail v1 — voxel detail dressing for blocky three.js (r128) characters
+// Shared by 마인크래프트 파이터 (fight_work, via tools/sync_fight.py) and 마인크래프트 마리오 (patch21 injects this file).
+// Adds small extra boxes (eyes, brows, seams, trim, belts, pockets, plates, rivets, fur tufts, bone ridges, slime gloss ...) as ONE merged
+// BufferGeometry per (body part x material kind), parented to the part mesh so it follows every joint. Vertex colours carry the colour and a
+// baked per-face shade (top bright / bottom dark, ±noise) so the blocks read with "normal-ish" shading even under flat light; a tiny
+// procedural canvas texture (1px darker rim + grain, NearestFilter) gives each detail block a crisp LEGO/voxel edge. Still strictly blocky.
+// Specs are pure data (rig_lib/details.js, BLOCK_DETAILS[id]); ops (fractions are of the part's own bounding box, -0.5..0.5; d/s are model units):
+//  ['P',part,face,u0,u1,v0,v1,d,col,mat]   plate on a face (f b t d o i ; o/i = outer/inner side of a limb, l/r = -x/+x). f/b/t/d: u=x v=y|z ; o/i/l/r: u=z v=y
+//  ['B',part,x0,x1,y0,y1,z0,z1,col,mat]    free box in part fractions (x mirrored on the left side)
+//  ['W',part,v0,v1,d,col,mat]              band wrapped around the 4 vertical sides (belt, cuff, collar, hem, hoop)
+//  ['R',part,face,[[u,v]..],s,col,mat]     rivets / studs / buttons (fine: skipped on low)
+//  ['S',part,face,u0,u1,v0,v1,col]         seam / stitch line, very thin (fine)
+//  ['N',part,face,n,s,d,col,mat,seed,[u0,u1,v0,v1]]  n scattered tufts (fur, moss, rust, stubble, spots) (on low n is quartered)
+// part: head torso hips | tents | armU* armF* hand* legU* legF* foot* (* = both sides, auto-mirrored) | legU4 legF4 (all four legs)
+//       | 'head:2' 'body:1' 'chest:0' = n-th direct mesh child of that group | 'tail' | 'wing*'
+// mat : c matte (default)  m metal  g gloss  s slime (translucent)  e glow (unlit)
+var BlockDetail=(typeof window!=='undefined'&&window.BlockDetail)||(function(){
+  const V3=()=>new THREE.Vector3();
+  let TEX=null,MATS=null;
+  function tex(kind){const c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');let s=kind.charCodeAt(0)*977;const rnd=()=>{s=(s*16807)%2147483647;return s/2147483647;};
+    for(let j=0;j<16;j++)for(let i=0;i<16;i++){let v=kind==='m'?232+((j%4===0)?-14:0)+rnd()*14:kind==='s'?240+rnd()*10:kind==='g'?244+rnd()*8:226+rnd()*26;
+      if(i===0||j===0)v=Math.min(v,kind==='s'?215:200);if(i===15||j===15)v=Math.min(v,kind==='s'?205:178);if(kind==='m'&&(i===1||j===1))v=255;
+      v=Math.max(0,Math.min(255,v|0));x.fillStyle='rgb('+v+','+v+','+v+')';x.fillRect(i,j,1,1);}
+    const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;t.generateMipmaps=false;if(THREE.sRGBEncoding)t.encoding=THREE.sRGBEncoding;return t;}
+  function mats(){if(MATS)return MATS;TEX={};['c','m','s','g'].forEach(k=>TEX[k]=tex(k));
+    MATS={c:new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.c,roughness:0.88,metalness:0}),
+      m:new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.m,roughness:0.34,metalness:0.72}),
+      g:new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.g,roughness:0.22,metalness:0.05}),
+      s:new THREE.MeshStandardMaterial({vertexColors:true,map:TEX.s,roughness:0.15,metalness:0,transparent:true,opacity:0.58,depthWrite:false}),
+      e:new THREE.MeshBasicMaterial({vertexColors:true})};
+    for(const k in MATS){MATS[k].name='bd_'+k;MATS[k].userData.bd=1;}return MATS;}
+  // ---------------------------------------------------------------- part resolver (works on RIG58-split and unsplit models)
+  const vol=m=>{const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;return (b.max.x-b.min.x)*(b.max.y-b.min.y)*(b.max.z-b.min.z);};
+  const isPart=o=>o&&o.isMesh&&o.visible!==false&&!(o.userData&&(o.userData.lego||o.userData.bd))&&o.name!=='rjCap'&&o.geometry&&o.geometry.type!=='PlaneGeometry'&&o.geometry.type!=='CircleGeometry';
+  const kids=g=>g?g.children.filter(isPart):[];
+  const biggest=a=>{let b=null,bv=-1;a.forEach(m=>{const v=vol(m);if(v>bv){bv=v;b=m;}});return b;};
+  const first=g=>g?(isPart(g)?g:kids(g)[0]||null):null;
+  function parts(obj,rig){const P={},J=rig.J||{};
+    const hd=rig.head;P.head=hd?(hd.isMesh&&isPart(hd)?hd:biggest(kids(hd))):null;P.headG=hd||null;
+    let body=J.ch?J.ch.parent:(hd?hd.parent:null);if(body&&body===obj)body=null;P.bodyG=body;P.chestG=J.ch||null;
+    const cand=[...kids(J.ch),...kids(body)];P.torso=biggest(cand);const rest=cand.filter(m=>m!==P.torso);
+    P.hips=biggest(J.ch&&P.torso&&P.torso.parent===J.ch?kids(body):rest.filter(m=>vol(m)>0.004));if(P.hips&&vol(P.hips)<0.004)P.hips=null;
+    for(const s of ['L','R']){P['armU'+s]=first(rig['arm'+s]);P['armF'+s]=J['e'+s]?kids(J['e'+s])[0]||null:null;P['hand'+s]=J['w'+s]?kids(J['w'+s])[0]||null:null;
+      P['legU'+s]=first(rig['leg'+s]);P['legF'+s]=J['k'+s]?kids(J['k'+s])[0]||null:null;P['foot'+s]=J['f'+s]?kids(J['f'+s])[0]||null:null;
+      const w=rig['wing'+s];P['wing'+s]=w?(w.isMesh?w:kids(w)[0]||null):null;}
+    for(const s of ['B','C']){P['legU'+s]=first(rig['leg'+s]);P['legF'+s]=J['k'+s]?kids(J['k'+s])[0]||null:null;}
+    P.tail=rig.tail?first(rig.tail):null;P.tents=(rig.tents||[]).map(first).filter(Boolean);
+    if(!P.torso){const all=[];obj.traverse(o=>{if(isPart(o))all.push(o);});P.torso=biggest(all);}
+    return P;}
+  function resolve(P,name){
+    if(name.indexOf(':')>0){const [g,i]=name.split(':');const G=g==='head'?P.headG:g==='body'?P.bodyG:g==='chest'?P.chestG:null;const k=kids(G);return k[+i]?[k[+i]]:[];}
+    if(name==='tents')return P.tents.slice();
+    if(name.endsWith('4')){const b=name.slice(0,-1);return ['L','R','B','C'].map(s=>P[b+s]).filter(Boolean);}
+    if(name.endsWith('*')){const b=name.slice(0,-1);return ['L','R'].map(s=>P[b+s]).filter(Boolean);}
+    return P[name]?[P[name]]:[];}
+  // ---------------------------------------------------------------- box builder
+  function Acc(){return {p:[],n:[],u:[],c:[],i:[],nb:0};}
+  const SH=[0.93,0.93,1.09,0.74,1.0,0.88];   // +x -x +y -y +z -z
+  const col=new THREE.Color();
+  function box(A,x0,x1,y0,y1,z0,z1,hex,seed){if(x1<x0)[x0,x1]=[x1,x0];if(y1<y0)[y0,y1]=[y1,y0];if(z1<z0)[z0,z1]=[z1,z0];
+    col.setHex(hex);if(col.convertSRGBToLinear)col.convertSRGBToLinear();const nz=1+(((seed*7919)%97)/97-0.5)*0.08;
+    const F=[[0,[x1,y0,z1],[x1,y0,z0],[x1,y1,z0],[x1,y1,z1]],[1,[x0,y0,z0],[x0,y0,z1],[x0,y1,z1],[x0,y1,z0]],[2,[x0,y1,z1],[x1,y1,z1],[x1,y1,z0],[x0,y1,z0]],
+      [3,[x0,y0,z0],[x1,y0,z0],[x1,y0,z1],[x0,y0,z1]],[4,[x0,y0,z1],[x1,y0,z1],[x1,y1,z1],[x0,y1,z1]],[5,[x1,y0,z0],[x0,y0,z0],[x0,y1,z0],[x1,y1,z0]]];
+    const NN=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]],UV=[[0,0],[1,0],[1,1],[0,1]];
+    for(const [f,...q] of F){const b=A.p.length/3,sh=SH[f]*nz;for(let k=0;k<4;k++){A.p.push(...q[k]);A.n.push(...NN[f]);A.u.push(...UV[k]);A.c.push(col.r*sh,col.g*sh,col.b*sh);}A.i.push(b,b+1,b+2,b,b+2,b+3);}A.nb++;}
+  function geo(A){const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(A.p,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(A.n,3));
+    g.setAttribute('uv',new THREE.Float32BufferAttribute(A.u,2));g.setAttribute('color',new THREE.Float32BufferAttribute(A.c,3));g.setIndex(A.i);g.computeBoundingBox();g.computeBoundingSphere();g.userData.bd=1;return g;}
+  // ---------------------------------------------------------------- apply a spec
+  function apply(obj,rig,id,opt){opt=opt||{};const spec=opt.spec||(typeof BLOCK_DETAILS!=='undefined'?BLOCK_DETAILS[id]:null);if(!spec||!obj||(obj.userData&&obj.userData.bdDone))return null;
+    obj.userData.bdDone=1;const low=!!opt.low,M=mats();obj.updateMatrixWorld(true);const P=parts(obj,rig);const inv=new THREE.Matrix4().copy(obj.matrixWorld).invert();
+    const accs=new Map(),info=new Map(),ws=V3(),os=V3(),tmp=new THREE.Matrix4();obj.getWorldScale(os);
+    const geomOf=m=>{let I=info.get(m);if(I)return I;const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox,s=V3(),c=V3();b.getSize(s);b.getCenter(c);
+      m.getWorldScale(ws);const k=ws.x/os.x||1;tmp.multiplyMatrices(inv,m.matrixWorld);const cx=new THREE.Vector3().setFromMatrixPosition(tmp).x;
+      I={s,c,k,mir:cx<-1e-4,m};info.set(m,I);return I;};
+    const acc=(m,mt)=>{const key=m.uuid+'|'+mt;let A=accs.get(key);if(!A){A=Acc();A.m=m;A.mt=mt;accs.set(key,A);}return A;};
+    let seed=1;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+    // face frame: returns function(u0,u1,v0,v1,dlo,dhi) -> local box
+    const face=(I,f)=>{const {s,c,mir}=I;if(f==='o')f=mir?'l':'r';else if(f==='i')f=mir?'r':'l';
+      const X=a=>c.x+(mir?-a:a)*s.x,Y=a=>c.y+a*s.y,Z=a=>c.z+a*s.z;
+      return (u0,u1,v0,v1,a,b)=>{switch(f){case 'f':return [X(u0),X(u1),Y(v0),Y(v1),c.z+s.z/2+a,c.z+s.z/2+b];case 'b':return [X(u0),X(u1),Y(v0),Y(v1),c.z-s.z/2-b,c.z-s.z/2-a];
+        case 't':return [X(u0),X(u1),c.y+s.y/2+a,c.y+s.y/2+b,Z(v0),Z(v1)];case 'd':return [X(u0),X(u1),c.y-s.y/2-b,c.y-s.y/2-a,Z(v0),Z(v1)];
+        case 'r':return [c.x+s.x/2+a,c.x+s.x/2+b,Y(v0),Y(v1),Z(u0),Z(u1)];default:return [c.x-s.x/2-b,c.x-s.x/2-a,Y(v0),Y(v1),Z(u0),Z(u1)];}};};
+    const put=(I,mt,b,hex)=>{mt=mt||'c';if(low&&(mt==='m'||mt==='g'))mt='c';box(acc(I.m,mt),b[0],b[1],b[2],b[3],b[4],b[5],hex,seed++);};  // low: metal/gloss collapse into matte -> fewer draw calls
+    for(const op of spec){const t=op[0],fine=t==='R'||t==='S';if(low&&fine&&!op.keep)continue;
+      for(const m of resolve(P,op[1])){const I=geomOf(m),k=I.k,E=0.003/k;
+        if(t==='P'){const F=face(I,op[2]);put(I,op[9],F(op[3],op[4],op[5],op[6],-E,op[7]/k),op[8]);}
+        else if(t==='S'){const F=face(I,op[2]);put(I,'c',F(op[3],op[4],op[5],op[6],-E,0.0035/k),op[7]);}
+        else if(t==='B'){const {s,c,mir}=I,X=a=>c.x+(mir?-a:a)*s.x;put(I,op[9],[X(op[2]),X(op[3]),c.y+op[4]*s.y,c.y+op[5]*s.y,c.z+op[6]*s.z,c.z+op[7]*s.z],op[8]);}
+        else if(t==='W'){const {s,c}=I,d=op[4]/k,y0=c.y+op[2]*s.y,y1=c.y+op[3]*s.y;put(I,op[6],[c.x-s.x/2-d,c.x+s.x/2+d,y0,y1,c.z-s.z/2-d,c.z+s.z/2+d],op[5]);}
+        else if(t==='R'){const F=face(I,op[2]),r=op[4]/k;for(const [u,v] of op[3]){const hs=r/2,b=F(u,u,v,v,-E,r*0.7);const isZ=op[2]==='f'||op[2]==='b';const isY=op[2]==='t'||op[2]==='d';
+            // expand the zero-size point into an s x s stud on the face plane
+            if(isZ){b[0]-=hs;b[1]+=hs;b[2]-=hs;b[3]+=hs;}else if(isY){b[0]-=hs;b[1]+=hs;b[4]-=hs;b[5]+=hs;}else{b[2]-=hs;b[3]+=hs;b[4]-=hs;b[5]+=hs;}put(I,op[6]||'m',b,op[5]);}}
+        else if(t==='N'){const F=face(I,op[2]);seed=(op[8]||7)*131+1;const n=low?Math.ceil(op[3]/4):op[3];const sz=op[4];const su=(op[2]==='o'||op[2]==='i'||op[2]==='l'||op[2]==='r')?I.s.z:I.s.x;
+            const sv=(op[2]==='t'||op[2]==='d')?I.s.z:I.s.y;const bd=op[9]||[-0.5,0.5,-0.5,0.5];for(let q=0;q<n;q++){const u=bd[0]+rnd()*(bd[1]-bd[0]),v=bd[2]+rnd()*(bd[3]-bd[2]),w=sz/k/su/2*(0.7+rnd()*0.6),h=sz/k/sv/2*(0.7+rnd()*0.6);
+            put(I,op[7],F(Math.max(-0.5,u-w),Math.min(0.5,u+w),Math.max(-0.5,v-h),Math.min(0.5,v+h),-E,op[5]/k*(0.6+rnd()*0.8)),op[6]);}}}}
+    const out=[];let boxes=0;accs.forEach(A=>{if(!A.nb)return;const mesh=new THREE.Mesh(geo(A),M[A.mt]||M.c);mesh.name='bdDetail';mesh.userData.bd=1;mesh.userData.bdNoSh=A.nb<4;
+      mesh.castShadow=!low&&A.nb>=4;mesh.receiveShadow=false;if(A.mt==='s')mesh.renderOrder=2;A.m.add(mesh);out.push(mesh);boxes+=A.nb;});
+    obj.userData.bd={meshes:out.length,boxes};return obj.userData.bd;}
+  return {apply,parts,mats,box,version:1};
+})();
+if(typeof window!=='undefined')window.BlockDetail=BlockDetail;
+
 // ---------------------------------------------------------------- audio: layered impact synth + music ----------------------------------------------------------------
 const AU={ctx:null,master:null,sfx:null,mus:null,cur:null,bufs:{},tracks:{},
   init(){if(this.ctx)return this.ctx;try{const C=window.AudioContext||window.webkitAudioContext;this.ctx=new C();}catch(e){return null;}
@@ -19005,7 +19302,7 @@ const CINE={on:null,
     const root=new THREE.Group();root.name='bfCrowd';const vol=m=>{const g=m.geometry;if(!g.boundingBox)g.computeBoundingBox();const b=g.boundingBox;return (b.max.x-b.min.x)*(b.max.y-b.min.y)*Math.max(0.02,b.max.z-b.min.z);};
     const mk=(m,n,sh)=>{const im=new THREE.InstancedMesh(m.geometry,m.material,n);im.instanceMatrix.setUsage(THREE.DynamicDrawUsage);im.frustumCulled=false;im.castShadow=sh;im.receiveShadow=!low;im.count=0;root.add(im);return im;};
     const near=meshes.map(m=>mk(m,NN,!low));
-    const farIdx=[];meshes.forEach((m,j)=>{if(m.name!=='rjCap'&&!(m.userData&&m.userData.lego)&&vol(m)>0.003)farIdx.push(j);});
+    const farIdx=[];meshes.forEach((m,j)=>{if(m.name!=='rjCap'&&m.name!=='bdDetail'&&!(m.userData&&m.userData.lego)&&vol(m)>0.003)farIdx.push(j);});
     // far LOD: plain 12-tri boxes of each part's bounds (same materials/UV layout as the unbevelled block) instead of the bevelled geometry
     const boxG=new Map(),farGeo=m=>{const g=m.geometry;if(boxG.has(g))return boxG.get(g);if(!g.boundingBox)g.computeBoundingBox();const bb=g.boundingBox,sz=new THREE.Vector3(),ce=new THREE.Vector3();bb.getSize(sz);bb.getCenter(ce);
       const n=Array.isArray(m.material)?m.material.length:1;const bx=new THREE.BoxGeometry(Math.max(sz.x,1e-3),Math.max(sz.y,1e-3),Math.max(sz.z,1e-3));bx.translate(ce.x,ce.y,ce.z);if(n===1)bx.clearGroups();boxG.set(g,bx);return bx;};
