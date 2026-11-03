@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v6.2.0">
+<meta name="ba-version" content="v6.2.1">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#14110e">
@@ -262,7 +262,7 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
 <div id="launcher" class="screen active">
   <div>
     <h1>미니 게임 모음</h1>
-    <p class="tag">마인크래프트 마리오 · 마인크래프트 파이터 · 체스 · 오목 · 장기 · 바둑 · UNO — 원하는 게임을 골라보세요</p><p class="dl" style="margin:6px 0 0;font-size:14px"><a id="htmlDl" href="https://github.com/Hwani27/board-games/releases/download/v6.2.0/minecraft-games-v6.2.0.html" download="minecraft-games-v6.2.0.html" target="_blank" rel="noopener" style="color:inherit;opacity:.85">⬇️ HTML 다운로드</a></p>
+    <p class="tag">마인크래프트 마리오 · 마인크래프트 파이터 · 체스 · 오목 · 장기 · 바둑 · UNO — 원하는 게임을 골라보세요</p><p class="dl" style="margin:6px 0 0;font-size:14px"><a id="htmlDl" href="https://github.com/Hwani27/board-games/releases/download/v6.2.1/minecraft-games-v6.2.1.html" download="minecraft-games-v6.2.0.html" target="_blank" rel="noopener" style="color:inherit;opacity:.85">⬇️ HTML 다운로드</a></p>
   </div>
   <div class="game-cards">
     <div class="gcard" onclick="openGame('blockaction')">
@@ -6167,7 +6167,7 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
     gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595', 'pw621'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
   function saveSave() { try { wo595Stamp(save); } catch (e) {} try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
@@ -9049,7 +9049,7 @@ const BlockAction = (() => {
     if (!player) { player = makeHero(); scene.add(player); }
     player.visible = true; player.rotation.set(0, 0, 0);
     pl = { x: sp[0], y: sp[1], vx: 0, vy: 0, hw: 0.28, h: 0.9, face: 1, ground: false, coy: 0, buf: 0, jumping: false, power: 0, inv: 0, ride: null, grow: 0, phase: 0, fireCd: 0, prevY: sp[1] };
-    setPower(0, true); stage57();
+    setPower(pw621(), true); stage57();   // v6.2.1: power carried from the last goal (dying resets it)
     G.ticks = 0; G.timeLeft = def.time; G.stageScore0 = G.score; G.over = false; G.w582 = null;
     cam.lockX = null; cam.fy = pl.y; cam.x = pl.x; cam.shake = 0;
     placeCamera(true);
@@ -9059,6 +9059,8 @@ const BlockAction = (() => {
     updateHUD(true); updBossBar();
     if (showIntro) stageIn53(def); else iris53(true, 0.45);
   }
+  // v6.2.1: Mario-style power carry-over. save.pw621 = power at the last goal (0 small · 1 big · 2 fire); a death resets it.
+  const pw621 = () => { const v = save && save.pw621 | 0; return v >= 2 ? 2 : v > 0 ? 1 : 0; };
   function setPower(p, instant) {
     pl.power = p; if (p > 0) pl.half57 = 0; pl.hB = p > 0 ? 1.28 : 0.9; if (!pl.truck) pl.h = pl.crouch ? pl.hB * 0.6 : pl.hB; if (p > (pl.power0 || 0) && !instant && typeof BGM !== 'undefined') BGM.jingle('power'); pl.power0 = p; pl.grow = instant ? 0 : 40;
     const tint = player.userData.tint || [];
@@ -9191,6 +9193,7 @@ const BlockAction = (() => {
     if (state !== 'play') return;
     if (pl.truck) { W3.group.remove(pl.truck.mesh); pl.truck = null; pl.hw = 0.28; AFX.hum(0); }
     state = 'dying'; G.dieT = 0; pl.vy = 0.3; snd('lose'); cam.shake = 8;
+    if (save.pw621) { save.pw621 = 0; saveSave(); }   // v6.2.1: dying loses the carried power
   }
   // a brick may be pounded through only when it is not load-bearing for progress: there must be solid ground
   // (or water) somewhere below it to land on, and the stage may mark extra protected tiles in L.keep
@@ -9531,6 +9534,7 @@ const BlockAction = (() => {
     save.best[def.id] = { score: Math.max(b.score || 0, gained), time: b.time ? Math.min(b.time, +G.clearTime.toFixed(1)) : +G.clearTime.toFixed(1), clear: true }; recBest57(def.id, old57);
     const unlockedNow = stageIdx + 2 > save.unlocked && stageIdx + 1 < STAGES.length;
     save.unlocked = Math.min(STAGES.length, Math.max(save.unlocked, stageIdx + 2));
+    save.pw621 = Math.max(0, Math.min(2, pl.power | 0));   // v6.2.1: keep the goal power for the next stage
     saveSave();
     try { G.w582 = shopBank582(def, !b.clear); } catch (e) {}
     if (afterClear5(def, { gained, newBest, unlockedNow })) return;
@@ -10294,7 +10298,7 @@ const BlockAction = (() => {
       enemies: () => enemies.map(e => ({ kind: e.kind, x: e.x, y: e.y, alive: e.alive, active: e.active, hp: e.hp })),
       L: () => L && { W: L.W, goal: L.goal && { x: L.goal.x, y: L.goal.y }, cp: L.cp && { x: L.cp.x, y: L.cp.y }, arena: L.arena && { x0: L.arena.x0, x1: L.arena.x1 }, start: L.start },
       tile: (x, y) => tile(x, y), save: () => JSON.parse(JSON.stringify(save)), G: () => G && { lives: G.lives, score: G.score, coins: G.coins, time: G.timeLeft, golemDown: G.golemDown },
-      power: p => setPower(p), boss: () => boss && { kind: boss.kind, hp: boss.hp, alive: boss.alive, active: boss.active, x: boss.x, y: boss.y, ai: boss.ai, dragonT: L.dragonT || 0 },
+      power: p => setPower(p), item621: (k, x, y) => spawnItem(k, x, y), pw621: () => save.pw621 || 0, boss: () => boss && { kind: boss.kind, hp: boss.hp, alive: boss.alive, active: boss.active, x: boss.x, y: boss.y, ai: boss.ai, dragonT: L.dragonT || 0 },
       crystals: () => crystals.map(c => ({ x: c.x, y: c.y, alive: c.alive })), skin: s => setHeroSkin(s), dragonNow: () => { if (!L.def.dragon || dragon) return; if (boss && boss.kind === 'boss') { boss.alive = false; boss.gone = true; W3.group.remove(boss.mesh); } cam.lockX = true; G.golemDown = stageIdx; spawnDragon(); }, shots: () => shots.map(s => ({ kind: s.kind, x: s.x, y: s.y, stuck: s.stuck })),
       cam: () => ({ x: cam.x, y: cam.y, d: cam.d, Wv: cam.Wv, shake: cam.shake }),
       truck: (mount) => { const m = makeCybertruck(); const x = Math.floor(pl.x) + (mount ? 0 : 3); m.position.set(x + 0.5, pl.y, ZP); W3.group.add(m); const it = { kind: 'truck', x: mount ? pl.x : x + 0.5, y: pl.y, vx: 0, vy: 0, hw: TRUCK_HW, h: TRUCK_H, mesh: m, grow: 1, emerge: 0 }; if (mount) mountTruck(it); else items.push(it); return !!pl.truck; },
@@ -23122,7 +23126,7 @@ body.mob620-editing #bfTouch,body.mob620-editing #baPad,body.mob620-editing #baP
   const iOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const standalone = !!(navigator.standalone || (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches)));
   const touchDev = (() => { try { return matchMedia('(pointer:coarse)').matches || (navigator.maxTouchPoints | 0) > 0; } catch (e) { return false; } })();
-  M.iOS = iOS; M.standalone = standalone; M.ver = 'v6.2.0';
+  M.iOS = iOS; M.standalone = standalone; M.ver = 'v6.2.1';
   if (M.app || standalone) document.body.classList.add('mob620-app');
 
   // ---------- 스플래시 ----------
