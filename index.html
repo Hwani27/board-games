@@ -6061,7 +6061,8 @@ const BlockAction = (() => {
       });
     }
   }
-  function hmat(k, extra) { const t = HERO_SKIN === 'steve' ? steveTex(k) : heroTex(k); const m = std(Object.assign({ color: 0xffffff, map: t.map, bumpMap: t.bump, bumpScale: 0.012, roughness: 0.78, envMapIntensity: 0.55 }, extra || {})); return HERO_SKIN === 'steve' ? rim572(m) : m; }
+  function isSteveSkin(s) { return s === 'steve' || (typeof SKINS572 !== 'undefined' && !!SKINS572[s]); }
+  function hmat(k, extra) { const t = isSteveSkin(HERO_SKIN) ? steveTex(k) : heroTex(k); const m = std(Object.assign({ color: 0xffffff, map: t.map, bumpMap: t.bump, bumpScale: 0.012, roughness: 0.78, envMapIntensity: 0.55 }, extra || {})); return isSteveSkin(HERO_SKIN) ? rim572(m) : m; }
   makeHero = function () {
     const P = 0.046;  // one "skin pixel" in world units — 32 tall ≈ 1.47 at full scale
     const R = 0.017;  // bevel radius (v5.3: softer)
@@ -6082,7 +6083,7 @@ const BlockAction = (() => {
     const capM = std({ color: 0xffffff, map: hmat('headT').map, bumpMap: hmat('headT').bumpMap, bumpScale: 0.01, roughness: 0.8, envMapIntensity: 0.5 });
     const brim = new THREE.Mesh(bevelBox(8.4 * P, 0.9 * P, 3.4 * P, 0.008), capM); brim.position.set(0, 1.95 * P, 5.3 * P); brim.rotation.x = 0.08; head.add(brim);
     tint.push(capM);
-    if (HERO_SKIN === 'steve') { head.remove(brim); }
+    if (isSteveSkin(HERO_SKIN)) { head.remove(brim); }
     const limb = (mats, px, py, parent) => {
       const pivot = new THREE.Group(); pivot.position.set(px, py, 0);
       const m = new THREE.Mesh(bevelBox(4 * P, 12 * P, 4 * P, R), mats); m.position.y = -6 * P; m.castShadow = true; m.receiveShadow = true;
@@ -6167,7 +6168,7 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
     gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595', 'pw621'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: (s.skin && typeof s.skin === 'string') ? s.skin : 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595', 'pw621'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
   function saveSave() { try { wo595Stamp(save); } catch (e) {} try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
@@ -6419,7 +6420,40 @@ const BlockAction = (() => {
   // =====================================================================
   //  Minecraft-inspired cast — all procedural (own canvas textures, no game assets)
   // =====================================================================
-  let HERO_SKIN = 'steve'; if (save) save.skin = 'steve';   // v5.7.1: Steve is the only playable hero (old 'cap' saves migrate)
+  const SKINS572 = {
+    steve: {
+      id: 'steve', nm: '클래식 스티브', ic: '👕', ds: '언제나 든든한 기본 푸른 셔츠', pr: 0,
+      shirt: ['#1fa3a6', '#22aaac', '#1c9a9d', '#26b0b1'], shirtD: '#137a7d',
+      pants: ['#3c3ba0', '#3a399a', '#4241a8', '#36358f'], pantsD: '#26256e',
+      shoe: ['#5d5d63', '#55555b', '#646469']
+    },
+    diamond: {
+      id: 'diamond', nm: '다이아몬드 갑옷', ic: '💎', ds: '푸른빛으로 찬란하게 빛나는 다이아 세트', pr: 200,
+      shirt: ['#4dedf4', '#55ffff', '#3ad0d7', '#62f6fc'], shirtD: '#269da3',
+      pants: ['#3ad0d7', '#4dedf4', '#2caeb5', '#55ffff'], pantsD: '#269da3',
+      shoe: ['#2caeb5', '#3ad0d7', '#228d93']
+    },
+    space: {
+      id: 'space', nm: '우주복 스티브', ic: '🚀', ds: '골드 부츠와 새하얀 우주 탐사 슈트', pr: 250,
+      shirt: ['#e8e8ee', '#f0f0f8', '#dcdce4', '#ffffff'], shirtD: '#b0b0bc',
+      pants: ['#dcdce4', '#e8e8ee', '#d0d0dc', '#f0f0f8'], pantsD: '#9a9aaa',
+      shoe: ['#f59e0b', '#d97706', '#b45309']
+    },
+    netherite: {
+      id: 'netherite', nm: '네더라이트 갑옷', ic: '🌌', ds: '가장 깊은 네더에서 제련한 단단한 흑요석 갑옷', pr: 300,
+      shirt: ['#312c36', '#3b3542', '#28242c', '#443e4c'], shirtD: '#1f1c22',
+      pants: ['#28242c', '#312c36', '#221e25', '#3b3542'], pantsD: '#18151b',
+      shoe: ['#1f1c22', '#28242c', '#18151b']
+    },
+    gold: {
+      id: 'gold', nm: '황금 갑옷', ic: '✨', ds: '눈부시게 번쩍이는 찬란한 황금 세트', pr: 150,
+      shirt: ['#fbbf24', '#f59e0b', '#fcd34d', '#eab308'], shirtD: '#d97706',
+      pants: ['#f59e0b', '#fbbf24', '#d97706', '#fcd34d'], pantsD: '#b45309',
+      shoe: ['#b45309', '#d97706', '#92400e']
+    }
+  };
+  function getSkin572() { return (typeof SKINS572 !== 'undefined' && SKINS572[HERO_SKIN]) || SKINS572.steve; }
+  let HERO_SKIN = (save && save.skin && SKINS572[save.skin]) ? save.skin : 'steve'; (old 'cap' saves migrate)
   const SC = { skin: '#c99670', skinD: '#a8764f', hair: '#3a2414', hairL: '#55361f', shirt: '#22a3a6', shirtL: '#3fc3c2', shirtD: '#14797c',
     pants: '#3b3a9c', pantsD: '#272672', shoe: '#5b5b60', shoeD: '#3a3a40', iris: '#5a46c8', mouth: '#5a3220' };
   // ================= v5.7.2 Steve HD: high-res pixel skin, thick expressive brows, eye highlights, pixel stubble, bevel light + rim =================
@@ -6484,7 +6518,8 @@ const BlockAction = (() => {
     bevel572(g, w, h, 1);
   }
   function steveHD572(kind) {
-    const lo = window.GQ && GQ.level === 'low', S = lo ? 256 : 512, key = 'hd572_' + kind + (lo ? 'l' : '');
+    const lo = window.GQ && GQ.level === 'low', S = lo ? 256 : 512, key = 'hd572_' + (HERO_SKIN || 'steve') + '_' + kind + (lo ? 'l' : '');
+    const sk = getSkin572();
     const side = (g, w, h, B, hairRows, beard) => {
       SEED572 = 11 + hairRows; grid572(g, w, h, 8, 8, (i, j) => {
         if (j < hairRows || (j < hairRows + 2 && i < 3) || (j === hairRows + 2 && i < 1)) return B ? { b: '#a0a0a0' } : PK572(ST572.hair);
@@ -6501,17 +6536,17 @@ const BlockAction = (() => {
       case 'bodyF': case 'bodyS': case 'bodyB': { const n = kind === 'bodyS' ? 4 : 8;
         return texPair(key, kind === 'bodyS' ? 128 : 256, 384, (g, w, h, B) => { SEED572 = 21 + n;
           grid572(g, w, h, n, 12, (i, j) => {
-            if (j >= 9) return B ? { b: '#868686' } : PK572(ST572.pants);
+            if (j >= 9) return B ? { b: '#868686' } : PK572(sk.pants);
             if (kind === 'bodyF' && j === 0 && i >= 3 && i <= 4) return B ? { b: '#8a8a8a' } : PK572(ST572.skin);   // collar V
             if (kind === 'bodyF' && j === 1 && i >= 3 && i <= 4 && R572() < 0.6) return B ? { b: '#8a8a8a' } : PK572(ST572.skin);
-            return B ? { b: '#888888' } : (R572() < 0.08 ? ST572.shirtD : PK572(ST572.shirt));
+            return B ? { b: '#888888' } : (R572() < 0.08 ? sk.shirtD : PK572(sk.shirt));
           }, B);
           if (B) return; g.fillStyle = 'rgba(0,30,40,.28)'; g.fillRect(0, h * 0.75 - 4, w, 8); bevel572(g, w, h, 1); }); }
-      case 'shirtCap': return texPair(key, 128, 128, (g, w, h, B) => { SEED572 = 31; grid572(g, w, h, 4, 4, () => B ? { b: '#888888' } : PK572(ST572.shirt), B); if (!B) bevel572(g, w, h, 1); });
-      case 'pantsCap': return texPair(key, 128, 128, (g, w, h, B) => { SEED572 = 33; grid572(g, w, h, 4, 4, () => B ? { b: '#888888' } : PK572(ST572.pants), B); if (!B) bevel572(g, w, h, 1); });
-      case 'bootSole': return texPair(key, 128, 128, (g, w, h, B) => { SEED572 = 35; grid572(g, w, h, 4, 4, () => B ? { b: '#707070' } : PK572(ST572.shoe), B); });
-      case 'arm': return texPair(key, 128, 384, (g, w, h, B) => { SEED572 = 41; grid572(g, w, h, 4, 12, (i, j) => j < 4 ? (B ? { b: '#888888' } : PK572(ST572.shirt)) : (B ? { b: '#8a8a8a' } : PK572(ST572.skin)), B); if (!B) { g.fillStyle = 'rgba(0,40,40,.35)'; g.fillRect(0, h / 3 - 5, w, 5); bevel572(g, w, h, 1); } });
-      case 'leg': return texPair(key, 128, 384, (g, w, h, B) => { SEED572 = 43; grid572(g, w, h, 4, 12, (i, j) => j >= 10 ? (B ? { b: '#707070' } : PK572(ST572.shoe)) : (B ? { b: '#868686' } : PK572(ST572.pants)), B); if (!B) bevel572(g, w, h, 1); });
+      case 'shirtCap': return texPair(key, 128, 128, (g, w, h, B) => { SEED572 = 31; grid572(g, w, h, 4, 4, () => B ? { b: '#888888' } : PK572(sk.shirt), B); if (!B) bevel572(g, w, h, 1); });
+      case 'pantsCap': return texPair(key, 128, 128, (g, w, h, B) => { SEED572 = 33; grid572(g, w, h, 4, 4, () => B ? { b: '#888888' } : PK572(sk.pants), B); if (!B) bevel572(g, w, h, 1); });
+      case 'bootSole': return texPair(key, 128, 128, (g, w, h, B) => { SEED572 = 35; grid572(g, w, h, 4, 4, () => B ? { b: '#707070' } : PK572(sk.shoe), B); });
+      case 'arm': return texPair(key, 128, 384, (g, w, h, B) => { SEED572 = 41; grid572(g, w, h, 4, 12, (i, j) => j < 4 ? (B ? { b: '#888888' } : PK572(sk.shirt)) : (B ? { b: '#8a8a8a' } : PK572(ST572.skin)), B); if (!B) { g.fillStyle = 'rgba(0,40,40,.35)'; g.fillRect(0, h / 3 - 5, w, 5); bevel572(g, w, h, 1); } });
+      case 'leg': return texPair(key, 128, 384, (g, w, h, B) => { SEED572 = 43; grid572(g, w, h, 4, 12, (i, j) => j >= 10 ? (B ? { b: '#707070' } : PK572(sk.shoe)) : (B ? { b: '#868686' } : PK572(sk.pants)), B); if (!B) bevel572(g, w, h, 1); });
     }
     return null;
   }
@@ -6529,7 +6564,7 @@ const BlockAction = (() => {
   }
   function steveTex(kind) {
     { const hd = steveHD572(kind); if (hd) return hd; }
-    const S = 256, key = 'st_' + kind;
+    const S = 256, key = 'st_' + (HERO_SKIN || 'steve') + '_' + kind;
     const hairTop = (g, w, h, depth) => { vgrad(g, 0, 0, w, h * depth, SC.hairL, SC.hair);
       for (let i = 0; i < 60; i++) { g.strokeStyle = `rgba(${Math.random() < 0.5 ? '15,8,3' : '110,70,40'},${0.2 + Math.random() * 0.3})`; g.lineWidth = 2; const x = Math.random() * w; g.beginPath(); g.moveTo(x, 0); g.quadraticCurveTo(x + rnd(-8, 8), h * depth * 0.6, x + rnd(-6, 6), h * depth); g.stroke(); } };
     const skinBase = (g, w, h) => { vgrad(g, 0, 0, w, h, '#d3a07a', '#bd8a62'); grain(g, w, h, 0.035, 0.5); };
@@ -6578,10 +6613,18 @@ const BlockAction = (() => {
     return heroTex(kind);
   }
   function setHeroSkin(s) {
-    s = 'steve';
+    s = s || 'steve';
+    if (!SKINS572[s]) s = 'steve';
     HERO_SKIN = s; save.skin = s; saveSave();
-    if (player) { player.parent && player.parent.remove(player); player = null; }
-    player = makeHero(); scene.add(player);
+    let oldPos = null;
+    if (player) {
+      oldPos = player.position.clone();
+      if (player.parent) player.parent.remove(player);
+      player = null;
+    }
+    player = makeHero();
+    if (oldPos) player.position.copy(oldPos);
+    scene.add(player);
     if (pl) setPower(pl.power || 0, true);
   }
 
@@ -10189,7 +10232,7 @@ const BlockAction = (() => {
       if (G.w582) { const W = G.w582, d = document.createElement('div'); d.className = 'w582'; d.dataset.earn = W.earn; d.dataset.w = W.w; p.appendChild(d); const t0 = performance.now(); const f = now => { if (!d.isConnected) return; const k = Math.min(1, Math.max(0, (now - t0 - 900) / 900)); d.textContent = `🪙 +${Math.round(W.earn * k)} 코인 → 지갑 ${(W.w - W.earn + Math.round(W.earn * k)).toLocaleString()}${W.first ? ' (첫 클리어 +20)' : ''}`; if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
       if (stageIdx + 1 < STAGES.length) add('다음 스테이지 ▶', () => shopGo582(stageIdx + 1, () => { stageIdx++; cpReached = false; startStage(true); }), 'pri');
       add('다시 하기', () => shopGo582(stageIdx, () => { cpReached = false; G.score = G.stageScore0; startStage(true); }));
-      add('🗺 월드맵', () => showMap5()); add('🛒 상점', () => shopOpen582());
+      add('🗺 월드맵', () => showMap5()); add('🛒 상점', () => shopOpen582()); add('👔 스킨 옷장', () => shopOpen582(null, 'skins'));
     } else if (kind === 'over') {
       h.textContent = '게임 오버'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
       add('다시 도전', () => shopGo582(stageIdx, () => newRun(stageIdx)), 'pri'); add('🗺 월드맵', () => showMap5());
@@ -11812,7 +11855,7 @@ const BlockAction = (() => {
     else if (n.k === 'gate') { mid.textContent = WT595(n.gw595); h.textContent = (WMETA595[n.gw595] || { name: n.gw595 }).name; p.textContent = '새로운 세계로 가는 길.'; }
     else if (n.k === 'crayon') { mid.textContent = '월드 3 · 크레용 나라'; h.textContent = '이상한 포털'; p.textContent = '위더를 물리친 뒤 포털이 오작동! 모든 것이 크레용으로 그려진 나라로 이어져요.'; add('📜 크레용 나라 장면 보기', () => playCut5('crayon'), 'pri', !S.crayon58); }
     else { mid.textContent = '차원문'; h.textContent = '네더 포탈'; p.textContent = '성 깊은 곳에 열린 보랏빛 차원문. 위더가 기다리는 네더로 이어져요.'; add('📜 포탈 장면 보기', () => playCut5('portal'), 'pri', !S.portal); }
-    add('🛒 상점 · 🪙 ' + shopSt582().w.toLocaleString(), () => shopOpen582(() => mapPanel5()), 'shop582');
+    add('🛒 상점 · 🪙 ' + shopSt582().w.toLocaleString(), () => shopOpen582(() => mapPanel5()), 'shop582'); add('👔 스킨 옷장', () => shopOpen582(() => mapPanel5(), 'skins'));
     if (S.ending) add('🎬 엔딩 다시보기', () => playCut5('ending'));
     if (allClear583()) add('👑 최종 엔딩 다시 보기', () => playFinale583(), 'pri');
     add('📋 스테이지 목록', () => { modeClass5(null); D.map.classList.remove('show'); showSelect(); selectExtras5(); });
@@ -11837,8 +11880,11 @@ const BlockAction = (() => {
     { id: 'truck', ic: '🚙', nm: '사이버트럭', ds: 'T 키 / 트럭 버튼 · 소환', pr: 250, mx: 3, prem: 1 }
   ], pend: null, el: null, open: false, sel: [] };
   function shopSt582() {
-    if (!save.shop || typeof save.shop !== 'object') save.shop = { v: 2, w: 100, inv: {}, welcome: 1 };
+    if (!save.shop || typeof save.shop !== 'object') save.shop = { v: 2, w: 100, inv: {}, welcome: 1, skins: ['steve'] };
     const s = save.shop; if (!s.inv || typeof s.inv !== 'object') s.inv = {};
+    if (!Array.isArray(s.skins)) s.skins = ['steve'];
+    if (!s.skins.includes('steve')) s.skins.push('steve');
+    if (!save.skin) save.skin = 'steve';
     if (!(s.v >= 2)) { s.inv.tnt = Math.floor(+s.inv.tnt || 0) * 2; s.v = 2; }   // v5.8.3: v1 stored 'TNT x2' packs, v2 stores bombs
     s.w = Math.max(0, Math.min(999999, Math.floor(+s.w || 0)));
     SHOP582.items.forEach(it => { s.inv[it.id] = Math.max(0, Math.min(it.mx, Math.floor(+s.inv[it.id] || 0))); });
@@ -11911,35 +11957,108 @@ const BlockAction = (() => {
       }
     } catch (e) {}
   }
-  function shopOpen582(back) {
+  function shopOpen582(back, tab) {
     const el = shopEl582(); if (!el) return; const s = shopSt582();
     SHOP582.mode = 'shop'; SHOP582.open = true; SHOP582.back = back || null;
-    el.innerHTML = `<div class="toast"></div><div class="pn"><div class="hd"><h3>🛒 상점</h3><div class="wl" data-w>🪙 ${s.w.toLocaleString()}</div><button type="button" class="x" data-x aria-label="닫기">✕</button></div>
-<div class="sub">스테이지에서 모은 코인은 <b>클리어할 때</b> 지갑에 들어와요${DIFF === 'hard' ? ' (어려움 ×1.5)' : ''}. 산 아이템과, 이미 커진 상태에서 주운 버섯·꽃은 <b>보관함</b>에 쌓여요. 스테이지 중 언제든 꺼내 쓰세요 — PC <b>1~5</b> · E · R · T / 폰은 오른쪽 위 <b>아이템 칸</b> 탭.</div><div class="gr"></div>
+    SHOP582.tab = tab === 'skins' ? 'skins' : 'items';
+    el.innerHTML = `<div class="toast"></div><div class="pn"><div class="hd">
+<div style="display:flex;gap:8px;align-items:center;flex:1;"><button type="button" class="tab-btn" data-tab="items" style="border:0;background:${SHOP582.tab==='items'?'#f8d36a':'rgba(255,255,255,.14)'};color:${SHOP582.tab==='items'?'#2a1a04':'#fff'};border-radius:12px;padding:8px 14px;font-weight:900;font-size:15px;cursor:pointer;">🛒 아이템 상점</button><button type="button" class="tab-btn" data-tab="skins" style="border:0;background:${SHOP582.tab==='skins'?'#f8d36a':'rgba(255,255,255,.14)'};color:${SHOP582.tab==='skins'?'#2a1a04':'#fff'};border-radius:12px;padding:8px 14px;font-weight:900;font-size:15px;cursor:pointer;">👔 스킨 옷장</button></div>
+<div class="wl" data-w>🪙 ${s.w.toLocaleString()}</div><button type="button" class="x" data-x aria-label="닫기">✕</button></div>
+<div class="sub"></div><div class="gr"></div>
 <div class="ft"><button type="button" class="sec" data-x>${back ? '← 돌아가기' : '닫기'}</button></div></div>`;
-    const gr = el.querySelector('.gr');
-    SHOP582.items.forEach(it => {
-      const c = document.createElement('div'); c.className = 'cd' + (it.prem ? ' prem' : ''); c.dataset.id = it.id;
-      c.innerHTML = `${it.prem ? '<div class="tag">프리미엄</div>' : ''}<div class="ic">${it.ic}</div><div class="nm">${it.nm}</div><div class="ds">${it.ds}</div><div class="ow"></div><button type="button"></button>`;
-      gr.appendChild(c); c.querySelector('button').onclick = ev => { ev.stopPropagation(); shopBuy582(it.id, c); };
+    el.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.onclick = ev => {
+        ev.stopPropagation(); snd('select');
+        SHOP582.tab = btn.dataset.tab;
+        shopRenderGrid582();
+      };
     });
     el.querySelectorAll('[data-x]').forEach(b => b.onclick = ev => { ev.stopPropagation(); snd('select'); shopClose582(); });
-    shopRefresh582(); el.classList.add('show');
+    shopRenderGrid582(); el.classList.add('show');
   }
   function shopSyncHdr582(w) {   // keep the world-map header / shop button showing the same wallet as the shop
     const t = '🪙 ' + w.toLocaleString(), h = document.getElementById('baMapT');
     if (h && /🪙 [\d,]+$/.test(h.textContent)) h.textContent = h.textContent.replace(/🪙 [\d,]+$/, t);
     document.querySelectorAll('button').forEach(b => { if (/^🛒 상점 · 🪙 [\d,]+$/.test(b.textContent)) b.textContent = '🛒 상점 · ' + t; });
   }
-  function shopRefresh582() {
-    const el = SHOP582.el, s = shopSt582(); if (!el) return;
+  function shopRenderGrid582() {
+    const el = SHOP582.el; if (!el) return;
+    const s = shopSt582(), gr = el.querySelector('.gr'), sub = el.querySelector('.sub'); if (!gr) return;
+    gr.innerHTML = '';
+    el.querySelectorAll('.tab-btn').forEach(btn => {
+      const active = btn.dataset.tab === SHOP582.tab;
+      btn.style.background = active ? '#f8d36a' : 'rgba(255,255,255,.14)';
+      btn.style.color = active ? '#2a1a04' : '#fff';
+    });
     const w = el.querySelector('[data-w]'); if (w) w.textContent = '🪙 ' + s.w.toLocaleString();
     shopSyncHdr582(s.w);
+    if (SHOP582.tab === 'skins') {
+      if (sub) sub.innerHTML = `모은 코인으로 멋진 스킨을 잠금 해제하고 갈아입으세요! <b>다이아몬드·우주복·네더라이트·황금</b> 갑옷으로 모험을 떠나요.`;
+      Object.values(SKINS572).forEach(sk => {
+        const owned = (s.skins || ['steve']).includes(sk.id);
+        const equipped = (save.skin || 'steve') === sk.id;
+        const c = document.createElement('div');
+        c.className = 'cd' + (sk.id !== 'steve' ? ' prem' : '');
+        c.dataset.skin = sk.id;
+        c.innerHTML = `${equipped ? '<div class="tag" style="background:#10b981;">착용 중</div>' : owned ? '<div class="tag" style="background:#3b82f6;">보유 중</div>' : ''}<div class="ic">${sk.ic}</div><div class="nm">${sk.nm}</div><div class="ds">${sk.ds}</div><div class="ow">${equipped ? '✨ 현재 착용 중' : owned ? '보유 중' : '🪙 ' + sk.pr + ' 코인'}</div><button type="button" style="${equipped ? 'background:#10b981;color:#fff;' : ''}">${equipped ? '착용 중' : owned ? '착용하기' : '🪙 ' + sk.pr + ' 구매'}</button>`;
+        gr.appendChild(c);
+        c.querySelector('button').onclick = ev => { ev.stopPropagation(); shopSkinAct582(sk.id, c); };
+      });
+    } else {
+      if (sub) sub.innerHTML = `스테이지에서 모은 코인은 <b>클리어할 때</b> 지갑에 들어와요${DIFF === 'hard' ? ' (어려움 ×1.5)' : ''}. 산 아이템과, 이미 커진 상태에서 주운 버섯·꽃은 <b>보관함</b>에 쌓여요. 스테이지 중 언제든 꺼내 쓰세요 — PC <b>1~5</b> · E · R · T / 폰은 오른쪽 위 <b>아이템 칸</b> 탭.`;
+      SHOP582.items.forEach(it => {
+        const c = document.createElement('div'); c.className = 'cd' + (it.prem ? ' prem' : ''); c.dataset.id = it.id;
+        c.innerHTML = `${it.prem ? '<div class="tag">프리미엄</div>' : ''}<div class="ic">${it.ic}</div><div class="nm">${it.nm}</div><div class="ds">${it.ds}</div><div class="ow"></div><button type="button"></button>`;
+        gr.appendChild(c); c.querySelector('button').onclick = ev => { ev.stopPropagation(); shopBuy582(it.id, c); };
+      });
+      shopRefreshItems582();
+    }
+  }
+  function shopRefreshItems582() {
+    const el = SHOP582.el, s = shopSt582(); if (!el) return;
     el.querySelectorAll('.cd[data-id]').forEach(c => {
       const it = SHOP582.items.find(i => i.id === c.dataset.id), n = s.inv[it.id], b = c.querySelector('button'), ow = c.querySelector('.ow');
       if (ow) ow.textContent = `보유 ${n} / ${it.mx}`;
       if (b && SHOP582.mode === 'shop') { b.disabled = n >= it.mx || s.w < it.pr; b.textContent = n >= it.mx ? '가득 참' : `🪙 ${it.pr} 구매`; }
     });
+  }
+  function shopRefresh582() {
+    const el = SHOP582.el, s = shopSt582(); if (!el) return;
+    const w = el.querySelector('[data-w]'); if (w) w.textContent = '🪙 ' + s.w.toLocaleString();
+    shopSyncHdr582(s.w);
+    if (SHOP582.tab === 'skins') {
+      shopRenderGrid582();
+    } else {
+      shopRefreshItems582();
+    }
+  }
+  function shopSkinAct582(id, card) {
+    const s = shopSt582(), sk = SKINS572[id]; if (!sk) return;
+    if (!Array.isArray(s.skins)) s.skins = ['steve'];
+    const owned = s.skins.includes(id);
+    const equipped = (save.skin || 'steve') === id;
+    if (equipped) return;
+    if (owned) {
+      setHeroSkin(id);
+      shopToast582(`${sk.ic} ${sk.nm} 착용 완료!`);
+      try { snd('power'); vib(12); } catch (e) {}
+      shopRenderGrid582();
+      return;
+    }
+    if (s.w < sk.pr) {
+      shopToast582('코인이 부족해요! 스테이지를 클리어해 보세요.');
+      snd('land');
+      return;
+    }
+    s.w -= sk.pr;
+    s.skins.push(id);
+    setHeroSkin(id);
+    saveSave();
+    const w = SHOP582.el && SHOP582.el.querySelector('[data-w]');
+    if (card && w) { shopFly582(card, w, Math.min(8, 3 + Math.round(sk.pr / 50))); w.classList.remove('bump'); void w.offsetWidth; w.classList.add('bump'); }
+    try { snd('power'); vib(15); } catch (e) {}
+    shopToast582(`${sk.ic} ${sk.nm} 구매 및 착용 완료!`);
+    shopRefresh582();
   }
   function shopBuy582(id, card) {
     const s = shopSt582(), it = SHOP582.items.find(i => i.id === id); if (!it) return false;
@@ -15879,7 +15998,7 @@ var BlockDetail=(function(){
     const k = Math.min(1, (dt || 1 / 60) * 60);
     try {
       if (player && !player.userData.rg58) rigObj58(player);
-      if (player && !player.userData.bdTry592 && HERO_SKIN === 'steve') bdBA592(player, 'hero');
+      if (player && !player.userData.bdTry592 && isSteveSkin(HERO_SKIN)) bdBA592(player, 'hero');
       if (player && pl) rigHero58(k);
       if (heroOnly) return;
       for (const e of enemies) { const m = e.mesh; if (!m) continue; if (!m.userData.rg58) rigObj58(m); if (!m.userData.bdTry592) bdBA592(m, e.kind); const r = m.userData.rg58; if (r) { const iv = e.inv || 0; if (iv > (r.inv0 || 0) + 4 || (e.alive === false && r.alive0)) r.hurt = 14; r.inv0 = iv; r.alive0 = e.alive !== false; } }
