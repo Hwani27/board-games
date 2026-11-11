@@ -7221,7 +7221,7 @@ const BlockAction = (() => {
       ud.torso.position.y = (ud.torso.userData.y0 === undefined ? (ud.torso.userData.y0 = ud.torso.position.y) : ud.torso.userData.y0) + Math.abs(Math.cos(e.ph)) * 0.012;
       return;
     }
-    if (e.kind === 'moosh') {
+    if (e.kind === 'moosh' || e.kind === 'dmoosh') {
       m.rotation.y = lerp(m.rotation.y, e.dir * (Math.PI / 2 - 0.45), 0.06);
       const gt = mobGait(e, m, 12 * ud.P, 0.02, 0.42), sw = gt.th; e.ph = gt.ph;
       ud.legs.forEach((l, i) => { l.rotation.x = (i === 0 || i === 3 ? sw : -sw); }); m.position.y = -12 * ud.P * (1 - Math.cos(sw));
@@ -7862,7 +7862,7 @@ const BlockAction = (() => {
   function animMobs2(e, m, ud, t) {
     if (!e.alive) return;
     if (ANIM5[e.kind]) { ANIM5[e.kind](e, m, ud, t); return; }
-    if (e.kind === 'snowgolem') {
+    if (e.kind === 'snowgolem' || e.kind === 'dsnow') {
       m.rotation.y = lerp(m.rotation.y, e.dir * 0.65, 0.12);
       const mv = Math.abs(e.vx) > 0.001; e.ph = (e.ph || 0) + (mv ? 0.2 : 0.04);
       ud.torso.rotation.z = Math.sin(e.ph) * (mv ? 0.07 : 0.025); ud.torso.position.y = 0.6 + Math.abs(Math.sin(e.ph)) * (mv ? 0.03 : 0.005);
@@ -7871,7 +7871,7 @@ const BlockAction = (() => {
       ud.arms[0].rotation.z = 0.95 + Math.sin(e.ph + 1) * 0.1;
       ud.neck.rotation.y = Math.sin(t * 0.02 + e.id) * 0.2; ud.fg.material.opacity = 0.4 + Math.sin(t * 0.13 + e.id) * 0.12;
       if (t % 14 === 0) spawnParts(e.x + rnd(-0.3, 0.3), e.y + 1.2, ZP, 0xeaf4ff, 1, 0.01, -0.005);
-    } else if (e.kind === 'irongolem') {
+    } else if (e.kind === 'irongolem' || e.kind === 'diron') {
       m.rotation.y = lerp(m.rotation.y, e.dir * (e.offer ? 0.35 : 0.7), 0.1);
       const gt = mobGait(e, m, 0.62, 0.03, 0.42), sw = gt.th; e.ph = gt.ph;
       ud.legs[0].rotation.x = sw; ud.legs[1].rotation.x = -sw;
@@ -10174,25 +10174,27 @@ const BlockAction = (() => {
   function animActors(dt) {
     const t = clock;
     enemies.forEach(e => {
+      try {
       const m = e.mesh.children[0]; if (!m) return;
       const ud = m.userData || {};
       if (ud.eyes62) ud.eyes62.forEach(s => { if (s.material) s.material.opacity = 0.62 + Math.sin(t * 0.22 + e.id) * 0.34; });
       if (e.kind === 'rsboss') { poseRsBoss62(e, t); return; }
       if (e.kind === 'bat') { if (ud.wings) ud.wings.forEach((w, i) => { w.rotation.z = (i ? -1 : 1) * (0.25 + Math.sin(t * 0.45 + e.id) * 0.75); }); m.rotation.y = lerp(m.rotation.y, e.dir * 0.5, 0.1); m.rotation.z = Math.sin(t * 0.05 + e.id) * 0.15; }
-      else if (e.kind === 'skeleton' || e.kind === 'pillager' || e.kind === 'moosh') animMobs(e, m, ud, t);
-      else if (MOB2[e.kind]) animMobs2(e, m, ud, t);
-      else if (ud.legL) {
+      else if (e.kind === 'skeleton' || e.kind === 'pillager' || e.kind === 'moosh' || e.kind === 'dmoosh') animMobs(e, m, ud, t);
+      else if (e.kind === 'dsnow' || e.kind === 'diron' || MOB2[e.kind]) animMobs2(e, m, ud, t);
+      else if (ud.legL || ud.legR || ud.armL || ud.armR) {
         if (e.alive) {
           m.rotation.y = lerp(m.rotation.y, e.dir * (e.kind === 'spiky' ? Math.PI / 2 : 0.65), 0.12);
           const sp = e.kind === 'boss' ? (e.ai === 'charge' && e.aiT > 30 ? 0.5 : 0.18) : 0.24;
           const sw = Math.sin(t * sp + e.id) * (e.kind === 'spiky' ? 0.7 : 0.45);
-          ud.legL.rotation.x = sw; ud.legR.rotation.x = -sw; ud.armL.rotation.x = -sw * 0.7; ud.armR.rotation.x = sw * 0.7;
+          if (ud.legL) ud.legL.rotation.x = sw; if (ud.legR) ud.legR.rotation.x = -sw; if (ud.armL) ud.armL.rotation.x = -sw * 0.7; if (ud.armR) ud.armR.rotation.x = sw * 0.7;
           if (ud.torso) { ud.torso.position.y = (ud.torso.userData.y0 === undefined ? (ud.torso.userData.y0 = ud.torso.position.y) : ud.torso.userData.y0) + Math.abs(Math.cos(t * sp + e.id)) * 0.02; ud.torso.rotation.x = e.kind === 'boss' && e.ai === 'charge' ? lerp(ud.torso.rotation.x, e.aiT < 30 ? -0.2 : 0.35, 0.15) : lerp(ud.torso.rotation.x, 0, 0.1); }
           if (ud.glow) ud.glow.material.opacity = 0.55 + Math.sin(t * 0.1 + e.id) * 0.2;
         }
         if (e.kind === 'boss' || e.kind === 'dboss') { e.mesh.visible = e.active && !(e.inv > 0 && (t >> 2) % 2 === 0); }
         if (e.kind === 'spiky') m.position.y = Math.abs(Math.sin(t * 0.24 + e.id)) * 0.03;
       }
+      } catch (err) { entErr5(e, err); }
     });
     if (dragon && dragon.alive) animDragon(dragon);
     // coins spin, ? blocks glow
