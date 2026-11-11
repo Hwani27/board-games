@@ -1,5 +1,5 @@
 /* 블록 게임 오프라인 서비스 워커 — BUILD 값은 tools/stamp_sw.py 가 index.html 해시로 갱신 */
-const BUILD = 'v6.2.2-86e53af8ed';
+const BUILD = 'v6.3.0-c6f6145925';
 const CACHE = 'blockgames-' + BUILD;
 const CORE = ['./', './index.html', './manifest.webmanifest',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-maskable-192.png', './icons/icon-maskable-512.png',
