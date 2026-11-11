@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta name="ba-version" content="v6.2.2">
+<meta name="ba-version" content="v6.3.0">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#14110e">
@@ -268,7 +268,7 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
     <div class="gcard" onclick="openGame('blockaction')">
       <div class="ic">⛏️</div>
       <h2>마인크래프트 마리오</h2>
-      <small>블록 세상 횡스크롤 점프 액션 · 스토리 모드<br>월드 1~5 · 19 스테이지 · 보스전</small>
+      <small>블록 세상 횡스크롤 점프 액션 · 스토리 모드<br>월드 1~5 · 외전 악몽 나라 · 24 스테이지 · 보스전</small>
     </div>
     <div class="gcard" onclick="openGame('chess')">
       <div class="ic">♛</div>
@@ -793,6 +793,7 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
   .ba-card.th-cave{background:linear-gradient(160deg,rgba(40,70,120,.8),rgba(8,14,30,.88));}
   .ba-card.th-wall{background:linear-gradient(160deg,rgba(90,80,160,.8),rgba(24,18,60,.88));}
   .ba-card.th-castle{background:linear-gradient(160deg,rgba(130,40,50,.82),rgba(30,8,14,.9));}
+  .ba-card.th-dream,.ba-card.th-dreamb{background:linear-gradient(160deg,rgba(88,28,120,.88),rgba(16,6,28,.94));}
   .ba-card.locked{filter:grayscale(.85) brightness(.6);cursor:not-allowed;}
   .ba-card.cleared{border-color:rgba(255,214,110,.75);}
   .ba-id{font-size:12px;font-weight:800;letter-spacing:.08em;opacity:.85;}
@@ -8552,7 +8553,7 @@ const BlockAction = (() => {
       else if (st === 'cut') k = MUS5.cut || 'story';
       else if (st === 'play' || st === 'intro' || st === 'talk') {
         const th = L && L.def && L.def.theme; k = STAGE24[th] || (L && L.def && L.def.music) || STAGE_T[th] || 'field';
-        if (boss && boss.active && boss.alive && (boss.kind === 'boss' || boss.kind === 'golem')) k = th === 'spaceb' ? 'spaceboss' : 'golem';
+        if (boss && boss.active && boss.alive && (boss.kind === 'boss' || boss.kind === 'golem' || boss.kind === 'dboss' || boss.kind === 'rsboss')) k = th === 'spaceb' ? 'spaceboss' : 'golem';
         if (L && L.def && L.def.dragon && (dragon || (L.dragonT > 0))) k = 'dragon';
         if (boss && boss.kind === 'wither' && boss.active && boss.alive) k = 'wither';
         if (boss && boss.kind === 'ufo' && boss.active && boss.alive) k = 'spaceboss';
@@ -9032,12 +9033,15 @@ const BlockAction = (() => {
   }
   function addEnemy(kind, x, y) {
     const sp = SPEC[kind];
-    const mesh = kind === 'spiky' ? makeSpiky() : kind === 'bat' ? makeBat() : kind === 'boss' ? makeBoss() : kind === 'skeleton' ? makeSkeleton() : kind === 'pillager' ? makePillager() : kind === 'moosh' ? makeMooshroom() : MOB2[kind] ? MOB2[kind]() : makeFoe(kind);
+    const mesh = DMK62[kind] ? DMK62[kind]() : kind === 'spiky' ? makeSpiky() : kind === 'bat' ? makeBat() : kind === 'boss' ? makeBoss() : kind === 'skeleton' ? makeSkeleton() : kind === 'pillager' ? makePillager() : kind === 'moosh' ? makeMooshroom() : MOB2[kind] ? MOB2[kind]() : makeFoe(kind);
     mesh.position.set(x, y, ZP); W3.group.add(mesh);
     const e = { kind, x, y, vx: 0, vy: 0, dir: -1, hw: sp.hw, h: sp.h, sp: sp.sp * (kind === 'boss' || kind === 'wither' || kind === 'ufo' ? 1 : DF().en), hp: sp.hp || 1, mesh, alive: true, active: false, dead: 0, t: Math.random() * 100, baseY: y, inv: 0, id: enemies.length, ai: 'walk', aiT: 0, home: x, kb: 0 };
     e.wk = (kind === 'boss' || kind === 'wither' || kind === 'ufo' || BOSSK[kind]) ? 1 : wk622(); e.sp *= e.wk;
     if (kind === 'axolotl') e.dir = 1;
     if (kind === 'boss') { e.hp = e.maxHp = bossHp57(5); }
+    if (kind === 'dboss') { e.hp = e.maxHp = bossHp57(8); e.nm62 = '그림자 꾸꾸'; }
+    if (kind === 'rsboss') { e.hp = e.maxHp = bossHp57(10); e.nm62 = '실사 스티브'; }
+    if (DMB62[kind]) e.nm62 = DMB62[kind];
     enemies.push(e); return e;
   }
 
@@ -9135,7 +9139,8 @@ const BlockAction = (() => {
       if (Math.abs(dxp) < 9) { e.dir = Math.sign(dxp) || e.dir; e.vx += (e.dir * e.sp - e.vx) * 0.04; e.baseY += ((pl.y + 0.8) - e.baseY) * 0.006; }
       else e.vx *= 0.95;
       e.x += e.vx; e.y = e.baseY + Math.sin(e.t * 0.06) * 1.1;
-    } else if (e.kind === 'boss') tickBoss(e);
+    } else if (e.kind === 'rsboss') tickRsBoss62(e);
+    else if (e.kind === 'boss' || e.kind === 'dboss') tickBoss(e);
     else if (e.kind === 'skeleton' || e.kind === 'pillager') { tickArcher(e); if (e.alive) e.mesh.position.set(e.x, e.y, ZP); return; }
     else if (e.kind === 'moosh') { tickMoosh(e); if (e.alive) e.mesh.position.set(e.x, e.y, ZP); return; }
     else {
@@ -9171,6 +9176,7 @@ const BlockAction = (() => {
     if (e.kind === 'ufo') return hitUfo54(e, dmg);
     if (e.kind === 'robo58') return hitRobo58(e, dmg);
     if (e.kind === 'drag59') return hitDrag59(e, dmg);
+    if (e.kind === 'dboss') return hitDreamBoss62(e, dmg);
     if (e.inv > 0) return false;
     e.hp -= dmg; e.inv = dmg >= 1 ? 50 : 12; snd('stomp'); cam.shake = 6;
     if (e.hp <= 0.01) {
@@ -9208,7 +9214,7 @@ const BlockAction = (() => {
     snd('stomp'); snd('land'); cam.shake = Math.max(cam.shake, 9); G.hitstop = 4; vib([18, 30, 12]);
     spawnParts(x, y + 0.05, ZP, 0xd8c8b0, NP(16), 0.14, 0.06); dustRing(x, y);
     enemies.forEach(e => { if (!e.alive || !e.active || ALLY[e.kind] || e.kind === 'moosh') return;
-      if (Math.abs(e.x - x) < 1.6 + e.hw && Math.abs(e.y - y) < 0.6) { hitFlash(e); if (BOSSK[e.kind]) { if (!(e.inv > 0)) hitBoss(e, 1); } else if (e.kind !== 'chief') killFlip(e, 200); } });
+      if (Math.abs(e.x - x) < 1.6 + e.hw && Math.abs(e.y - y) < 0.6) { hitFlash(e); if (BOSSK[e.kind]) { if (!(e.inv > 0)) hitBoss(e, 1); } else if (DMB62[e.kind]) { if (!(e.inv > 0)) dreamHit62(e, 1); } else if (e.kind !== 'chief') killFlip(e, 200); } });
   }
   function dustRing(x, y) {
     const m = new THREE.Mesh(new THREE.RingGeometry(0.2, 0.34, 40), new THREE.MeshBasicMaterial({ color: LIN(0xf0e6d6), transparent: true, opacity: 0.8, depthWrite: false, toneMapped: false, side: THREE.DoubleSide }));
@@ -9425,7 +9431,7 @@ const BlockAction = (() => {
       const r = moveBody(f, f.vx, f.vy);
       if (r.ground) f.vy = 0.16;
       if (r.hitX || r.head || f.life <= 0 || f.y < -3 || Math.abs(f.x - cam.x) > cam.Wv) f.gone = true;
-      for (const e of enemies) if (e.alive && e.active && e.kind !== 'moosh' && e.kind !== 'chief' && !ALLY[e.kind] && overlap(f, e)) { f.gone = true; if (FIRE5[e.kind]) { FIRE5[e.kind](e, f); break; } hitFlash(e); if (BOSSK[e.kind]) hitBoss(e, 0.34); else killFlip(e, 200); break; }
+      for (const e of enemies) if (e.alive && e.active && e.kind !== 'moosh' && e.kind !== 'chief' && !ALLY[e.kind] && overlap(f, e)) { f.gone = true; if (FIRE5[e.kind]) { FIRE5[e.kind](e, f); break; } hitFlash(e); if (DMB62[e.kind]) { dreamHit62(e, 1); break; } if (BOSSK[e.kind]) hitBoss(e, 0.34); else killFlip(e, 200); break; }
       L.chimneys.forEach(c => { if (c.flame && c.mesh && c.mesh.visible && Math.abs(f.x - (c.x + 1)) < 0.5 && f.y < c.y + 1 && f.y > c.y) f.gone = true; });
       if (f.gone) { spawnParts(f.x, f.y, ZP, 0xff8a2a, NP(6), 0.05, 0.05); W3.group.remove(f.mesh); } else f.mesh.position.set(f.x, f.y + 0.1, ZP);
     });
@@ -9446,6 +9452,8 @@ const BlockAction = (() => {
       else if (boss.kind === 'ufo') ufoWake54(boss);
       else if (boss.kind === 'robo58') roboWake58(boss);
       else if (boss.kind === 'drag59') dragWake59(boss);
+      else if (boss.kind === 'dboss') { banner('그림자 꾸꾸', '까만 그림자야. 빨간 눈이 빛날 때 머리를 밟아!', 1600); snd('check'); bossIntro53(boss); }
+      else if (boss.kind === 'rsboss') { banner('실사 스티브', '너무 진짜 같아… 팔을 뻗기 전에 머리를 밟아!', 1800); snd('check'); bossIntro53(boss); }
       else { banner('골렘 왕', '머리를 5번 밟거나 불덩이로!', 1500); snd('check'); bossIntro53(boss); }
       updBossBar();
     }
@@ -9533,8 +9541,9 @@ const BlockAction = (() => {
     const b = save.best[def.id] || {}, old57 = Object.assign({}, b);
     const newBest = !b.score || gained > b.score;
     save.best[def.id] = { score: Math.max(b.score || 0, gained), time: b.time ? Math.min(b.time, +G.clearTime.toFixed(1)) : +G.clearTime.toFixed(1), clear: true }; recBest57(def.id, old57);
-    const unlockedNow = stageIdx + 2 > save.unlocked && stageIdx + 1 < STAGES.length;
-    save.unlocked = Math.min(STAGES.length, Math.max(save.unlocked, stageIdx + 2));
+    const side62 = def.wk === 'dream';
+    const unlockedNow = !side62 && stageIdx + 2 > save.unlocked && stageIdx + 1 < STAGES.length && !(STAGES[stageIdx + 1] && STAGES[stageIdx + 1].wk === 'dream');
+    if (!side62) save.unlocked = Math.min(STAGES.length, Math.max(save.unlocked, stageIdx + 2));
     save.pw621 = Math.max(0, Math.min(2, pl.power | 0));   // v6.2.1: keep the goal power for the next stage
     saveSave();
     try { G.w582 = shopBank582(def, !b.clear); } catch (e) {}
@@ -10042,6 +10051,8 @@ const BlockAction = (() => {
     enemies.forEach(e => {
       const m = e.mesh.children[0]; if (!m) return;
       const ud = m.userData || {};
+      if (ud.eyes62) ud.eyes62.forEach(s => { if (s.material) s.material.opacity = 0.62 + Math.sin(t * 0.22 + e.id) * 0.34; });
+      if (e.kind === 'rsboss') { poseRsBoss62(e, t); return; }
       if (e.kind === 'bat') { if (ud.wings) ud.wings.forEach((w, i) => { w.rotation.z = (i ? -1 : 1) * (0.25 + Math.sin(t * 0.45 + e.id) * 0.75); }); m.rotation.y = lerp(m.rotation.y, e.dir * 0.5, 0.1); m.rotation.z = Math.sin(t * 0.05 + e.id) * 0.15; }
       else if (e.kind === 'skeleton' || e.kind === 'pillager' || e.kind === 'moosh') animMobs(e, m, ud, t);
       else if (MOB2[e.kind]) animMobs2(e, m, ud, t);
@@ -10054,7 +10065,7 @@ const BlockAction = (() => {
           if (ud.torso) { ud.torso.position.y = (ud.torso.userData.y0 === undefined ? (ud.torso.userData.y0 = ud.torso.position.y) : ud.torso.userData.y0) + Math.abs(Math.cos(t * sp + e.id)) * 0.02; ud.torso.rotation.x = e.kind === 'boss' && e.ai === 'charge' ? lerp(ud.torso.rotation.x, e.aiT < 30 ? -0.2 : 0.35, 0.15) : lerp(ud.torso.rotation.x, 0, 0.1); }
           if (ud.glow) ud.glow.material.opacity = 0.55 + Math.sin(t * 0.1 + e.id) * 0.2;
         }
-        if (e.kind === 'boss') { e.mesh.visible = e.active && !(e.inv > 0 && (t >> 2) % 2 === 0); }
+        if (e.kind === 'boss' || e.kind === 'dboss') { e.mesh.visible = e.active && !(e.inv > 0 && (t >> 2) % 2 === 0); }
         if (e.kind === 'spiky') m.position.y = Math.abs(Math.sin(t * 0.24 + e.id)) * 0.03;
       }
     });
@@ -10132,7 +10143,7 @@ const BlockAction = (() => {
   function updBossBar() {
     const el = $('baBoss'); if (!el) return;
     const on = boss && boss.active && boss.alive && state !== 'select';
-    const nm = el.querySelector('b'); if (nm) nm.textContent = boss && boss.kind === 'dragon' ? '엔더 드래곤' : boss && boss.kind === 'wither' ? '위더' : boss && boss.kind === 'ufo' ? '우주 해적 UFO' : boss && boss.kind === 'robo58' ? '크레용 로봇' : boss && boss.kind === 'drag59' ? '잉크 드래곤' : '골렘 왕';
+    const nm = el.querySelector('b'); if (nm) nm.textContent = boss && boss.kind === 'dragon' ? '엔더 드래곤' : boss && boss.kind === 'wither' ? '위더' : boss && boss.kind === 'ufo' ? '우주 해적 UFO' : boss && boss.kind === 'robo58' ? '크레용 로봇' : boss && boss.kind === 'drag59' ? '잉크 드래곤' : boss && boss.kind === 'dboss' ? '그림자 꾸꾸' : boss && boss.kind === 'rsboss' ? '실사 스티브' : '골렘 왕';
     el.style.display = on ? 'block' : 'none';
     if (on) el.querySelector('i').style.width = Math.max(0, boss.hp / (boss.maxHp || 5) * 100) + '%';
   }
@@ -10152,12 +10163,12 @@ const BlockAction = (() => {
     const el = $('baSelect'); if (!el) return;
     const grid = el.querySelector('.ba-cards'); grid.innerHTML = '';
     STAGES.forEach((s, i) => {
-      const locked = i + 1 > save.unlocked && !clr595(i), b = save.best[s.id];
+      const locked = !stageOpen62(i), b = save.best[s.id];
       const c = document.createElement('button'); c.type = 'button'; c.className = 'ba-card th-' + s.theme + (locked ? ' locked' : '') + (b && b.clear ? ' cleared' : '');
       c.innerHTML = `<div class="ba-id"></div><div class="ba-nm"></div><div class="ba-sub"></div><div class="ba-best"></div>`;
       c.querySelector('.ba-id').textContent = (locked ? '🔒 ' : b && b.clear ? '⭐ ' : '') + 'STAGE ' + s.id;
       c.querySelector('.ba-nm').textContent = s.name;
-      c.querySelector('.ba-sub').textContent = locked ? '이전 스테이지를 클리어하면 열려요' : s.sub;
+      c.querySelector('.ba-sub').textContent = locked ? (s.wk === 'dream' && !dreamOn62() ? '월드 3 크레용 나라를 클리어하면 열려요' : '이전 스테이지를 클리어하면 열려요') : s.sub;
       c.querySelector('.ba-best').textContent = b && b.clear ? `최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}` : locked ? '' : '아직 기록 없음';
       c.disabled = locked;
       c.onclick = () => { if (!locked) { SFX && snd('select'); shopGo582(i, () => newRun(i)); } };
@@ -10184,10 +10195,10 @@ const BlockAction = (() => {
       h.textContent = def.id + ' 클리어!';
       p.innerHTML = ''; const lines = [`스테이지 점수 ${info.gained.toLocaleString()}${info.newBest ? '  🏆 최고 기록!' : ''}`, `클리어 시간 ${G.clearTime.toFixed(1)}초`, `코인 ${G.coins} · 남은 목숨 ${G.lives}`, `난이도 ${diffLbl57(G.d57)}${bestLine57(def.id)}`];
       if (info.unlockedNow) lines.push(`🔓 ${STAGES[stageIdx + 1].id} ${STAGES[stageIdx + 1].name} 해금!`);
-      if (stageIdx + 1 >= STAGES.length) lines.push('🎉 모든 월드를 정복했습니다! 모든 스테이지 클리어');
+      if (def.wk !== 'dream' && def.id === lastFinal595() && allClear583()) lines.push('🎉 모든 월드를 정복했습니다! 모든 스테이지 클리어');
       lines.forEach(t => { const d = document.createElement('div'); d.textContent = t; p.appendChild(d); });
       if (G.w582) { const W = G.w582, d = document.createElement('div'); d.className = 'w582'; d.dataset.earn = W.earn; d.dataset.w = W.w; p.appendChild(d); const t0 = performance.now(); const f = now => { if (!d.isConnected) return; const k = Math.min(1, Math.max(0, (now - t0 - 900) / 900)); d.textContent = `🪙 +${Math.round(W.earn * k)} 코인 → 지갑 ${(W.w - W.earn + Math.round(W.earn * k)).toLocaleString()}${W.first ? ' (첫 클리어 +20)' : ''}`; if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
-      if (stageIdx + 1 < STAGES.length) add('다음 스테이지 ▶', () => shopGo582(stageIdx + 1, () => { stageIdx++; cpReached = false; startStage(true); }), 'pri');
+      if (stageIdx + 1 < STAGES.length && stageOpen62(stageIdx + 1) && !(def.wk !== 'dream' && STAGES[stageIdx + 1].wk === 'dream')) add('다음 스테이지 ▶', () => shopGo582(stageIdx + 1, () => { stageIdx++; cpReached = false; startStage(true); }), 'pri');
       add('다시 하기', () => shopGo582(stageIdx, () => { cpReached = false; G.score = G.stageScore0; startStage(true); }));
       add('🗺 월드맵', () => showMap5()); add('🛒 상점', () => shopOpen582());
     } else if (kind === 'over') {
@@ -11471,7 +11482,7 @@ const BlockAction = (() => {
   function endCut5() {
     if (!CUT.on) return; CUT.on = false; cine5(false); cam.ov = null; VOICE.cancel();
     const id = CUT.id, after = CUT.after; CUT.after = null;
-    if (id === 'intro') story5().intro = 1; if (id === 'portal') story5().portal = 1; if (id === 'ending') story5().ending = 1; if (id === 'crayon') story5().crayon58 = 1; if (id === 'rocket58') story5().rocket58 = 1; if (id === 'book59') story5().book59 = 1; if (id === 'gift595') story5().gift595 = 1; if (id === 'sky595') story5().sp595 = 1; saveSave();
+    if (id === 'intro') story5().intro = 1; if (id === 'portal') story5().portal = 1; if (id === 'ending') story5().ending = 1; if (id === 'crayon') story5().crayon58 = 1; if (id === 'rocket58') story5().rocket58 = 1; if (id === 'book59') story5().book59 = 1; if (id === 'gift595') story5().gift595 = 1; if (id === 'sky595') story5().sp595 = 1; if (id === 'dreamin62') story5().dreamIn62 = 1; if (id === 'dreamend62') story5().dream62 = 1; saveSave();
     if (after) after(); else showMap5();
   }
   function abortCut5() { if (!CUT.on) return; CUT.on = false; CUT.after = null; CUT.hero = null; cine5(false); cam.ov = null; VOICE.cancel(); }
@@ -11681,6 +11692,14 @@ const BlockAction = (() => {
     if (clock % 20 === 0) sfx5('sizzle');
   }
   function afterClear5(def, info) {
+    if (def && def.wk === 'dream' && def.bossKind === 'rsboss') {
+      playCut5('dreamend62', () => {
+        const S = story5(); S.dream62 = 1; saveSave();
+        if (!S.book59 && !S.dreamOpt62) playCut5('gift595', () => playCut5('book59', () => { const gi = gateNode595('book'); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); }));
+        else showMap5();
+      });
+      return true;
+    }
     if (def.id === '1-4') { const first = !story5().portal; if (first || STORY5.forcePortal) { playCut5('portal', () => { save.node = 6; saveSave(); showMap5({ celebrate: 6 }); }); return true; } }
     if (def.id === '2-4' && (!story5().ending || STORY5.forceEnding)) { playCut5('ending', () => { if (!story5().crayon58) playCut5('crayon', () => { save.node = 10; saveSave(); showMap5({ celebrate: 11 }); }); else { save.node = 9; saveSave(); showMap5(); } }); return true; }
     if (afterClear595(def)) return true;   // v5.9.5: crayon → storybook → space (finale after the last world's final stage)
@@ -11703,6 +11722,8 @@ const BlockAction = (() => {
   function nodeOpen5(i) {
     const n = MAPN5[i], S = story5(); if (!n) return false;
     if (n.k === 'village') return true;
+    if (n.k === 'dream') return dreamOn62();
+    if (n.s !== undefined && STAGES[n.s] && STAGES[n.s].wk === 'dream') return dreamStageOpen62(n.s);
     if (n.k === 'rocket') return w4Open58();
     if (n.k === 'book') return w5Open59();
     if (n.k === 'crayon') return w3Open54();
@@ -11712,7 +11733,7 @@ const BlockAction = (() => {
     if (n.s >= 4 && !S.portal && !(save.best['1-4'] && save.best['1-4'].clear)) return false;
     return (n.s < save.unlocked || clr595(n.s)) && n.s < STAGES.length;
   }
-  function nodeClear5(i) { const n = MAPN5[i]; if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : n.k === 'gate' ? worldOpen595(n.gw595) : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
+  function nodeClear5(i) { const n = MAPN5[i]; if (n.k === 'dream') return clrId595(dreamFinal62()); if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : n.k === 'gate' ? worldOpen595(n.gw595) : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
   function buildMap5() {
     const sc = new THREE.Scene(); MAP.scene = sc; MAP.cam = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
     sc.background = new THREE.Color(0x8ec5f0); sc.fog = new THREE.Fog(0x8ec5f0, 22, 60);
@@ -11775,7 +11796,7 @@ const BlockAction = (() => {
     // node pads + labels
     MAP.pads = MAPN5.map((n, i) => {
       const pad = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.56, 0.22, 20), std({ color: 0xffffff, roughness: 0.5, metalness: 0.2 })); pad.position.set(n.x, 0.11, n.z); g.add(pad);
-      const lab = n.s !== undefined ? STAGES[n.s].id : n.k === 'village' ? '마을' : n.k === 'rocket' ? '로켓' : n.k === 'crayon' ? '크레용' : n.k === 'book' ? '그림책' : '포탈';
+      const lab = n.s !== undefined ? STAGES[n.s].id : n.k === 'village' ? '마을' : n.k === 'rocket' ? '로켓' : n.k === 'crayon' ? '크레용' : n.k === 'book' ? '그림책' : n.k === 'dream' ? '외전' : '포탈';
       const t = canvasTex((c, w, h) => { c.font = 'bold 54px "Segoe UI",sans-serif'; c.textAlign = 'center'; c.lineWidth = 10; c.strokeStyle = 'rgba(20,10,40,.9)'; c.strokeText(lab, w / 2, 62); c.fillStyle = '#fff6d0'; c.fillText(lab, w / 2, 62); }, 192, 80);
       const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, transparent: true, depthWrite: false })); sp.scale.set(1.5, 0.62, 1); sp.position.set(n.x, 1.0, n.z + 0.7); g.add(sp);
       const flag = new THREE.Mesh(new THREE.BoxGeometry(0.36, 0.24, 0.03), std({ color: 0xffd040, emissive: 0x6a4a00, emissiveIntensity: 0.5 })); flag.position.set(n.x + 0.3, 0.95, n.z - 0.3); g.add(flag);
@@ -11793,7 +11814,7 @@ const BlockAction = (() => {
     MAP.embers = new THREE.Points(eg, new THREE.PointsMaterial({ color: LIN(0xffa050), size: 0.09, transparent: true, opacity: 0.85, toneMapped: false })); g.add(MAP.embers);
     mapDecor595(g); MAP.built = true; MAP.cx = 0; MAP.hx = MAPN5[0].x; MAP.hz = MAPN5[0].z; MAP.ph = 0;
   }
-  function refreshMap5() { refreshMap5b(); refreshMapCrayon58(); refreshMapSpace54(); refreshMapBook59(); }
+  function refreshMap5() { refreshMap5b(); refreshMapCrayon58(); refreshMapSpace54(); refreshMapBook59(); refreshDream62(); }
   function refreshMap5b() {
     MAP.pads.forEach((p, i) => { const open = nodeOpen5(i), clr = nodeClear5(i), w2 = i >= 5;
       p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : w2 ? 0xff5a3a : 0x4aa0ff); p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : w2 ? 0x3a0a00 : 0x0a2a5a) : 0); p.pad.material.emissiveIntensity = 0.6;
@@ -11811,6 +11832,7 @@ const BlockAction = (() => {
     else if (n.k === 'book') { mid.textContent = WT595('book'); h.textContent = '커다란 그림책'; p.textContent = '크레용 로봇이 그려 준 커다란 그림책! 잉크 낙서 드래곤이 페이지를 까맣게 칠하고 있어요.'; add('📖 그림책 장면 보기', () => playCut5('gift595', () => playCut5('book59', () => showMap5())), 'pri', !S.book59); }
     else if (n.k === 'gate') { mid.textContent = WT595(n.gw595); h.textContent = (WMETA595[n.gw595] || { name: n.gw595 }).name; p.textContent = '새로운 세계로 가는 길.'; }
     else if (n.k === 'crayon') { mid.textContent = '월드 3 · 크레용 나라'; h.textContent = '이상한 포털'; p.textContent = '위더를 물리친 뒤 포털이 오작동! 모든 것이 크레용으로 그려진 나라로 이어져요.'; add('📜 크레용 나라 장면 보기', () => playCut5('crayon'), 'pri', !S.crayon58); }
+    else if (n.k === 'dream') { const open = dreamOn62(); mid.textContent = '외전 · 악몽 나라'; h.textContent = '잠든 길'; p.textContent = open ? (S.dream62 ? '악몽은 끝났어요. 친구들은 무사하고, 길은 그대로 남아 있어요.' : '크레용 나라를 지나 꾸꾸가 잠들었어요. 꿈속에서 친구들이 적이 되어 있지만, 깨우면 다시 친구가 돼요.') : '월드 3 크레용 나라를 클리어하면 악몽 나라가 열려요.'; add(S.dreamIn62 ? '▶ 외전 이어하기' : '▶ 잠들기', () => { if (!S.dreamIn62) playCut5('dreamin62', () => { const i = dreamFirstIdx62(); save.node = dreamGateIdx62(); saveSave(); if (i >= 0) shopGo582(i, () => playFromMap5(i)); else showMap5(); }); else { const i = dreamFirstIdx62(); if (i >= 0) shopGo582(i, () => playFromMap5(i)); } }, 'pri', !open); add('📜 잠드는 장면', () => playCut5('dreamin62', () => showMap5()), '', !open); if (S.dream62) add('🎬 깨어나는 장면', () => playCut5('dreamend62', () => showMap5())); }
     else { mid.textContent = '차원문'; h.textContent = '네더 포탈'; p.textContent = '성 깊은 곳에 열린 보랏빛 차원문. 위더가 기다리는 네더로 이어져요.'; add('📜 포탈 장면 보기', () => playCut5('portal'), 'pri', !S.portal); }
     add('🛒 상점 · 🪙 ' + shopSt582().w.toLocaleString(), () => shopOpen582(() => mapPanel5()), 'shop582');
     if (S.ending) add('🎬 엔딩 다시보기', () => playCut5('ending'));
@@ -12624,6 +12646,7 @@ const BlockAction = (() => {
     if (!el.querySelector('.ba-tomap')) { const b = document.createElement('button'); b.type = 'button'; b.className = 'ba-tomap'; b.textContent = '🗺 월드맵으로'; b.style.cssText = 'margin:4px 0 10px;padding:8px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.35);background:linear-gradient(180deg,#f8d36a,#e0a020);color:#2a1a04;font-weight:900;cursor:pointer;'; b.onclick = () => { snd('select'); showMap5(); }; panel.insertBefore(b, panel.querySelector('.ba-cards')); }
     const grid = el.querySelector('.ba-cards'); if (grid && !grid.querySelector('.ba-wtitle')) { const cards = grid.querySelectorAll('.ba-card'); const t1 = document.createElement('div'); t1.className = 'ba-wtitle'; t1.textContent = '월드 1 · 골렘 왕의 성'; grid.insertBefore(t1, cards[0]); if (cards[4]) { const t2 = document.createElement('div'); t2.className = 'ba-wtitle'; t2.textContent = '월드 2 · 네더'; grid.insertBefore(t2, cards[4]); }
       WORLD_ORDER595.forEach((k, wi) => { const i0 = WSTART595(k); if (wi < 2 || i0 < 0 || !cards[i0]) return; const t = document.createElement('div'); t.className = 'ba-wtitle'; t.textContent = WT595(k, 'sel'); grid.insertBefore(t, cards[i0]); });
+      const di62 = STAGES.findIndex(s => s.wk === 'dream'); if (di62 >= 0 && cards[di62]) { const td = document.createElement('div'); td.className = 'ba-wtitle'; td.textContent = '외전 · 악몽 나라'; grid.insertBefore(td, cards[di62]); }
       cards.forEach((c, i) => { if (i >= 4 && !nodeOpen5(nodeOf58(i)) && !c.disabled) { c.disabled = true; c.classList.add('locked'); } }); }
   }
   function playFromMap5(s) { save.node = nodeOf58(s); saveSave(); MAP.leaving = true; modeClass5(null); if (DOM5) DOM5.map.classList.remove('show'); renderer.toneMappingExposure = MAP.exp0 !== undefined ? MAP.exp0 : renderer.toneMappingExposure; newRun(s); }
@@ -12636,7 +12659,7 @@ const BlockAction = (() => {
     let at = typeof save.node === 'number' ? save.node : 0; if (!nodeOpen5(at)) at = 0;
     MAP.at = at; MAP.walk = null; MAP.path = []; MAP.hx = MAPN5[at].x; MAP.hz = MAPN5[at].z; MAP.cx = MAP.hx; MAP.leaving = false;
     if (o.celebrate !== undefined && nodeOpen5(o.celebrate)) { MAP.at = Math.max(0, o.celebrate - 2); MAP.hx = MAPN5[MAP.at].x; MAP.hz = MAPN5[MAP.at].z; MAP.cx = MAP.hx; walkTo5(o.celebrate); }
-    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59(); spaceAuto595();
+    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59(); dreamAuto62(); spaceAuto595();
     if (MAP.exp0 === undefined) MAP.exp0 = renderer.toneMappingExposure;
   }
   function walkTo5(target) {
@@ -12650,7 +12673,7 @@ const BlockAction = (() => {
     const lP = inp.left && !MAPIN5.pl, rP = inp.right && !MAPIN5.pr; MAPIN5.pl = inp.left; MAPIN5.pr = inp.right;
     if (!MAP.walk) {
       if (rP && nextOpen595(MAP.at, 1) >= 0) walkTo5(nextOpen595(MAP.at, 1)); else if (lP && MAP.at > 0 && nextOpen595(MAP.at, -1) >= 0) walkTo5(nextOpen595(MAP.at, -1));
-      else if ((inp.jumpP || MAPIN5.act) && !SHOP582.open) { MAPIN5.act = false; const n = MAPN5[MAP.at]; snd('select'); if (n.s !== undefined) shopGo582(n.s, () => playFromMap5(n.s)); else if (n.k === 'village') playCut5('intro'); else if (n.k === 'rocket') rocketCut54(); else if (n.k === 'book') { if (story5().book59) playCut5('book59'); } else if (n.k === 'gate') { } else if (n.k === 'crayon') { if (story5().crayon58) playCut5('crayon'); } else if (story5().portal) playCut5('portal'); return; }
+      else if ((inp.jumpP || MAPIN5.act) && !SHOP582.open) { MAPIN5.act = false; const n = MAPN5[MAP.at]; snd('select'); if (n.s !== undefined) shopGo582(n.s, () => playFromMap5(n.s)); else if (n.k === 'village') playCut5('intro'); else if (n.k === 'rocket') rocketCut54(); else if (n.k === 'book') { if (story5().book59) playCut5('book59'); } else if (n.k === 'gate') { } else if (n.k === 'dream') { if (dreamOn62() && !story5().dreamIn62) playCut5('dreamin62', () => showMap5()); } else if (n.k === 'crayon') { if (story5().crayon58) playCut5('crayon'); } else if (story5().portal) playCut5('portal'); return; }
     } else MAPIN5.act = false;
     if (MAP.walk) { const n = MAPN5[MAP.walk.to], dx = n.x - MAP.hx, dz = n.z - MAP.hz, d = Math.hypot(dx, dz), sp = 0.11;
       MAP.face = Math.atan2(dx, dz);
@@ -13339,8 +13362,8 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     let el = document.getElementById('tc53');
     if (!el) { el = document.createElement('div'); el.id = 'tc53'; el.innerHTML = '<div class="bar"><div class="w"></div><div class="id"></div><div class="nm"></div><div class="sub"></div><div class="lv"></div></div>'; host53().appendChild(el); }
     const wn = String(def.id).split('-')[0];
-    const WN = WN595(), bk595 = def.wk === 'book'; el.classList.toggle('bk59', bk595); if (bk595) bkPage59(def.name, 'WORLD ' + wn + ' · 그림책 나라');
-    el.querySelector('.w').textContent = 'WORLD ' + wn + (WN[wn] ? ' · ' + WN[wn] : '');
+    const WN = WN595(), bk595 = def.wk === 'book', dream62 = def.wk === 'dream'; el.classList.toggle('bk59', bk595); if (bk595) bkPage59(def.name, 'WORLD ' + wn + ' · 그림책 나라');
+    el.querySelector('.w').textContent = dream62 ? '외전 · 악몽 나라' : ('WORLD ' + wn + (WN[wn] ? ' · ' + WN[wn] : ''));
     el.querySelector('.id').textContent = def.id; el.querySelector('.nm').textContent = def.name; el.querySelector('.sub').textContent = def.sub || '';
     el.querySelector('.lv').textContent = '♥ × ' + (G ? G.lives : 3);
     el.classList.remove('show'); el.style.display = 'block'; void el.offsetWidth; el.classList.add('show');
@@ -16628,6 +16651,7 @@ var BlockDetail=(function(){
   }
   function bookAuto59() {   // saves that already beat 4-3 get the World 5 opening once
     if (!clrId595(finalOf595('crayon')) || story5().book59 || STORY5.noFinale583) return;
+    if (!story5().dreamOpt62 && !story5().dream62 && !clrId595(dreamFinal62())) return;
     setTimeout(() => { if (state === 'map' && !CUT.on && !story5().book59) playCut5('gift595', () => playCut5('book59', () => { const gi = gateNode595('book'); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); })); }, 700);
   }
   if (save && !save.wo && save.best && save.best['4-3'] && save.best['4-3'].clear && save.unlocked < 16) save.unlocked = 16;   // legacy layout only (v5.9.5 migrates after)
@@ -16881,11 +16905,12 @@ var BlockDetail=(function(){
       else { MAPN5.push({ k: 'gate', x: x0 + 1, z: 0.4, gw595: k }); idx.forEach((s, j) => MAPN5.push({ s, x: x0 + 4.5 + 4.5 * j, z: j % 2 ? 0.8 : -0.7 })); x0 += 6 + 4.5 * idx.length; }
     });
   }
-  function mapDecor595(g) { WORLD_ORDER595.forEach(k => { const M = WMAP595[k]; if (!M || WO595.dx[k] === undefined) return; const sg = new THREE.Group(); sg.position.x = M.bx + WO595.dx[k]; g.add(sg); M.build(sg); }); }
-  function mapFrame595(cx) { WORLD_ORDER595.forEach(k => { const M = WMAP595[k]; if (M && WO595.dx[k] !== undefined) M.frame(cx - WO595.dx[k]); }); }
+  function mapDecor595(g) { WORLD_ORDER595.forEach(k => { const M = WMAP595[k]; if (!M || WO595.dx[k] === undefined) return; const sg = new THREE.Group(); sg.position.x = M.bx + WO595.dx[k]; g.add(sg); M.build(sg); }); buildDreamIsle62(g); }
+  function mapFrame595(cx) { WORLD_ORDER595.forEach(k => { const M = WMAP595[k]; if (M && WO595.dx[k] !== undefined) M.frame(cx - WO595.dx[k]); }); dreamFrame62(cx); }
   // ---- 3) story flow between worlds ----
   function introCut595(nk, go) {
     const S = story5();
+    if (nk === 'book' && !S.book59 && !S.dreamOpt62 && !S.dream62 && !clrId595(dreamFinal62())) { playCut5('dreamin62', () => { const gi = dreamGateIdx62(); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); }); return true; }
     if (nk === 'book' && !S.book59) { playCut5('gift595', () => playCut5('book59', go)); return true; }
     if (nk === 'space' && !S.sp595) { playCut5('sky595', go); return true; }
     return false;
@@ -16988,12 +17013,412 @@ var BlockDetail=(function(){
   {
     const lines = {}; CREDITS5.replace(/<h3>WORLD (\d+)<\/h3><div class="l">([^<]*)<\/div>/g, (m, n, t) => { lines[WLEG595[n]] = t; return m; });
     const gen = WORLD_ORDER595.map((k, i) => '<h3>WORLD ' + (i + 1) + '</h3><div class="l">' + (lines[k] || STAGES.filter(d => d.wk === k).map(d => d.name).join(' · ')) + '</div>').join('\n');
-    CREDITS5 = CREDITS5.replace(/<h3>WORLD 1<\/h3>[\s\S]*?(?=<h3>MUSIC<\/h3>)/, gen + '\n');
+    CREDITS5 = CREDITS5.replace(/<h3>WORLD 1<\/h3>[\s\S]*?(?=<h3>MUSIC<\/h3>)/, gen + '\n<h3>외전</h3><div class="l">악몽 나라 · 뒤틀린 마을 · 깜깜한 성벽 · 악몽 숲 · 그림자 꾸꾸 · 실사 스티브</div>\n');
   }
   // ---- 5) migrate this browser's save once STAGES is final ----
   try { migrateWO595(save); wo595Stamp.ok = layout595(); WO595.done = true; if (save.unlocked > STAGES.length) save.unlocked = STAGES.length; if (typeof save.node === 'number' && save.node >= MAPN5.length) save.node = 0; saveSave(); } catch (e) { console.warn('wo595', e); }
   function installDebug595() { window.__ba = window.__ba || {}; window.__ba.wo595 = () => ({ order: WORLD_ORDER595.slice(), ids: STAGES.map(d => d.id + ':' + d.uid595), nodes: MAPN5.map(n => n.s !== undefined ? 's' + n.s + '@' + n.x : n.k + '@' + n.x), last: lastFinal595(), save: JSON.parse(JSON.stringify(save)) }); window.__ba.wo595mig = o => migrateWO595(JSON.parse(JSON.stringify(o))); window.__ba.wo595open = k => worldOpen595(k); }
   /* /W595 */
+  /* DREAM62 — 외전 · 악몽 나라. Side world on the map between crayon and the picture book.
+     Stage ids stay E-* and worlds 1–5 are not renumbered, so old saves keep their stage keys.
+     New players who clear crayon fall asleep into the dream, then wake into the picture-book story.
+     Saves that already passed crayon keep that path and find the dream as an optional gate. */
+  const DMB62 = { dtutu: '뚜뚜', diron: '철골렘', dmoosh: '무시룸', dsnow: '눈골렘' };
+  const DMK62 = {
+    dtutu: () => wireLimbs62(corrupt62(makeVillager5('bori'))),
+    diron: () => wireLimbs62(corrupt62(makeIronGolem())),
+    dmoosh: () => wireLimbs62(corrupt62(makeMooshroom())),
+    dsnow: () => wireLimbs62(corrupt62(makeSnowGolem())),
+    dboss: () => { const g = wireLimbs62(corrupt62(makeHero(), { shadow: 1 })); g.scale.multiplyScalar(1.55); return g; },
+    rsboss: () => makeRsBoss62()
+  };
+  function corrupt62(g, opt) {
+    opt = opt || {};
+    const dark = opt.shadow ? 0.14 : 0.3, ink = opt.shadow ? 0.78 : 0.5;
+    g.traverse(o => {
+      if (!o.isMesh || !o.material || o.userData.eye62) return;
+      const one = m => {
+        if (!m || !m.color || (m.userData && m.userData.cor62)) return m;
+        const c = m.clone();
+        c.color.multiplyScalar(dark);
+        c.color.lerp(new THREE.Color(opt.shadow ? 0x07040e : 0x160a22), ink);
+        if (c.emissive) { c.emissive.setRGB(0, 0, 0); c.emissiveIntensity = 0; }
+        if (c.emissiveMap) c.emissiveMap = null;
+        if (!c.userData) c.userData = {};
+        c.userData.cor62 = 1;
+        return c;
+      };
+      o.material = Array.isArray(o.material) ? o.material.map(one) : one(o.material);
+    });
+    g.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(g);
+    const h = Math.max(0.4, box.max.y - box.min.y);
+    const y = box.min.y + h * 0.78;
+    const z = Math.max(0.12, (box.max.z - box.min.z) * 0.42);
+    const eyeS = opt.shadow ? Math.min(0.2, Math.max(0.1, h * 0.07)) : Math.min(0.16, Math.max(0.08, h * 0.05));
+    const eyes = [-1, 1].map(s => {
+      const e = glowSprite(LIN(0xff1830), eyeS);
+      e.position.set(s * Math.max(0.05, h * 0.065), y, z);
+      e.material.opacity = 0.92; e.userData.eye62 = 1; g.add(e); return e;
+    });
+    g.userData.eyes62 = eyes;
+    if (g.children[0]) { if (!g.children[0].userData) g.children[0].userData = {}; g.children[0].userData.eyes62 = eyes; }
+    return g;
+  }
+  function wireLimbs62(g) {
+    const m = g.children[0]; if (!m) return g;
+    const ud = m.userData || (m.userData = {});
+    const L = g.userData && g.userData.limbs;
+    if (L) { ud.legL = L.legL; ud.legR = L.legR; ud.armL = L.armL; ud.armR = L.armR; if (L.body) ud.torso = L.body; if (L.head) ud.head = L.head; }
+    if (!ud.legL && ud.legs && ud.legs.length >= 2) { ud.legL = ud.legs[0]; ud.legR = ud.legs[1]; }
+    if (!ud.armL && ud.arms && ud.arms.length >= 2) { ud.armL = ud.arms[0]; ud.armR = ud.arms[1]; }
+    return g;
+  }
+  function dreamOn62() { return clrId595(finalOf595('crayon')); }
+  function dreamList62() { const a = []; STAGES.forEach((d, i) => { if (d.wk === 'dream') a.push(i); }); return a; }
+  function dreamStageOpen62(i) {
+    if (!dreamOn62()) return false;
+    const a = dreamList62(), k = a.indexOf(i);
+    if (k < 0) return false;
+    return k === 0 || clr595(a[k - 1]);
+  }
+  function stageOpen62(i) { const s = STAGES[i]; if (s && s.wk === 'dream') return dreamStageOpen62(i); return i < save.unlocked || clr595(i); }
+  function dreamFinal62() { const a = dreamList62(); return a.length ? STAGES[a[a.length - 1]].id : null; }
+  function dreamFirstIdx62() { const a = dreamList62(); return a.length ? a[0] : -1; }
+  function dreamGateIdx62() { const i = MAPN5.findIndex(n => n.k === 'dream'); return i < 0 ? 0 : i; }
+  function dreamHit62(e, dmg, fromStomp) {
+    if (!e || !e.alive || e.inv > 0) return;
+    e.hp -= dmg; e.inv = 18;
+    if (fromStomp) stompBounce5(e); else { hitFlash(e); snd('stomp'); cam.shake = Math.max(cam.shake, 4); }
+    if (e.hp <= 0) { killFlip(e, 900); floatText((e.nm62 || '친구') + ', 눈이 떠졌어!', e.x, e.y + e.h + 0.45); }
+    else floatText(e.hp + '번 더!', e.x, e.y + e.h + 0.35);
+  }
+  function dreamTouch62(e, st) { if (st) dreamHit62(e, 1, true); else hurt(); }
+  function hitDreamBoss62(e, dmg) {
+    if (!e || e.inv > 0) return false;
+    e.hp -= dmg; e.inv = dmg >= 1 ? 42 : 12; snd('stomp'); cam.shake = 7; hitFlash(e);
+    if (e.hp <= 0.01) {
+      e.alive = false; e.mode = 'flip'; e.dead = 170; e.vy = 0.28; e.vx = 0; addScore(5000, e.x, e.y + 2.4);
+      banner(e.kind === 'rsboss' ? '실사 스티브가 흐려졌어!' : '그림자가 흩어졌어!', e.kind === 'rsboss' ? '악몽이 걷혀. 깃발로 달려가!' : '꿈이 더 깊어져. 깃발로!', 1800); snd('wave');
+      const a = L.arena; if (a) { for (let y = 2; y < 13; y++) setTile(a.x1 + 1, y, E); if (a.gateR) pops.push({ type: 'gate', m: a.gateR, t: 0, dir: 1 }); }
+      cam.lockX = null;
+    } else floatText('악몽 ' + Math.max(1, Math.ceil(e.hp)), e.x, e.y + e.h + 0.3);
+    updBossBar(); return true;
+  }
+  function dreamAuto62() {
+    const S = story5();
+    if (!dreamOn62() || S.dseen62 || S.dream62 || !S.dreamOpt62) return;
+    S.dseen62 = 1; saveSave();
+    setTimeout(() => { if (state === 'map' && !CUT.on) banner('외전 · 악몽 나라가 열렸어요!', '크레용 나라 옆, 잠든 길이 보여요.', 2400); }, 800);
+  }
+  function refreshDream62() {
+    if (!MAP.pads) return;
+    MAP.pads.forEach((p, i) => {
+      const n = MAPN5[i]; if (!n) return;
+      const dream = n.k === 'dream' || (n.s !== undefined && STAGES[n.s] && STAGES[n.s].wk === 'dream');
+      if (!dream) return;
+      const open = nodeOpen5(i), clr = nodeClear5(i);
+      p.pad.material.color.setHex(!open ? 0x6a6a72 : clr ? 0xffc83a : 0xc46bff);
+      p.pad.material.emissive = new THREE.Color(open ? (clr ? 0x5a3a00 : 0x3a1048) : 0);
+    });
+    const m = MAP.pathMesh, c = new THREE.Color();
+    if (m && MAP.pth) {
+      MAP.pth.forEach((p, i) => {
+        const nxt = MAPN5[p[6] + 1]; if (!nxt) return;
+        const dream = nxt.k === 'dream' || (nxt.s !== undefined && STAGES[nxt.s] && STAGES[nxt.s].wk === 'dream');
+        if (!dream) return;
+        c.setHex(nodeOpen5(p[6] + 1) ? 0xb088e0 : 0x2a2030); m.setColorAt(i, c);
+      });
+      if (m.instanceColor) m.instanceColor.needsUpdate = true;
+    }
+  }
+  function buildDreamIsle62(g) {
+    const gate = MAPN5.find(n => n.k === 'dream'); if (!gate || !g) return;
+    const cube = new THREE.BoxGeometry(1, 1, 1); cube.userData.keep = true;
+    const top = std({ color: 0x3a2458, roughness: 0.95 }), sideM = std({ color: 0x241433, roughness: 1 });
+    const hsh = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return s - Math.floor(s); };
+    const T = [], Sd = [];
+    const x0 = Math.round(gate.x) - 2, x1 = x0 + 36;
+    for (let x = x0; x <= x1; x++) for (let z = -5; z <= 4; z++) {
+      if (Math.abs(z) > 3 + (hsh(x, 5) > 0.55 ? 1 : 0)) continue;
+      T.push([x, 0, z]); Sd.push([x, -1, z]);
+    }
+    const im = (list, mat) => { if (!list.length) return; const m = new THREE.InstancedMesh(cube, mat, list.length), d = new THREE.Object3D();
+      list.forEach((p, i) => { d.position.set(p[0], p[1] - 0.5, p[2]); d.updateMatrix(); m.setMatrixAt(i, d.matrix); }); g.add(m); };
+    im(T, top); im(Sd, sideM);
+    const trunk = std({ color: 0x2a1840, roughness: 0.9 }), leaf = std({ color: 0x6a3490, roughness: 0.8 });
+    [[1.5, -3.2], [6, 3.1], [11, -3.4], [16, 3.2], [21, -2.8], [26, 3.0]].forEach(([dx, z], i) => {
+      const t = new THREE.Group();
+      const tr = new THREE.Mesh(cube, trunk); tr.scale.set(0.35, 1.25 + (i % 2) * 0.45, 0.35); tr.position.y = 0.7; t.add(tr);
+      const l = new THREE.Mesh(cube, leaf); l.scale.set(1.05, 0.7, 1.05); l.position.y = 1.55; t.add(l);
+      t.position.set(gate.x + dx, 0, z); g.add(t);
+    });
+    const moon = new THREE.Mesh(new THREE.SphereGeometry(0.7, 16, 12), new THREE.MeshBasicMaterial({ color: LIN(0xffe7a0), toneMapped: false }));
+    moon.position.set(gate.x + 9, 5.5, -6.4); g.add(moon); MAP.dreamMoon62 = moon;
+    const bed = new THREE.Mesh(new THREE.BoxGeometry(1.35, 0.22, 0.72), std({ color: 0x7a5ad8, roughness: 0.75 }));
+    bed.position.set(gate.x, 0.18, -2.15); g.add(bed);
+    const pillow = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.16, 0.36), std({ color: 0xf0d8ea, roughness: 0.7 }));
+    pillow.position.set(gate.x - 0.4, 0.34, -2.15); g.add(pillow);
+  }
+  function dreamFrame62(cx) {
+    const gate = MAPN5.find(n => n.k === 'dream'); if (!gate || !MAP.scene || !MAP.scene.background) return;
+    const k = Math.max(0, Math.min(1, (cx - (gate.x - 8)) / 5)) * (1 - Math.max(0, Math.min(1, (cx - (gate.x + 28)) / 5)));
+    if (k > 0.02) {
+      const bg = MAP.scene.background.clone().lerp(new THREE.Color(0x14081f), k * 0.82);
+      MAP.scene.background.copy(bg); if (MAP.scene.fog) MAP.scene.fog.color.copy(bg);
+    }
+    if (MAP.dreamMoon62) MAP.dreamMoon62.position.y = 5.5 + Math.sin(performance.now() / 900) * 0.12;
+  }
+  THEMES.dream = Object.assign({}, THEMES.castle, { bg: 0x120818, fog: 0x1c1030, fogNear: 3, fogFar: 26, hemi: 0.2, amb: 0.22, moon: 0.12, key: 0.26, rim: 0.42, torch: 2.3 });
+  THEMES.dreamb = Object.assign({}, THEMES.castle, { bg: 0x18060e, fog: 0x260810, fogNear: 2.4, fogFar: 24, hemi: 0.16, amb: 0.18, moon: 0.1, key: 0.22, rim: 0.36, torch: 2.45 });
+  Object.assign(SPEC, {
+    dtutu: { hw: 0.36, h: 1.15, sp: 0.02, hp: 3, edge: true },
+    diron: { hw: 0.55, h: 2.15, sp: 0.012, hp: 4, edge: true },
+    dmoosh: { hw: 0.62, h: 1.15, sp: 0.016, hp: 3, edge: true },
+    dsnow: { hw: 0.4, h: 1.55, sp: 0.015, hp: 3, edge: true },
+    dboss: { hw: 0.58, h: 1.95, sp: 0.026, hp: 8 },
+    rsboss: { hw: 0.46, h: 1.98, sp: 0.024, hp: 10 }
+  });
+  BOSSK.dboss = 1; BOSSK.rsboss = 1;
+  ['dtutu', 'diron', 'dmoosh', 'dsnow'].forEach(k => { HOSTILE[k] = 1; TOUCH5[k] = dreamTouch62; });
+  const Q62 = Math.PI / 2, iD62 = STAGES.length;
+  STAGES.push(
+    { id: 'E-1', name: '뒤틀린 마을', sub: '잠든 꾸꾸의 마을이 보랏빛으로 일그러졌어요. 꿈속 뚜뚜는 세 번 살살 밟으면 눈을 떠요', theme: 'dream', grade: 'castle', w: 198, time: 360, world: 3, wk: 'dream', n595: 1, uid595: 'dream-1', music: 'castle',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 40); b.q(11, 5, 'grow'); b.brick(12, 5, 2); b.coin(15, 3, 4); b.e('walker', 20); b.e('zombie', 26); b.e('bat', 32, 7); b.arc(36, 4, 4);
+        b.ground(44, 80); b.e('creeper', 50); b.e('skeleton', 58); b.solid(54, 5, 3, 1); b.coin(54, 6, 3); b.q(64, 6, 'coin'); b.firebar(68, 5, 3, 0.03); b.e('walker', 72); b.e('zombie', 76);
+        b.mover(81, 2, 3, 'x', 4, 0.016, -Q62);
+        b.ground(90, 130); b.cp(94); b.e('creeper', 100); b.e('bat', 106, 7); b.stairsUp(110, 3); b.solid(113, 2, 6, 3); b.arc(113, 6, 5); b.q(116, 9, 'grow'); b.e('skeleton', 122); b.e('zombie', 126);
+        b.ground(134, 170); b.e('walker', 138); b.brick(144, 6, 2); b.q(146, 6, 'tnt'); b.brick(147, 6); b.e('creeper', 150); b.coin(154, 3, 4); b.e('dtutu', 162);
+        b.ground(174, 197); b.stairsUp(178, 4); b.solid(182, 2, 2, 4); b.goal(188); b.exit(194);
+        [6, 48, 98, 140, 180].forEach(x => b.wtorch(x, 5));
+      } },
+    { id: 'E-2', name: '깜깜한 성벽', sub: '성벽이 동굴처럼 깜깜해졌어요. 움직이는 발판을 타고, 꿈속 철골렘은 네 번 밟아요', theme: 'cave', w: 204, time: 380, world: 3, wk: 'dream', n595: 2, uid595: 'dream-2', music: 'cave',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 22); b.q(9, 5, 'grow'); b.brick(10, 5, 2); b.coin(12, 3, 3); b.e('skeleton', 16); b.e('spider', 20);
+        b.ground(26, 34, 4); b.e('bat', 30, 8); b.coin(27, 6, 3);
+        b.mover(36, 3, 3, 'x', 4.2, 0.016, -Q62);
+        b.ground(46, 78); b.e('pillager', 52); b.e('creeper', 58); b.solid(62, 5, 3, 1); b.coin(62, 6, 3); b.q(68, 6, 'coin'); b.firebar(72, 5, 3, -0.03); b.e('spider', 74);
+        b.lava(79, 82); b.mover(80, 3, 2, 'y', 2.4, 0.02, 0);
+        b.ground(84, 124); b.cp(88); b.e('skeleton', 94); b.stairsUp(100, 3); b.solid(103, 2, 5, 3); b.arc(103, 6, 4); b.e('bat', 110, 8); b.e('creeper', 114); b.q(116, 6, 'tnt'); b.e('pillager', 120);
+        b.mover(125, 3, 2, 'y', 3, 0.022, 0); b.mover(129, 4, 2, 'y', 3, 0.022, 1.7);
+        b.ground(134, 176); b.e('spider', 140); b.e('zombie', 146); b.firebar(150, 5, 4, 0.032); b.coin(154, 3, 3); b.e('diron', 164);
+        b.ground(180, 203); b.stairsUp(184, 4); b.solid(188, 2, 2, 4); b.goal(194); b.exit(200);
+        for (let x = 6; x < 200; x += 14) b.wtorch(x, 6);
+      } },
+    { id: 'E-3', name: '악몽 숲', sub: '네더가 꿈속에서 엉뚱한 숲이 됐어요. 무시룸과 눈골렘도 빨간 눈으로 걸어다녀요', theme: 'fortress', w: 200, time: 380, world: 3, wk: 'dream', n595: 3, uid595: 'dream-3', music: 'fortress',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 34); b.q(10, 5, 'grow'); b.brick(11, 5, 2); b.coin(14, 3, 4); b.e('zombie', 18); b.e('wskel', 24); b.e('bat', 30, 7);
+        b.ground(38, 72); b.e('creeper', 44); b.solid(50, 5, 3, 1); b.coin(50, 6, 3); b.q(56, 6, 'coin'); b.firebar(60, 5, 3, 0.03); b.e('zombie', 64); b.e('hoglin', 68);
+        b.mover(73, 2, 3, 'x', 3.6, 0.016, -Q62);
+        b.ground(82, 122); b.cp(86); b.e('wskel', 92); b.stairsUp(98, 3); b.solid(101, 2, 5, 3); b.arc(101, 6, 4); b.e('bat', 108, 8); b.q(110, 9, 'grow'); b.e('creeper', 114); b.e('dmoosh', 118);
+        b.lava(123, 126); b.mover(124, 3, 2, 'y', 2.6, 0.02, 1);
+        b.ground(128, 172); b.e('zombie', 134); b.brick(140, 6, 2); b.q(142, 6, 'tnt'); b.brick(143, 6); b.e('wskel', 148); b.coin(152, 3, 3); b.e('dsnow', 160);
+        b.ground(176, 199); b.e('creeper', 180); b.stairsUp(184, 4); b.solid(188, 2, 2, 4); b.goal(192); b.exit(196);
+        [8, 46, 90, 136, 178].forEach(x => b.wtorch(x, 5));
+      } },
+    { id: 'E-4', name: '그림자 꾸꾸', sub: '까만 그림자 꾸꾸. 빨간 눈만 빛나요. 머리를 밟으면 그림자가 흩어지고 꿈이 더 깊어져요', theme: 'dreamb', grade: 'castle', w: 164, time: 420, world: 3, wk: 'dream', n595: 4, uid595: 'dream-4', music: 'castle', bossKind: 'dboss',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 32); b.q(10, 5, 'grow'); b.brick(11, 5, 2); b.e('zombie', 16); b.e('bat', 22, 7); b.coin(24, 3, 4); b.e('creeper', 28);
+        b.mover(33, 2, 3, 'x', 3.4, 0.015, -Q62);
+        b.ground(40, 74); b.cp(44); b.firebar(48, 5, 3, 0.03); b.e('skeleton', 52); b.q(56, 6, 'coin'); b.e('zombie', 60); b.e('creeper', 66); b.solid(70, 5, 2, 1);
+        b.mover(75, 3, 2, 'y', 2.8, 0.02, 0); b.mover(79, 4, 2, 'y', 2.8, 0.02, 2);
+        b.ground(84, 163); b.e('zombie', 90); b.item('grow', 96); b.coin(98, 3, 4);
+        b.solid(112, 6, 3, 1); b.solid(120, 8, 3, 1); b.solid(128, 6, 3, 1);
+        b.arena(108, 132, 124);
+        b.goal(146); b.exit(154);
+        for (let x = 5; x < 160; x += 12) b.wtorch(x, 6);
+      } },
+    { id: 'E-5', name: '실사 스티브', sub: '꿈이 더 깊어졌어요. 네모가 아닌, 너무 진짜 같은 스티브! 팔을 뻗기 전에 머리를 밟아요', theme: 'dreamb', grade: 'castle', w: 168, time: 440, world: 3, wk: 'dream', n595: 5, uid595: 'dream-5', music: 'castle', bossKind: 'rsboss',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 28); b.q(9, 5, 'grow'); b.brick(10, 5, 2); b.e('zombie', 16); b.e('bat', 22, 7); b.coin(18, 3, 3);
+        b.mover(29, 2, 3, 'x', 3.2, 0.014, -Q62);
+        b.ground(36, 70); b.cp(40); b.e('creeper', 46); b.firebar(52, 5, 3, 0.028); b.e('skeleton', 58); b.q(62, 6, 'coin'); b.e('zombie', 66);
+        b.mover(71, 3, 2, 'y', 2.6, 0.02, 0); b.mover(75, 4, 2, 'y', 2.6, 0.02, 2);
+        b.ground(80, 167); b.e('walker', 88); b.item('grow', 94); b.coin(96, 3, 3);
+        b.solid(114, 6, 3, 1); b.solid(122, 8, 3, 1); b.solid(130, 6, 3, 1);
+        b.arena(110, 136, 128);
+        b.goal(150); b.exit(158);
+        for (let x = 6; x < 164; x += 12) b.wtorch(x, 6);
+      } }
+  );
+  {
+    const bookAt = MAPN5.findIndex(n => n.gw595 === 'book');
+    const SPAN = 32, COUNT = 6;
+    const S62 = story5();
+    if (bookAt >= 0 && !S62.dv62c) {
+      if (S62.dv62) { if (typeof save.node === 'number' && save.node >= bookAt + 5) save.node += 1; }
+      else {
+        if (typeof save.node === 'number' && save.node >= bookAt) save.node += COUNT;
+        if (clrId595(finalOf595('crayon'))) S62.dreamOpt62 = 1;
+        S62.dv62 = 1;
+      }
+      S62.dv62c = 1; saveSave();
+    }
+    if (bookAt >= 0) {
+      for (let i = bookAt; i < MAPN5.length; i++) MAPN5[i].x += SPAN;
+      ['book', 'space'].forEach(k => { if (WO595.dx[k] !== undefined) WO595.dx[k] += SPAN; });
+      const xG = (MAPN5[bookAt - 1] ? MAPN5[bookAt - 1].x : 62) + 4.4;
+      const zs = [-0.7, 0.8, -0.55, 0.5, -0.65];
+      const ins = [{ k: 'dream', x: xG, z: 0.25 }];
+      for (let j = 0; j < 5; j++) ins.push({ s: iD62 + j, x: xG + 4.8 + j * 4.6, z: zs[j] });
+      MAPN5.splice(bookAt, 0, ...ins);
+    }
+  }
+  CH5.dtutu = { name: '꿈속 뚜뚜', col: '#ff6a8a', mk: () => corrupt62(makeVillager5('bori')), hf: 0.2, span: 0.6, yaw: 0.35 };
+  CH5.diron = { name: '꿈속 철골렘', col: '#d8d0e8', mk: () => corrupt62(makeIronGolem()), hf: 0.18, span: 0.5, yaw: 0.3 };
+  CH5.dmoosh = { name: '꿈속 무시룸', col: '#ff5a6a', mk: () => corrupt62(makeMooshroom()), hf: 0.32, span: 0.8, yaw: 0.8 };
+  CH5.dsnow = { name: '꿈속 눈골렘', col: '#e8d0ff', mk: () => corrupt62(makeSnowGolem()), hf: 0.2, span: 0.55, yaw: 0.35 };
+  CH5.dboss = { name: '그림자 꾸꾸', col: '#ff4060', mk: () => corrupt62(makeHero(), { shadow: 1 }), hf: 0.2, span: 0.62, yaw: -0.2 };
+  CH5.rsboss = { name: '실사 스티브', col: '#e8b89a', mk: () => makeRsBoss62(), hf: 0.45, span: 0.7, yaw: 0.4 };
+  Object.assign(TALK5, {
+    dm_hi: [['haru', '여기… 우리 마을인데 색깔이 이상해. 나, 꿈속인가 봐.'], ['dtutu', '히히, 꿈속 뚜뚜야. 머리 위를 살살 세 번 밟으면 눈이 떠져!'], ['haru', '알겠어. 아프게 하지 않고 깨워 줄게!']],
+    dm_tutu: [['dtutu', '꾸꾸, 나 좀 이상하지? 빨간 눈이 마음대로야.'], ['haru', '괜찮아, 뚜뚜. 이건 악몽일 뿐이야. 금방 깨울게!']],
+    dm_wall: [['haru', '성벽이 깜깜한 동굴이 됐어. 움직이는 발판, 타이밍을 맞추자.'], ['diron', '철의 심장이 차갑다… 네 번 밟으면 다시 따뜻해진다.']],
+    dm_iron: [['diron', '꾸꾸. 나는 여전히 네 편이다. 다만 꿈이 눈을 가렸을 뿐.'], ['haru', '철골렘! 내가 깨워 줄게. 같이 마을로 돌아가자.']],
+    dm_forest: [['haru', '네더가 기억나. 근데 이건 무서운 곳이 아니라, 엉뚱한 꿈이야.'], ['dmoosh', '음머…? 눈이 빨개도, 밟으면 다시 음머가 될 거야.'], ['dsnow', '눈덩이도 보랏빛이야. 녹진 않으니까, 살살 깨워 줘!']],
+    dm_gate: [['haru', '저 앞에… 나랑 똑같은 그림자가 있어.'], ['dboss', '나는 그림자 꾸꾸야. 이 꿈의 친구들은 전부 내 편이지.']],
+    dm_boss: [['dboss', '친구들은 꿈속에서 영원히 내 옆에 있을 거야.'], ['haru', '아니야! 친구들은 내 편이고, 이건 꿈일 뿐이야!'], ['dboss', '그럼 증명해 봐. 빨간 눈이 빛날 때, 머리를 밟아!']],
+    dm_deep: [['haru', '그림자가 사라졌는데… 꿈이 더 깊어졌어. 발밑이 까맣다.'], ['haru', '저 앞에 있는 건 블록이 아니야. 사람처럼 생겼어.']],
+    dm_real: [['rsboss', '여긴 왜 다들 네모나지? 나만 너무 진짜 같은데.'], ['haru', '꿈이 깊어진 거야. 너무 진짜면, 오히려 이상하잖아!'], ['rsboss', '팔을 뻗기 전에 위로 올라가 봐. 그게 깨우는 방법이야.']]
+  });
+  Object.assign(TALKS5, {
+    'E-1': [{ x: 8, id: 'dm_hi' }, { x: 156, id: 'dm_tutu' }],
+    'E-2': [{ x: 8, id: 'dm_wall' }, { x: 158, id: 'dm_iron' }],
+    'E-3': [{ x: 8, id: 'dm_forest' }],
+    'E-4': [{ x: 8, id: 'dm_gate' }, { x: 'arena', id: 'dm_boss' }],
+    'E-5': [{ x: 8, id: 'dm_deep' }, { x: 'arena', id: 'dm_real' }]
+  });
+  Object.assign(CUTS5, {
+    dreamin62: { music: 'story', setup() {
+      cutWorld5({ theme: 'crayon', w: 46, hero: 11 });
+      actor5('bori', CH5.bori.mk(), 14.2, 2, -1);
+      const ir = actor5('iron', CH5.iron.mk(), 17.4, 2, -1); ir.g.scale.setScalar(0.62);
+      const mo = actor5('moosh', CH5.moosh.mk(), 8.2, 2, 1); mo.g.scale.setScalar(0.72);
+      const bed = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.28, 0.8), std({ color: 0x7a5ad8, roughness: 0.75 }));
+      bed.position.set(11, 2.16, -0.9); W3.group.add(bed);
+      CUT.cam0 = [13, 3.6, 10];
+      return [
+        { wait: 24 },
+        { say: 'haru', text: '후아암… 크레용 나라, 정말 신났어. 눈이 스르르 감겨.' },
+        { say: 'bori', text: '꾸꾸, 잠깐 눈 붙이자. 우리가 옆에서 지킬게!' },
+        { say: 'iron', text: '편히 자거라. 악몽이 찾아와도, 우리는 네 친구다.' },
+        { say: 'moosh', text: '음머~ 좋은 꿈 꿔!' },
+        { fn: () => { flashScreen(0.95, '#14081c'); cam.shake = 5; } },
+        { wait: 36 },
+        { say: 'haru', text: '어라…? 마을인데, 왜 이렇게 깜깜하지?' },
+        { fn: () => banner('외전 · 악몽 나라', '잠든 꾸꾸의 뒤틀린 꿈', 2400) },
+        { wait: 70 }
+      ];
+    } },
+    dreamend62: { music: 'story', setup() {
+      cutWorld5({ theme: 'crayon', w: 48, hero: 12 });
+      actor5('bori', CH5.bori.mk(), 15.2, 2, -1);
+      const ir = actor5('iron', CH5.iron.mk(), 18.2, 2, -1); ir.g.scale.setScalar(0.62);
+      const mo = actor5('moosh', CH5.moosh.mk(), 9.2, 2, 1); mo.g.scale.setScalar(0.72);
+      const sn = actor5('snow', CH5.snow.mk(), 7.2, 2, 1); sn.g.scale.setScalar(0.8);
+      const bed = new THREE.Mesh(new THREE.BoxGeometry(1.5, 0.28, 0.8), std({ color: 0xf2d48a, roughness: 0.8 }));
+      bed.position.set(12, 2.16, -0.9); W3.group.add(bed);
+      CUT.cam0 = [14, 3.5, 10.5];
+      return [
+        { wait: 16 },
+        { fn: () => { flashScreen(0.85, '#fff6d8'); spawnParts(12, 3, ZP, 0xffe08a, NP(24), 0.12, 0.05); } },
+        { say: 'haru', text: '으응… 꿈이었어. 다들 여기 있구나!' },
+        { say: 'bori', text: '꾸꾸, 방금 존 거야? 우리는 한 번도 적이 된 적 없어!' },
+        { say: 'iron', text: '악몽은 끝났다. 눈은 다시 따뜻하구나.' },
+        { say: 'snow', text: '눈덩이도 하얗게 돌아왔어. 녹지도 않았고!' },
+        { say: 'moosh', text: '음머~ 다음 모험으로 가자. 그림책, 그리고 저 멀리 우주까지!' },
+        { say: 'haru', text: '마지막엔 너무 진짜 같은 스티브도 있었어. 그것까지 다 꿈이었어.' },
+        { say: 'haru', text: '응! 친구들은 무사해. 자, 모험은 계속이야!' },
+        { fn: () => banner('잠에서 깼어!', '친구들은 무사하고, 이야기는 계속된다', 2600) },
+        { wait: 80 }
+      ];
+    } }
+  });
+  function makeRsBoss62() {
+    const Lib = window.RealSteveLib;
+    if (!Lib || !Lib.make) {
+      const g = wireLimbs62(corrupt62(makeHero(), { shadow: 1 })); g.scale.multiplyScalar(1.5); g.userData.rsFallback = 1; return g;
+    }
+    const Q = (window.GQ && GQ.level === 'low') ? 0.4 : 0.55;
+    const R = Lib.make(Q).build();
+    const g = new THREE.Group();
+    R.mesh.position.y = -0.13;
+    g.add(R.mesh);
+    g.scale.setScalar(1.08);
+    g.userData.rs = R;
+    const head = R.B && R.B.head;
+    if (head) [-1, 1].forEach(s => {
+      const e = glowSprite(LIN(0xff1828), 0.1);
+      e.position.set(0.04 * s, 0.155, 0.145);
+      e.material.opacity = 1; e.userData.eye62 = 1; head.add(e);
+    });
+    return g;
+  }
+  function tickRsBoss62(e) {
+    const a = L.arena; if (!a) return;
+    e.aiT++;
+    e.vy = Math.max(-0.4, e.vy - 0.016);
+    if (e.ai === 'walk' || !e.ai) {
+      e.dir = pl.x > e.x ? 1 : -1; e.vx = e.dir * 0.02 * (DF ? DF().bspd : 1);
+      if (e.aiT > 80) { e.ai = Math.random() < 0.65 ? 'wind' : 'jump'; e.aiT = 0; e.dir = pl.x > e.x ? 1 : -1; }
+    } else if (e.ai === 'wind') {
+      e.vx = 0; e.dir = pl.x > e.x ? 1 : -1;
+      if (e.aiT > 26) { e.ai = 'jab'; e.aiT = 0; }
+    } else if (e.ai === 'jab') {
+      e.vx = e.dir * 0.125 * (DF ? DF().bspd : 1);
+      if (e.aiT > 20) { e.ai = 'rest'; e.aiT = 0; }
+    } else if (e.ai === 'jump') {
+      if (e.aiT === 1) { e.vy = 0.3; e.vx = (pl.x > e.x ? 1 : -1) * 0.035; }
+    } else if (e.ai === 'rest') {
+      e.vx *= 0.82; if (e.aiT > 34) { e.ai = 'walk'; e.aiT = 0; }
+    }
+    const wasAir = !e.onG;
+    const r = moveBody(e, e.vx, e.vy);
+    e.onG = r.ground; if (r.ground) e.vy = 0;
+    if (r.hitX) { e.dir = -e.dir; if (e.ai === 'jab') { e.ai = 'rest'; e.aiT = 0; cam.shake = 6; snd('capture'); } }
+    if (e.x < a.x0 + 1.1) { e.x = a.x0 + 1.1; e.dir = 1; }
+    if (e.x > a.x1 - 0.2) { e.x = a.x1 - 0.2; e.dir = -1; }
+    if (wasAir && r.ground && e.ai === 'jump') {
+      cam.shake = 9; snd('capture'); spawnParts(e.x, e.y, ZP, 0xc4a080, NP(10), 0.08, 0.05);
+      e.ai = 'rest'; e.aiT = 0;
+      if (pl.ground && Math.abs(pl.x - e.x) < 3.6) { pl.vy = 0.12; pl.ground = false; }
+    }
+  }
+  function poseRsBoss62(e, t) {
+    const mesh = e.mesh && e.mesh.children[0];
+    const R = e.mesh && e.mesh.userData && e.mesh.userData.rs;
+    if (!mesh || !R || !R.B) return;
+    const B = R.B;
+    mesh.rotation.y = e.dir >= 0 ? Math.PI / 2 - 0.7 : -Math.PI / 2 + 0.7;
+    const sw = Math.sin(t * 0.2 + e.id) * (Math.abs(e.vx) > 0.01 ? 1 : 0.25);
+    const jab = e.ai === 'jab' ? 1 : e.ai === 'wind' ? -0.7 : 0;
+    const set = (b, x, y, z) => { if (b) b.rotation.set(x, y || 0, z || 0); };
+    set(B.thighL, sw * 0.45); set(B.thighR, -sw * 0.45);
+    set(B.shinL, Math.max(0, -sw) * 0.55); set(B.shinR, Math.max(0, sw) * 0.55);
+    set(B.armL, -sw * 0.35 + (e.ai === 'jump' ? -0.8 : 0));
+    set(B.armR, sw * 0.25 + jab * 1.15);
+    set(B.foreL, 0.35); set(B.foreR, jab > 0 ? 0.15 : 0.45);
+    set(B.spine, Math.sin(t * 0.08) * 0.03, jab * 0.15);
+    if (e.kind === 'rsboss') e.mesh.visible = e.active && !(e.inv > 0 && (t >> 2) % 2 === 0);
+    if (B.head) B.head.children.forEach(c => { if (c.userData && c.userData.eye62 && c.material) c.material.opacity = 0.7 + Math.sin(t * 0.25) * 0.25; });
+  }
+  window.__dream62 = {
+    info: () => ({ on: dreamOn62(), opt: !!story5().dreamOpt62, done: !!story5().dream62, ids: STAGES.filter(s => s.wk === 'dream').map(s => s.id + ':' + s.theme), order: WORLD_ORDER595.slice(), nodes: MAPN5.map(n => n.k === 'dream' || (n.s !== undefined && STAGES[n.s] && STAGES[n.s].wk === 'dream') ? ((n.k || (STAGES[n.s] && STAGES[n.s].id)) + '@' + n.x.toFixed(1)) : null).filter(Boolean) }),
+    go: n => { const a = dreamList62(), i = a[Math.max(0, Math.min(a.length - 1, n | 0))]; newRun(i); state = 'play'; if (G) G.introT = 0; return { i, id: STAGES[i].id }; },
+    look: x => { if (!pl) return null; pl.x = x; pl.y = 2; pl.vx = 0; pl.vy = 0; pl.ground = true; cam.x = x; cam.fy = 2; placeCamera(true); return { x: pl.x, theme: L && L.def && L.def.theme }; },
+    mobs: () => enemies.filter(e => e.alive).map(e => ({ k: e.kind, x: +e.x.toFixed(1), y: +e.y.toFixed(1) })),
+    wakeBoss: () => { if (!boss) return null; boss.active = true; boss.mesh.visible = true; if (L && L.arena) { boss.x = L.arena.bossX; pl.x = boss.x - 3.2; } boss.y = 2; cam.lockX = true; cam.x = boss.x - 2; placeCamera(true); return { kind: boss.kind, hp: boss.hp, max: boss.maxHp, x: boss.x }; },
+    end: () => { playCut5('dreamend62', () => {}); return state; },
+    tick: n => { for (let i = 0; i < n; i++) tick(); },
+    draw: () => { placeCamera(false); postRender52(scene, camera); return true; }
+  };
+
   return { ensure, setActive(v) { active = v; if (!v) { releaseKeys(); BGM.update(state, false); } else if (started && state === 'play') { /* resume input cleanly */ releaseKeys(); } } };
 })();
 
@@ -23184,6 +23609,7 @@ function boot(){
 }
 window.BlockFighter={BF,UI,M,G,ROSTER,ARENAS,FEEL,CINE,DP,MV,SUP,XP,WL,CAMF,ceremony:BFCeremony,
   _test:{vDown,vUp,startMatch,stopMatch,RBY,makeFighterView,applyPose,poseFor,syncViews,fvMinY,MV:typeof MV!=="undefined"?MV:null,SUPMV:typeof SUPMV!=="undefined"?SUPMV:null}};
+try { window.RealSteveLib = RealSteveLib; } catch (e) {}
 if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 
@@ -23286,7 +23712,7 @@ body.mob620-editing #bfTouch,body.mob620-editing #baPad,body.mob620-editing #baP
   const iOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const standalone = !!(navigator.standalone || (window.matchMedia && (matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches)));
   const touchDev = (() => { try { return matchMedia('(pointer:coarse)').matches || (navigator.maxTouchPoints | 0) > 0; } catch (e) { return false; } })();
-  M.iOS = iOS; M.standalone = standalone; M.ver = 'v6.2.2';
+  M.iOS = iOS; M.standalone = standalone; M.ver = 'v6.3.0';
   if (M.app || standalone) document.body.classList.add('mob620-app');
 
   // ---------- 스플래시 ----------
