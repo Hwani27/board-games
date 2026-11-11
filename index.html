@@ -268,7 +268,7 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
     <div class="gcard" onclick="openGame('blockaction')">
       <div class="ic">⛏️</div>
       <h2>마인크래프트 마리오</h2>
-      <small>블록 세상 횡스크롤 점프 액션 · 스토리 모드<br>월드 1~5 · 외전 악몽 나라 · 23 스테이지 · 보스전</small>
+      <small>블록 세상 횡스크롤 점프 액션 · 스토리 모드<br>월드 1~5 · 외전 악몽 나라 · 24 스테이지 · 보스전</small>
     </div>
     <div class="gcard" onclick="openGame('chess')">
       <div class="ic">♛</div>
@@ -8553,7 +8553,7 @@ const BlockAction = (() => {
       else if (st === 'cut') k = MUS5.cut || 'story';
       else if (st === 'play' || st === 'intro' || st === 'talk') {
         const th = L && L.def && L.def.theme; k = STAGE24[th] || (L && L.def && L.def.music) || STAGE_T[th] || 'field';
-        if (boss && boss.active && boss.alive && (boss.kind === 'boss' || boss.kind === 'golem' || boss.kind === 'dboss')) k = th === 'spaceb' ? 'spaceboss' : 'golem';
+        if (boss && boss.active && boss.alive && (boss.kind === 'boss' || boss.kind === 'golem' || boss.kind === 'dboss' || boss.kind === 'rsboss')) k = th === 'spaceb' ? 'spaceboss' : 'golem';
         if (L && L.def && L.def.dragon && (dragon || (L.dragonT > 0))) k = 'dragon';
         if (boss && boss.kind === 'wither' && boss.active && boss.alive) k = 'wither';
         if (boss && boss.kind === 'ufo' && boss.active && boss.alive) k = 'spaceboss';
@@ -9040,6 +9040,7 @@ const BlockAction = (() => {
     if (kind === 'axolotl') e.dir = 1;
     if (kind === 'boss') { e.hp = e.maxHp = bossHp57(5); }
     if (kind === 'dboss') { e.hp = e.maxHp = bossHp57(8); e.nm62 = '그림자 꾸꾸'; }
+    if (kind === 'rsboss') { e.hp = e.maxHp = bossHp57(10); e.nm62 = '실사 스티브'; }
     if (DMB62[kind]) e.nm62 = DMB62[kind];
     enemies.push(e); return e;
   }
@@ -9138,7 +9139,8 @@ const BlockAction = (() => {
       if (Math.abs(dxp) < 9) { e.dir = Math.sign(dxp) || e.dir; e.vx += (e.dir * e.sp - e.vx) * 0.04; e.baseY += ((pl.y + 0.8) - e.baseY) * 0.006; }
       else e.vx *= 0.95;
       e.x += e.vx; e.y = e.baseY + Math.sin(e.t * 0.06) * 1.1;
-    } else if (e.kind === 'boss' || e.kind === 'dboss') tickBoss(e);
+    } else if (e.kind === 'rsboss') tickRsBoss62(e);
+    else if (e.kind === 'boss' || e.kind === 'dboss') tickBoss(e);
     else if (e.kind === 'skeleton' || e.kind === 'pillager') { tickArcher(e); if (e.alive) e.mesh.position.set(e.x, e.y, ZP); return; }
     else if (e.kind === 'moosh') { tickMoosh(e); if (e.alive) e.mesh.position.set(e.x, e.y, ZP); return; }
     else {
@@ -9450,7 +9452,8 @@ const BlockAction = (() => {
       else if (boss.kind === 'ufo') ufoWake54(boss);
       else if (boss.kind === 'robo58') roboWake58(boss);
       else if (boss.kind === 'drag59') dragWake59(boss);
-      else if (boss.kind === 'dboss') { banner('그림자 꾸꾸', '빨간 눈이 빛날 때 머리를 밟아!', 1600); snd('check'); bossIntro53(boss); }
+      else if (boss.kind === 'dboss') { banner('그림자 꾸꾸', '까만 그림자야. 빨간 눈이 빛날 때 머리를 밟아!', 1600); snd('check'); bossIntro53(boss); }
+      else if (boss.kind === 'rsboss') { banner('실사 스티브', '너무 진짜 같아… 팔을 뻗기 전에 머리를 밟아!', 1800); snd('check'); bossIntro53(boss); }
       else { banner('골렘 왕', '머리를 5번 밟거나 불덩이로!', 1500); snd('check'); bossIntro53(boss); }
       updBossBar();
     }
@@ -10049,6 +10052,7 @@ const BlockAction = (() => {
       const m = e.mesh.children[0]; if (!m) return;
       const ud = m.userData || {};
       if (ud.eyes62) ud.eyes62.forEach(s => { if (s.material) s.material.opacity = 0.62 + Math.sin(t * 0.22 + e.id) * 0.34; });
+      if (e.kind === 'rsboss') { poseRsBoss62(e, t); return; }
       if (e.kind === 'bat') { if (ud.wings) ud.wings.forEach((w, i) => { w.rotation.z = (i ? -1 : 1) * (0.25 + Math.sin(t * 0.45 + e.id) * 0.75); }); m.rotation.y = lerp(m.rotation.y, e.dir * 0.5, 0.1); m.rotation.z = Math.sin(t * 0.05 + e.id) * 0.15; }
       else if (e.kind === 'skeleton' || e.kind === 'pillager' || e.kind === 'moosh') animMobs(e, m, ud, t);
       else if (MOB2[e.kind]) animMobs2(e, m, ud, t);
@@ -10139,7 +10143,7 @@ const BlockAction = (() => {
   function updBossBar() {
     const el = $('baBoss'); if (!el) return;
     const on = boss && boss.active && boss.alive && state !== 'select';
-    const nm = el.querySelector('b'); if (nm) nm.textContent = boss && boss.kind === 'dragon' ? '엔더 드래곤' : boss && boss.kind === 'wither' ? '위더' : boss && boss.kind === 'ufo' ? '우주 해적 UFO' : boss && boss.kind === 'robo58' ? '크레용 로봇' : boss && boss.kind === 'drag59' ? '잉크 드래곤' : boss && boss.kind === 'dboss' ? '그림자 꾸꾸' : '골렘 왕';
+    const nm = el.querySelector('b'); if (nm) nm.textContent = boss && boss.kind === 'dragon' ? '엔더 드래곤' : boss && boss.kind === 'wither' ? '위더' : boss && boss.kind === 'ufo' ? '우주 해적 UFO' : boss && boss.kind === 'robo58' ? '크레용 로봇' : boss && boss.kind === 'drag59' ? '잉크 드래곤' : boss && boss.kind === 'dboss' ? '그림자 꾸꾸' : boss && boss.kind === 'rsboss' ? '실사 스티브' : '골렘 왕';
     el.style.display = on ? 'block' : 'none';
     if (on) el.querySelector('i').style.width = Math.max(0, boss.hp / (boss.maxHp || 5) * 100) + '%';
   }
@@ -11688,7 +11692,7 @@ const BlockAction = (() => {
     if (clock % 20 === 0) sfx5('sizzle');
   }
   function afterClear5(def, info) {
-    if (def && def.wk === 'dream' && def.bossKind === 'dboss') {
+    if (def && def.wk === 'dream' && def.bossKind === 'rsboss') {
       playCut5('dreamend62', () => {
         const S = story5(); S.dream62 = 1; saveSave();
         if (!S.book59 && !S.dreamOpt62) playCut5('gift595', () => playCut5('book59', () => { const gi = gateNode595('book'); save.node = gi; saveSave(); showMap5({ celebrate: gi + 1 }); }));
@@ -11729,7 +11733,7 @@ const BlockAction = (() => {
     if (n.s >= 4 && !S.portal && !(save.best['1-4'] && save.best['1-4'].clear)) return false;
     return (n.s < save.unlocked || clr595(n.s)) && n.s < STAGES.length;
   }
-  function nodeClear5(i) { const n = MAPN5[i]; if (n.k === 'dream') return !!(story5().dream62 || clrId595(dreamFinal62())); if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : n.k === 'gate' ? worldOpen595(n.gw595) : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
+  function nodeClear5(i) { const n = MAPN5[i]; if (n.k === 'dream') return clrId595(dreamFinal62()); if (n.s === undefined) return n.k === 'rocket' ? w4Open58() : n.k === 'book' ? (!!story5().book59 || w5Open59()) : n.k === 'crayon' ? (!!story5().crayon58 || w3Open54()) : n.k === 'village' ? !!story5().intro : n.k === 'gate' ? worldOpen595(n.gw595) : !!story5().portal; const b = save.best[STAGES[n.s].id]; return !!(b && b.clear); }
   function buildMap5() {
     const sc = new THREE.Scene(); MAP.scene = sc; MAP.cam = new THREE.PerspectiveCamera(40, 1, 0.1, 200);
     sc.background = new THREE.Color(0x8ec5f0); sc.fog = new THREE.Fog(0x8ec5f0, 22, 60);
@@ -17009,7 +17013,7 @@ var BlockDetail=(function(){
   {
     const lines = {}; CREDITS5.replace(/<h3>WORLD (\d+)<\/h3><div class="l">([^<]*)<\/div>/g, (m, n, t) => { lines[WLEG595[n]] = t; return m; });
     const gen = WORLD_ORDER595.map((k, i) => '<h3>WORLD ' + (i + 1) + '</h3><div class="l">' + (lines[k] || STAGES.filter(d => d.wk === k).map(d => d.name).join(' · ')) + '</div>').join('\n');
-    CREDITS5 = CREDITS5.replace(/<h3>WORLD 1<\/h3>[\s\S]*?(?=<h3>MUSIC<\/h3>)/, gen + '\n<h3>외전</h3><div class="l">악몽 나라 · 뒤틀린 마을 · 깜깜한 성벽 · 악몽 숲 · 그림자 꾸꾸</div>\n');
+    CREDITS5 = CREDITS5.replace(/<h3>WORLD 1<\/h3>[\s\S]*?(?=<h3>MUSIC<\/h3>)/, gen + '\n<h3>외전</h3><div class="l">악몽 나라 · 뒤틀린 마을 · 깜깜한 성벽 · 악몽 숲 · 그림자 꾸꾸 · 실사 스티브</div>\n');
   }
   // ---- 5) migrate this browser's save once STAGES is final ----
   try { migrateWO595(save); wo595Stamp.ok = layout595(); WO595.done = true; if (save.unlocked > STAGES.length) save.unlocked = STAGES.length; if (typeof save.node === 'number' && save.node >= MAPN5.length) save.node = 0; saveSave(); } catch (e) { console.warn('wo595', e); }
@@ -17025,17 +17029,21 @@ var BlockDetail=(function(){
     diron: () => wireLimbs62(corrupt62(makeIronGolem())),
     dmoosh: () => wireLimbs62(corrupt62(makeMooshroom())),
     dsnow: () => wireLimbs62(corrupt62(makeSnowGolem())),
-    dboss: () => { const g = wireLimbs62(corrupt62(makeHero())); g.scale.multiplyScalar(1.62); return g; }
+    dboss: () => { const g = wireLimbs62(corrupt62(makeHero(), { shadow: 1 })); g.scale.multiplyScalar(1.55); return g; },
+    rsboss: () => makeRsBoss62()
   };
-  function corrupt62(g) {
+  function corrupt62(g, opt) {
+    opt = opt || {};
+    const dark = opt.shadow ? 0.14 : 0.3, ink = opt.shadow ? 0.78 : 0.5;
     g.traverse(o => {
-      if (!o.isMesh || !o.material) return;
+      if (!o.isMesh || !o.material || o.userData.eye62) return;
       const one = m => {
         if (!m || !m.color || (m.userData && m.userData.cor62)) return m;
         const c = m.clone();
-        c.color.multiplyScalar(0.42);
-        c.color.lerp(new THREE.Color(0x1a0a28), 0.38);
-        if (c.emissive) { c.emissive.lerp(new THREE.Color(0x5a0018), 0.7); c.emissiveIntensity = Math.max(0.4, (c.emissiveIntensity || 0) * 0.4 + 0.35); }
+        c.color.multiplyScalar(dark);
+        c.color.lerp(new THREE.Color(opt.shadow ? 0x07040e : 0x160a22), ink);
+        if (c.emissive) { c.emissive.setRGB(0, 0, 0); c.emissiveIntensity = 0; }
+        if (c.emissiveMap) c.emissiveMap = null;
         if (!c.userData) c.userData = {};
         c.userData.cor62 = 1;
         return c;
@@ -17047,10 +17055,11 @@ var BlockDetail=(function(){
     const h = Math.max(0.4, box.max.y - box.min.y);
     const y = box.min.y + h * 0.78;
     const z = Math.max(0.12, (box.max.z - box.min.z) * 0.42);
+    const eyeS = opt.shadow ? Math.min(0.2, Math.max(0.1, h * 0.07)) : Math.min(0.16, Math.max(0.08, h * 0.05));
     const eyes = [-1, 1].map(s => {
-      const e = glowSprite(LIN(0xff2040), Math.max(0.14, h * 0.09));
-      e.position.set(s * Math.max(0.05, h * 0.07), y, z);
-      e.material.opacity = 0.95; e.userData.eye62 = 1; g.add(e); return e;
+      const e = glowSprite(LIN(0xff1830), eyeS);
+      e.position.set(s * Math.max(0.05, h * 0.065), y, z);
+      e.material.opacity = 0.92; e.userData.eye62 = 1; g.add(e); return e;
     });
     g.userData.eyes62 = eyes;
     if (g.children[0]) { if (!g.children[0].userData) g.children[0].userData = {}; g.children[0].userData.eyes62 = eyes; }
@@ -17090,7 +17099,7 @@ var BlockDetail=(function(){
     e.hp -= dmg; e.inv = dmg >= 1 ? 42 : 12; snd('stomp'); cam.shake = 7; hitFlash(e);
     if (e.hp <= 0.01) {
       e.alive = false; e.mode = 'flip'; e.dead = 170; e.vy = 0.28; e.vx = 0; addScore(5000, e.x, e.y + 2.4);
-      banner('그림자 꾸꾸가 스르르 사라졌어!', '악몽이 걷혀. 깃발로 달려가!', 1800); snd('wave');
+      banner(e.kind === 'rsboss' ? '실사 스티브가 흐려졌어!' : '그림자가 흩어졌어!', e.kind === 'rsboss' ? '악몽이 걷혀. 깃발로 달려가!' : '꿈이 더 깊어져. 깃발로!', 1800); snd('wave');
       const a = L.arena; if (a) { for (let y = 2; y < 13; y++) setTile(a.x1 + 1, y, E); if (a.gateR) pops.push({ type: 'gate', m: a.gateR, t: 0, dir: 1 }); }
       cam.lockX = null;
     } else floatText('악몽 ' + Math.max(1, Math.ceil(e.hp)), e.x, e.y + e.h + 0.3);
@@ -17129,7 +17138,7 @@ var BlockDetail=(function(){
     const top = std({ color: 0x3a2458, roughness: 0.95 }), sideM = std({ color: 0x241433, roughness: 1 });
     const hsh = (x, z) => { const s = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return s - Math.floor(s); };
     const T = [], Sd = [];
-    const x0 = Math.round(gate.x) - 2, x1 = x0 + 28;
+    const x0 = Math.round(gate.x) - 2, x1 = x0 + 36;
     for (let x = x0; x <= x1; x++) for (let z = -5; z <= 4; z++) {
       if (Math.abs(z) > 3 + (hsh(x, 5) > 0.55 ? 1 : 0)) continue;
       T.push([x, 0, z]); Sd.push([x, -1, z]);
@@ -17138,7 +17147,7 @@ var BlockDetail=(function(){
       list.forEach((p, i) => { d.position.set(p[0], p[1] - 0.5, p[2]); d.updateMatrix(); m.setMatrixAt(i, d.matrix); }); g.add(m); };
     im(T, top); im(Sd, sideM);
     const trunk = std({ color: 0x2a1840, roughness: 0.9 }), leaf = std({ color: 0x6a3490, roughness: 0.8 });
-    [[1.5, -3.2], [6, 3.1], [11, -3.4], [16, 3.2], [21, -2.8]].forEach(([dx, z], i) => {
+    [[1.5, -3.2], [6, 3.1], [11, -3.4], [16, 3.2], [21, -2.8], [26, 3.0]].forEach(([dx, z], i) => {
       const t = new THREE.Group();
       const tr = new THREE.Mesh(cube, trunk); tr.scale.set(0.35, 1.25 + (i % 2) * 0.45, 0.35); tr.position.y = 0.7; t.add(tr);
       const l = new THREE.Mesh(cube, leaf); l.scale.set(1.05, 0.7, 1.05); l.position.y = 1.55; t.add(l);
@@ -17153,7 +17162,7 @@ var BlockDetail=(function(){
   }
   function dreamFrame62(cx) {
     const gate = MAPN5.find(n => n.k === 'dream'); if (!gate || !MAP.scene || !MAP.scene.background) return;
-    const k = Math.max(0, Math.min(1, (cx - (gate.x - 8)) / 5)) * (1 - Math.max(0, Math.min(1, (cx - (gate.x + 20)) / 5)));
+    const k = Math.max(0, Math.min(1, (cx - (gate.x - 8)) / 5)) * (1 - Math.max(0, Math.min(1, (cx - (gate.x + 28)) / 5)));
     if (k > 0.02) {
       const bg = MAP.scene.background.clone().lerp(new THREE.Color(0x14081f), k * 0.82);
       MAP.scene.background.copy(bg); if (MAP.scene.fog) MAP.scene.fog.color.copy(bg);
@@ -17167,9 +17176,10 @@ var BlockDetail=(function(){
     diron: { hw: 0.55, h: 2.15, sp: 0.012, hp: 4, edge: true },
     dmoosh: { hw: 0.62, h: 1.15, sp: 0.016, hp: 3, edge: true },
     dsnow: { hw: 0.4, h: 1.55, sp: 0.015, hp: 3, edge: true },
-    dboss: { hw: 0.62, h: 2.05, sp: 0.028, hp: 8 }
+    dboss: { hw: 0.58, h: 1.95, sp: 0.026, hp: 8 },
+    rsboss: { hw: 0.46, h: 1.98, sp: 0.024, hp: 10 }
   });
-  BOSSK.dboss = 1;
+  BOSSK.dboss = 1; BOSSK.rsboss = 1;
   ['dtutu', 'diron', 'dmoosh', 'dsnow'].forEach(k => { HOSTILE[k] = 1; TOUCH5[k] = dreamTouch62; });
   const Q62 = Math.PI / 2, iD62 = STAGES.length;
   STAGES.push(
@@ -17210,7 +17220,7 @@ var BlockDetail=(function(){
         b.ground(176, 199); b.e('creeper', 180); b.stairsUp(184, 4); b.solid(188, 2, 2, 4); b.goal(192); b.exit(196);
         [8, 46, 90, 136, 178].forEach(x => b.wtorch(x, 5));
       } },
-    { id: 'E-4', name: '그림자 꾸꾸', sub: '꿈속의 또 다른 꾸꾸! 빨간 눈이 빛날 때 머리를 밟으면 악몽이 걷혀요', theme: 'dreamb', grade: 'castle', w: 164, time: 420, world: 3, wk: 'dream', n595: 4, uid595: 'dream-4', music: 'castle', bossKind: 'dboss',
+    { id: 'E-4', name: '그림자 꾸꾸', sub: '까만 그림자 꾸꾸. 빨간 눈만 빛나요. 머리를 밟으면 그림자가 흩어지고 꿈이 더 깊어져요', theme: 'dreamb', grade: 'castle', w: 164, time: 420, world: 3, wk: 'dream', n595: 4, uid595: 'dream-4', music: 'castle', bossKind: 'dboss',
       build(b) {
         b.start(3, 2);
         b.ground(0, 32); b.q(10, 5, 'grow'); b.brick(11, 5, 2); b.e('zombie', 16); b.e('bat', 22, 7); b.coin(24, 3, 4); b.e('creeper', 28);
@@ -17222,24 +17232,41 @@ var BlockDetail=(function(){
         b.arena(108, 132, 124);
         b.goal(146); b.exit(154);
         for (let x = 5; x < 160; x += 12) b.wtorch(x, 6);
+      } },
+    { id: 'E-5', name: '실사 스티브', sub: '꿈이 더 깊어졌어요. 네모가 아닌, 너무 진짜 같은 스티브! 팔을 뻗기 전에 머리를 밟아요', theme: 'dreamb', grade: 'castle', w: 168, time: 440, world: 3, wk: 'dream', n595: 5, uid595: 'dream-5', music: 'castle', bossKind: 'rsboss',
+      build(b) {
+        b.start(3, 2);
+        b.ground(0, 28); b.q(9, 5, 'grow'); b.brick(10, 5, 2); b.e('zombie', 16); b.e('bat', 22, 7); b.coin(18, 3, 3);
+        b.mover(29, 2, 3, 'x', 3.2, 0.014, -Q62);
+        b.ground(36, 70); b.cp(40); b.e('creeper', 46); b.firebar(52, 5, 3, 0.028); b.e('skeleton', 58); b.q(62, 6, 'coin'); b.e('zombie', 66);
+        b.mover(71, 3, 2, 'y', 2.6, 0.02, 0); b.mover(75, 4, 2, 'y', 2.6, 0.02, 2);
+        b.ground(80, 167); b.e('walker', 88); b.item('grow', 94); b.coin(96, 3, 3);
+        b.solid(114, 6, 3, 1); b.solid(122, 8, 3, 1); b.solid(130, 6, 3, 1);
+        b.arena(110, 136, 128);
+        b.goal(150); b.exit(158);
+        for (let x = 6; x < 164; x += 12) b.wtorch(x, 6);
       } }
   );
   {
     const bookAt = MAPN5.findIndex(n => n.gw595 === 'book');
-    const SPAN = 26, COUNT = 5;
+    const SPAN = 32, COUNT = 6;
     const S62 = story5();
-    if (!S62.dv62 && bookAt >= 0) {
-      if (typeof save.node === 'number' && save.node >= bookAt) save.node += COUNT;
-      if (clrId595(finalOf595('crayon'))) S62.dreamOpt62 = 1;
-      S62.dv62 = 1; saveSave();
+    if (bookAt >= 0 && !S62.dv62c) {
+      if (S62.dv62) { if (typeof save.node === 'number' && save.node >= bookAt + 5) save.node += 1; }
+      else {
+        if (typeof save.node === 'number' && save.node >= bookAt) save.node += COUNT;
+        if (clrId595(finalOf595('crayon'))) S62.dreamOpt62 = 1;
+        S62.dv62 = 1;
+      }
+      S62.dv62c = 1; saveSave();
     }
     if (bookAt >= 0) {
       for (let i = bookAt; i < MAPN5.length; i++) MAPN5[i].x += SPAN;
       ['book', 'space'].forEach(k => { if (WO595.dx[k] !== undefined) WO595.dx[k] += SPAN; });
       const xG = (MAPN5[bookAt - 1] ? MAPN5[bookAt - 1].x : 62) + 4.4;
-      const zs = [-0.7, 0.8, -0.55, 0.5];
+      const zs = [-0.7, 0.8, -0.55, 0.5, -0.65];
       const ins = [{ k: 'dream', x: xG, z: 0.25 }];
-      for (let j = 0; j < 4; j++) ins.push({ s: iD62 + j, x: xG + 4.8 + j * 4.6, z: zs[j] });
+      for (let j = 0; j < 5; j++) ins.push({ s: iD62 + j, x: xG + 4.8 + j * 4.6, z: zs[j] });
       MAPN5.splice(bookAt, 0, ...ins);
     }
   }
@@ -17247,7 +17274,8 @@ var BlockDetail=(function(){
   CH5.diron = { name: '꿈속 철골렘', col: '#d8d0e8', mk: () => corrupt62(makeIronGolem()), hf: 0.18, span: 0.5, yaw: 0.3 };
   CH5.dmoosh = { name: '꿈속 무시룸', col: '#ff5a6a', mk: () => corrupt62(makeMooshroom()), hf: 0.32, span: 0.8, yaw: 0.8 };
   CH5.dsnow = { name: '꿈속 눈골렘', col: '#e8d0ff', mk: () => corrupt62(makeSnowGolem()), hf: 0.2, span: 0.55, yaw: 0.35 };
-  CH5.dboss = { name: '그림자 꾸꾸', col: '#ff4060', mk: () => corrupt62(makeHero()), hf: 0.2, span: 0.62, yaw: -0.2 };
+  CH5.dboss = { name: '그림자 꾸꾸', col: '#ff4060', mk: () => corrupt62(makeHero(), { shadow: 1 }), hf: 0.2, span: 0.62, yaw: -0.2 };
+  CH5.rsboss = { name: '실사 스티브', col: '#e8b89a', mk: () => makeRsBoss62(), hf: 0.45, span: 0.7, yaw: 0.4 };
   Object.assign(TALK5, {
     dm_hi: [['haru', '여기… 우리 마을인데 색깔이 이상해. 나, 꿈속인가 봐.'], ['dtutu', '히히, 꿈속 뚜뚜야. 머리 위를 살살 세 번 밟으면 눈이 떠져!'], ['haru', '알겠어. 아프게 하지 않고 깨워 줄게!']],
     dm_tutu: [['dtutu', '꾸꾸, 나 좀 이상하지? 빨간 눈이 마음대로야.'], ['haru', '괜찮아, 뚜뚜. 이건 악몽일 뿐이야. 금방 깨울게!']],
@@ -17255,13 +17283,16 @@ var BlockDetail=(function(){
     dm_iron: [['diron', '꾸꾸. 나는 여전히 네 편이다. 다만 꿈이 눈을 가렸을 뿐.'], ['haru', '철골렘! 내가 깨워 줄게. 같이 마을로 돌아가자.']],
     dm_forest: [['haru', '네더가 기억나. 근데 이건 무서운 곳이 아니라, 엉뚱한 꿈이야.'], ['dmoosh', '음머…? 눈이 빨개도, 밟으면 다시 음머가 될 거야.'], ['dsnow', '눈덩이도 보랏빛이야. 녹진 않으니까, 살살 깨워 줘!']],
     dm_gate: [['haru', '저 앞에… 나랑 똑같은 그림자가 있어.'], ['dboss', '나는 그림자 꾸꾸야. 이 꿈의 친구들은 전부 내 편이지.']],
-    dm_boss: [['dboss', '친구들은 꿈속에서 영원히 내 옆에 있을 거야.'], ['haru', '아니야! 친구들은 내 편이고, 이건 꿈일 뿐이야!'], ['dboss', '그럼 증명해 봐. 빨간 눈이 흔들릴 때, 머리를 밟아!']]
+    dm_boss: [['dboss', '친구들은 꿈속에서 영원히 내 옆에 있을 거야.'], ['haru', '아니야! 친구들은 내 편이고, 이건 꿈일 뿐이야!'], ['dboss', '그럼 증명해 봐. 빨간 눈이 빛날 때, 머리를 밟아!']],
+    dm_deep: [['haru', '그림자가 사라졌는데… 꿈이 더 깊어졌어. 발밑이 까맣다.'], ['haru', '저 앞에 있는 건 블록이 아니야. 사람처럼 생겼어.']],
+    dm_real: [['rsboss', '여긴 왜 다들 네모나지? 나만 너무 진짜 같은데.'], ['haru', '꿈이 깊어진 거야. 너무 진짜면, 오히려 이상하잖아!'], ['rsboss', '팔을 뻗기 전에 위로 올라가 봐. 그게 깨우는 방법이야.']]
   });
   Object.assign(TALKS5, {
     'E-1': [{ x: 8, id: 'dm_hi' }, { x: 156, id: 'dm_tutu' }],
     'E-2': [{ x: 8, id: 'dm_wall' }, { x: 158, id: 'dm_iron' }],
     'E-3': [{ x: 8, id: 'dm_forest' }],
-    'E-4': [{ x: 8, id: 'dm_gate' }, { x: 'arena', id: 'dm_boss' }]
+    'E-4': [{ x: 8, id: 'dm_gate' }, { x: 'arena', id: 'dm_boss' }],
+    'E-5': [{ x: 8, id: 'dm_deep' }, { x: 'arena', id: 'dm_real' }]
   });
   Object.assign(CUTS5, {
     dreamin62: { music: 'story', setup() {
@@ -17302,12 +17333,81 @@ var BlockDetail=(function(){
         { say: 'iron', text: '악몽은 끝났다. 눈은 다시 따뜻하구나.' },
         { say: 'snow', text: '눈덩이도 하얗게 돌아왔어. 녹지도 않았고!' },
         { say: 'moosh', text: '음머~ 다음 모험으로 가자. 그림책, 그리고 저 멀리 우주까지!' },
+        { say: 'haru', text: '마지막엔 너무 진짜 같은 스티브도 있었어. 그것까지 다 꿈이었어.' },
         { say: 'haru', text: '응! 친구들은 무사해. 자, 모험은 계속이야!' },
         { fn: () => banner('잠에서 깼어!', '친구들은 무사하고, 이야기는 계속된다', 2600) },
         { wait: 80 }
       ];
     } }
   });
+  function makeRsBoss62() {
+    const Lib = window.RealSteveLib;
+    if (!Lib || !Lib.make) {
+      const g = wireLimbs62(corrupt62(makeHero(), { shadow: 1 })); g.scale.multiplyScalar(1.5); g.userData.rsFallback = 1; return g;
+    }
+    const Q = (window.GQ && GQ.level === 'low') ? 0.4 : 0.55;
+    const R = Lib.make(Q).build();
+    const g = new THREE.Group();
+    R.mesh.position.y = -0.13;
+    g.add(R.mesh);
+    g.scale.setScalar(1.08);
+    g.userData.rs = R;
+    const head = R.B && R.B.head;
+    if (head) [-1, 1].forEach(s => {
+      const e = glowSprite(LIN(0xff1828), 0.1);
+      e.position.set(0.04 * s, 0.155, 0.145);
+      e.material.opacity = 1; e.userData.eye62 = 1; head.add(e);
+    });
+    return g;
+  }
+  function tickRsBoss62(e) {
+    const a = L.arena; if (!a) return;
+    e.aiT++;
+    e.vy = Math.max(-0.4, e.vy - 0.016);
+    if (e.ai === 'walk' || !e.ai) {
+      e.dir = pl.x > e.x ? 1 : -1; e.vx = e.dir * 0.02 * (DF ? DF().bspd : 1);
+      if (e.aiT > 80) { e.ai = Math.random() < 0.65 ? 'wind' : 'jump'; e.aiT = 0; e.dir = pl.x > e.x ? 1 : -1; }
+    } else if (e.ai === 'wind') {
+      e.vx = 0; e.dir = pl.x > e.x ? 1 : -1;
+      if (e.aiT > 26) { e.ai = 'jab'; e.aiT = 0; }
+    } else if (e.ai === 'jab') {
+      e.vx = e.dir * 0.125 * (DF ? DF().bspd : 1);
+      if (e.aiT > 20) { e.ai = 'rest'; e.aiT = 0; }
+    } else if (e.ai === 'jump') {
+      if (e.aiT === 1) { e.vy = 0.3; e.vx = (pl.x > e.x ? 1 : -1) * 0.035; }
+    } else if (e.ai === 'rest') {
+      e.vx *= 0.82; if (e.aiT > 34) { e.ai = 'walk'; e.aiT = 0; }
+    }
+    const wasAir = !e.onG;
+    const r = moveBody(e, e.vx, e.vy);
+    e.onG = r.ground; if (r.ground) e.vy = 0;
+    if (r.hitX) { e.dir = -e.dir; if (e.ai === 'jab') { e.ai = 'rest'; e.aiT = 0; cam.shake = 6; snd('capture'); } }
+    if (e.x < a.x0 + 1.1) { e.x = a.x0 + 1.1; e.dir = 1; }
+    if (e.x > a.x1 - 0.2) { e.x = a.x1 - 0.2; e.dir = -1; }
+    if (wasAir && r.ground && e.ai === 'jump') {
+      cam.shake = 9; snd('capture'); spawnParts(e.x, e.y, ZP, 0xc4a080, NP(10), 0.08, 0.05);
+      e.ai = 'rest'; e.aiT = 0;
+      if (pl.ground && Math.abs(pl.x - e.x) < 3.6) { pl.vy = 0.12; pl.ground = false; }
+    }
+  }
+  function poseRsBoss62(e, t) {
+    const mesh = e.mesh && e.mesh.children[0];
+    const R = e.mesh && e.mesh.userData && e.mesh.userData.rs;
+    if (!mesh || !R || !R.B) return;
+    const B = R.B;
+    mesh.rotation.y = e.dir >= 0 ? Math.PI / 2 - 0.7 : -Math.PI / 2 + 0.7;
+    const sw = Math.sin(t * 0.2 + e.id) * (Math.abs(e.vx) > 0.01 ? 1 : 0.25);
+    const jab = e.ai === 'jab' ? 1 : e.ai === 'wind' ? -0.7 : 0;
+    const set = (b, x, y, z) => { if (b) b.rotation.set(x, y || 0, z || 0); };
+    set(B.thighL, sw * 0.45); set(B.thighR, -sw * 0.45);
+    set(B.shinL, Math.max(0, -sw) * 0.55); set(B.shinR, Math.max(0, sw) * 0.55);
+    set(B.armL, -sw * 0.35 + (e.ai === 'jump' ? -0.8 : 0));
+    set(B.armR, sw * 0.25 + jab * 1.15);
+    set(B.foreL, 0.35); set(B.foreR, jab > 0 ? 0.15 : 0.45);
+    set(B.spine, Math.sin(t * 0.08) * 0.03, jab * 0.15);
+    if (e.kind === 'rsboss') e.mesh.visible = e.active && !(e.inv > 0 && (t >> 2) % 2 === 0);
+    if (B.head) B.head.children.forEach(c => { if (c.userData && c.userData.eye62 && c.material) c.material.opacity = 0.7 + Math.sin(t * 0.25) * 0.25; });
+  }
   window.__dream62 = {
     info: () => ({ on: dreamOn62(), opt: !!story5().dreamOpt62, done: !!story5().dream62, ids: STAGES.filter(s => s.wk === 'dream').map(s => s.id + ':' + s.theme), order: WORLD_ORDER595.slice(), nodes: MAPN5.map(n => n.k === 'dream' || (n.s !== undefined && STAGES[n.s] && STAGES[n.s].wk === 'dream') ? ((n.k || (STAGES[n.s] && STAGES[n.s].id)) + '@' + n.x.toFixed(1)) : null).filter(Boolean) }),
     go: n => { const a = dreamList62(), i = a[Math.max(0, Math.min(a.length - 1, n | 0))]; newRun(i); state = 'play'; if (G) G.introT = 0; return { i, id: STAGES[i].id }; },
@@ -23509,6 +23609,7 @@ function boot(){
 }
 window.BlockFighter={BF,UI,M,G,ROSTER,ARENAS,FEEL,CINE,DP,MV,SUP,XP,WL,CAMF,ceremony:BFCeremony,
   _test:{vDown,vUp,startMatch,stopMatch,RBY,makeFighterView,applyPose,poseFor,syncViews,fvMinY,MV:typeof MV!=="undefined"?MV:null,SUPMV:typeof SUPMV!=="undefined"?SUPMV:null}};
+try { window.RealSteveLib = RealSteveLib; } catch (e) {}
 if(D.readyState==='loading')D.addEventListener('DOMContentLoaded',boot);else boot();
 })();
 
