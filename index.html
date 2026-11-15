@@ -866,6 +866,8 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
     <button type="button" id="baTnt" aria-label="TNT">🧨<small>TNT</small><i id="baTntB">0</i></button>
   </div>
   <div id="baFlash"></div>
+  <div id="baRotate">가로로 돌리면 화면이 더 커요</div>
+  <div id="baCoach"></div>
 </div>
 <style>
   #baPad .ba-dpad{display:grid;grid-template-columns:auto auto auto;grid-template-areas:"l d r";gap:10px;align-items:end;}
@@ -6304,8 +6306,8 @@ const BlockAction = (() => {
   const ZP = 0.22;           // z of the play lane (actors, coins)
   const TD = 1.2;            // tile depth
   // v4 feel: snappier accel/turnaround, faster fall (gFall) with a short apex hang while jump is held
-  const C = { walk: 0.092, run: 0.152, accW: 0.0052, accR: 0.0064, fric: 0.0078, skid: 0.0145, air: 0.0048,
-    gUp: 0.0102, gDown: 0.026, gFall: 0.029, gMax: -0.34, hang: 0.55, hangV: 0.04, jump: 0.268, jumpRun: 0.04, coyote: 6, buffer: 7 };
+  const C = { walk: 0.092, run: 0.156, accW: 0.0066, accR: 0.008, fric: 0.0102, skid: 0.0165, air: 0.0066,
+    gUp: 0.0092, gDown: 0.028, gFall: 0.031, gMax: -0.36, hang: 0.5, hangV: 0.045, jump: 0.272, jumpRun: 0.045, coyote: 7, buffer: 8 };
   const SAVE_KEY = 'ba_stages_v1';
   function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595', 'pw621'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
   function saveSave() { try { wo595Stamp(save); } catch (e) {} try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
@@ -7288,17 +7290,18 @@ const BlockAction = (() => {
       s.connect(f); f.connect(g); g.connect(pn53(c)); s.start(t, Math.random()); s.stop(t + dur + 0.05);
     }
     const LIB = {
-      jump: () => { tone(330, 720, 0.13, 'square', 0.07); tone(660, 1300, 0.09, 'triangle', 0.04); },
+      jump: () => { noise(0.04, 0.05, 'highpass', 1400, 2800); tone(380, 920, 0.1, 'square', 0.075); tone(620, 1400, 0.12, 'triangle', 0.045, 0.02); },
       djump: () => { tone(280, 900, 0.16, 'square', 0.08); tone(560, 1600, 0.12, 'triangle', 0.05); },
       wslide: () => { noise(0.22, 0.035, 'bandpass', 500, 1400, 0.01, 1.2); },
       walljump: () => { tone(330, 990, 0.1, 'triangle', 0.08); tone(660, 1320, 0.08, 'square', 0.025, 0.03); noise(0.1, 0.06, 'highpass', 1800, 3000, 0.005, 1.4); },
       airjump: () => { tone(520, 1400, 0.12, 'triangle', 0.09); tone(1047, 1047, 0.07, 'sine', 0.06, 0.05); tone(1568, 1568, 0.12, 'sine', 0.05, 0.1); tone(940, 2100, 0.1, 'square', 0.025, 0.035); noise(0.16, 0.07, 'bandpass', 900, 3600, 0.02, 1.6); },
       summon: () => { noise(0.35, 0.12, 'highpass', 2400, 6000, 0, 0.8); tone(110, 880, 0.32, 'sawtooth', 0.05); tone(1760, 220, 0.18, 'square', 0.03, 0.22); noise(0.18, 0.16, 'lowpass', 1400, 200, 0.3); },
-      land: () => { noise(0.07, 0.12, 'lowpass', 900, 200); tone(140, 70, 0.06, 'sine', 0.12); },
-      stomp: () => { tone(520, 140, 0.11, 'square', 0.11); noise(0.08, 0.14, 'bandpass', 1800, 400, 0, 1.2); tone(90, 50, 0.1, 'sine', 0.18); },
-      coin: () => { tone(988, 0, 0.07, 'square', 0.06); tone(1319, 0, 0.22, 'square', 0.06, 0.06); },
+      land: () => { noise(0.08, 0.14, 'lowpass', 700, 140); tone(120, 55, 0.07, 'sine', 0.14); },
+      stomp: () => { tone(160, 48, 0.13, 'sine', 0.22); tone(380, 90, 0.08, 'square', 0.07); noise(0.09, 0.16, 'lowpass', 800, 160); },
+      coin: () => { tone(988, 1175, 0.055, 'square', 0.07); tone(1568, 1860, 0.16, 'triangle', 0.055, 0.045); },
       brick: () => { noise(0.22, 0.22, 'lowpass', 2400, 300); tone(160, 60, 0.14, 'triangle', 0.14); noise(0.12, 0.1, 'highpass', 3000, 1200, 0.05); },
-      power: () => { [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, f * 1.01, 0.09, 'square', 0.055, i * 0.055)); },
+      power: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, f * 1.015, 0.11, 'triangle', 0.06, i * 0.055)); noise(0.18, 0.03, 'highpass', 2200, 4200, 0.04); },
+      hurt: () => { tone(240, 70, 0.16, 'sawtooth', 0.09); tone(130, 48, 0.18, 'square', 0.05); noise(0.12, 0.09, 'bandpass', 420, 160); },
       pickup: () => { tone(660, 990, 0.08, 'triangle', 0.08); tone(990, 1480, 0.12, 'triangle', 0.07, 0.07); },
       throw: () => { noise(0.12, 0.08, 'bandpass', 600, 2400, 0, 2); },
       fwhoosh: () => { noise(0.17, 0.11, 'bandpass', 420, 2800, 0, 1.6); noise(0.12, 0.05, 'highpass', 5200, 2600, 0.03); tone(190, 95, 0.12, 'sine', 0.07); },
@@ -9199,6 +9202,8 @@ const BlockAction = (() => {
     placeCamera(true);
     state = showIntro ? 'intro' : 'play'; G.introT = showIntro ? 100 : 0;
     hideOverlays(); setMenu(false);
+    { const root = document.getElementById('blockaction'); if (root) root.classList.add('ba-play'); }
+    if (COACH.on) { COACH.x0 = pl.x; COACH.st0 = G.stomps | 0; }
     banner(def.id + '  ' + def.name, showIntro ? '목숨 × ' + G.lives : '', showIntro ? 1500 : 900);
     updateHUD(true); updBossBar();
     if (showIntro) stageIn53(def); else iris53(true, 0.45);
@@ -9332,7 +9337,7 @@ const BlockAction = (() => {
   function hurt() {
     if (pl.inv > 0 || state !== 'play' || pl.truck) return;
     if (hurt57()) return;
-    if (pl.power > 0) { setPower(pl.power - 1); pl.inv = 120; snd('hurt'); cam.shake = 6; }
+    if (pl.power > 0) { setPower(pl.power - 1); pl.inv = 120; snd('hurt'); cam.shake = Math.max(cam.shake, 8); G.hitstop = 5; vib(18); }
     else die();
   }
   function die() {
@@ -9415,6 +9420,7 @@ const BlockAction = (() => {
       const gr = ((inp.jump || p.djH571 > 0) && p.jumping) ? C.gUp : (p.vy < 0 ? C.gFall : C.gDown);
       const hang = (inp.jump && !p.ground && !p.truck && Math.abs(p.vy) < C.hangV) ? C.hang : 1;   // apex hang while the button is held
       p.vy = Math.max(C.gMax * LG54(1) * (p.truck ? 1.15 : 1), p.vy - gr * LG54(0) * hang * (p.truck ? 1.18 : 1));
+      if (p.jumping && !inp.jump && !p.truck && p.vy > 0.05) { p.vy *= 0.46; p.jumping = false; }   // tap = short hop, hold = full height
     }
     wslide571(p, dir, wet);
     p.wet = wet;
@@ -9443,7 +9449,8 @@ const BlockAction = (() => {
     }
     if (p.pound && p.ground && p.ride) poundImpact(p.x, p.y);
     if (p.ground && !wasGround) { const hard = -preVy; snd('land'); spawnParts(p.x, p.y, ZP, 0xcab59a, NP(Math.min(14, Math.round(4 + hard * 30))), 0.04 + hard * 0.08, 0.03);
-      p.landK = Math.min(1, 0.35 + hard * 2.6); if (hard > 0.26) { cam.shake = Math.max(cam.shake, 2.5); vib(6); } }
+      if (hard > 0.08) dustRing(p.x, p.y);
+      p.landK = Math.min(1, 0.35 + hard * 2.6); if (hard > 0.2) { cam.shake = Math.max(cam.shake, 3); vib(8); } }
     if (p.ground && Math.abs(p.vx) > C.walk * 0.9 && clock % 5 === 0) spawnParts(p.x - p.face * 0.18, p.y + 0.02, ZP, 0xcab59a, 1, 0.025, 0.025);
     if (p.pound && wet0) p.pound = 0;
     // fire
@@ -9501,6 +9508,7 @@ const BlockAction = (() => {
     tickWorld(true);
     if (pl.grow > 0) pl.grow--;
     stepPlayer(inp);
+    coach66();
     tick5();
     if (pl.truck) tickTruck();
     if (state !== 'play') return;
@@ -9540,7 +9548,7 @@ const BlockAction = (() => {
         const inp2 = prevIn;
         pl.vy = inp2.jump ? 0.3 : 0.2; pl.jumping = !!inp2.jump; pl.y = e.y + e.h + 0.01;
         G.combo = (pl.ground ? 0 : (G.combo || 0)) + 1;
-        G.hitstop = BOSSK[e.kind] ? 6 : 4; cam.shake = Math.max(cam.shake, BOSSK[e.kind] ? 5 : 3); vib(12); hitFlash(e); G.stomps = (G.stomps || 0) + 1;
+        G.hitstop = BOSSK[e.kind] ? 6 : 5; cam.shake = Math.max(cam.shake, BOSSK[e.kind] ? 6 : 4); vib(12); hitFlash(e); G.stomps = (G.stomps || 0) + 1;
         if (pl.pound) { pl.pound = 0; G.hitstop = 7; cam.shake = Math.max(cam.shake, 9); vib([20, 30, 14]); dustRing(e.x, e.y + e.h); spawnParts(e.x, e.y + e.h, ZP, 0xffe8a0, NP(12), 0.12, 0.08); G.poundStomps = (G.poundStomps || 0) + 1;
           if (e.kind === 'guard') e.hp = 1; }
         spawnParts(e.x, e.y + e.h, ZP, 0xffffff, NP(6), 0.07, 0.05);
@@ -9867,10 +9875,10 @@ const BlockAction = (() => {
     AN.look = lerp(AN.look, lookY, 0.08 * k); AN.lookX = lerp(AN.lookX, lookX, 0.08 * k);
     Lb.head.rotation.y = AN.look - (Lb.body.rotation.y || 0) * 0.7; Lb.head.rotation.x = AN.lookX - Lb.body.rotation.x * 0.8;   // head keeps looking forward
     // squash on landing, stretch in the air
-    if (p.ground && !AN.lastGround) AN.squash = Math.min(1, 0.5 + AN.fall * 2.4);
+    if (p.ground && !AN.lastGround) AN.squash = Math.min(1, 0.7 + AN.fall * 3.2);
     AN.lastGround = p.ground; AN.fall = Math.max(0, -p.vy);
     AN.squash = Math.max(0, AN.squash - 0.09 * k);
-    const st = p.ground ? (1 - Math.sin(AN.squash * Math.PI) * 0.2) * (1 - (AN.rsq || 0)) : 1 + Math.min(0.2, Math.abs(p.vy) * 0.7);
+    const st = p.ground ? (1 - Math.sin(AN.squash * Math.PI) * 0.28) * (1 - (AN.rsq || 0)) : 1 + Math.min(0.22, Math.abs(p.vy) * 0.8);
     model.scale.set(1 / Math.sqrt(st), st, 1 / Math.sqrt(st));
     // hurt blink + fade into the exit
     const blink = state === 'play' && p.inv > 0 && (clock >> 2) % 2 === 0;
@@ -10315,7 +10323,8 @@ const BlockAction = (() => {
       c.onclick = () => { if (!locked) { SFX && snd('select'); shopGo582(i, () => newRun(i)); } };
       grid.appendChild(c);
     });
-    el.classList.add('show'); setPad(false);
+    el.classList.add('show'); setPad(false); coachDone();
+    { const root = document.getElementById('blockaction'); if (root) root.classList.remove('ba-play'); }
     { const mp = $('baMap'); if (mp) mp.classList.remove('show'); modeClass5(null); sayHide5(); selectExtras5(); }
     const ob = $('baOver'); if (ob) ob.classList.remove('show');
     updBossBar();
@@ -10359,6 +10368,41 @@ const BlockAction = (() => {
   window.__baApp = { state: () => state, pause: () => pause(), resume: () => resume() };   // v6.2.0 app hooks (back button / background)
   function releaseKeys() { for (const k in keys) keys[k] = false; prevIn = {}; RUN5.reset(); try { lrEnd584(); } catch (e) {} }
 
+  // ---------- first-run coach: one line at a time, only until move / jump / stomp ----------
+  const COACH = { on: false, step: 0, x0: 0, st0: 0 };
+  function coachShow(t) {
+    const el = document.getElementById('baCoach'); if (!el) return;
+    if (!t) { el.classList.remove('on'); el.textContent = ''; return; }
+    el.textContent = t; el.classList.add('on');
+  }
+  function coachDone() { COACH.on = false; COACH.step = 3; coachShow(''); try { localStorage.setItem('ba_coach_v1', '1'); } catch (e) {} }
+  function coach66() {
+    if (!COACH.on || state !== 'play' || !pl || !G) return;
+    const lines = ['← →  움직여 보세요', '점프를 길게 누르면 더 높아요', '적 머리를 밟아 보세요'];
+    if (COACH.step === 0 && Math.abs(pl.x - COACH.x0) > 0.4) COACH.step = 1;
+    if (COACH.step === 1 && !pl.ground && pl.vy > 0.04) COACH.step = 2;
+    if (COACH.step === 2 && (G.stomps | 0) > COACH.st0) COACH.step = 3;
+    if (COACH.step >= 3) { coachDone(); return; }
+    coachShow(lines[COACH.step]);
+  }
+  function portalFirst66() {
+    try {
+      if (localStorage.getItem('ba_coach_v1') === '1') return false;
+      if (save && (save.unlocked | 0) > 1) return false;
+      if (save && save.story && (save.story.intro || save.story.portal)) return false;
+      if (save && save.best) { for (const k in save.best) if (save.best[k] && save.best[k].clear) return false; }
+      return true;
+    } catch (e) { return false; }
+  }
+  function portalStart66() {
+    COACH.on = true; COACH.step = 0;
+    abortCut5();
+    G = { lives: DF().lives, score: 0, coins: 0, tnt: 0, utnt: 0, truckN: 0, hitstop: 0, slow: 0 };
+    stageIdx = 0; cpReached = false;
+    startStage(false);
+    COACH.x0 = pl.x; COACH.st0 = G.stomps | 0;
+    coachShow('← →  움직여 보세요');
+  }
   // ---------- boot ----------
   function ensure() {
     if (started) return;
@@ -10397,7 +10441,9 @@ const BlockAction = (() => {
     buildFx();
     bindInput();
     window.addEventListener('resize', onResize);
-    dom5(); showSelect(); showMap5();
+    dom5();
+    if (portalFirst66()) portalStart66();
+    else { showSelect(); showMap5(); }
     if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); installDebug54(); installDebug56(); installDebug57(); installDebug58(); installDebug59(); installDebug595(); }
     last = performance.now(); requestAnimationFrame(animate);
   }
@@ -10419,14 +10465,25 @@ const BlockAction = (() => {
     });
     window.addEventListener('keyup', e => { if (e.code === 'ShiftLeft' || e.code === 'ShiftRight') return; keys[e.code] = false; });
     window.addEventListener('blur', releaseKeys);
+    const pads = new Map();
     const hold = (el, code) => {
       if (!el) return;
-      const down = e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (err) {} keys[code] = true; el.classList.add('on'); vib(8); if (code === 'ArrowLeft' || code === 'ArrowRight') RUN5.dirDown(code); };
-      const up = () => { if (keys[code] && (code === 'ArrowLeft' || code === 'ArrowRight')) RUN5.dirUp(code); keys[code] = false; el.classList.remove('on'); };
+      const down = e => { e.preventDefault(); try { el.setPointerCapture(e.pointerId); } catch (err) {} pads.set(e.pointerId, code); keys[code] = true; el.classList.add('on'); vib(8); if (code === 'ArrowLeft' || code === 'ArrowRight') RUN5.dirDown(code); };
+      const up = e => {
+        if (e && e.pointerId != null) { if (pads.get(e.pointerId) !== code) return; pads.delete(e.pointerId); }
+        let still = false; pads.forEach(c => { if (c === code) still = true; }); if (still) return;
+        if (keys[code] && (code === 'ArrowLeft' || code === 'ArrowRight')) RUN5.dirUp(code); keys[code] = false; el.classList.remove('on');
+      };
       el.addEventListener('pointerdown', down); el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
+      window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       el.addEventListener('contextmenu', e => e.preventDefault());
     };
     hold($('baLeft'), 'ArrowLeft'); hold($('baRight'), 'ArrowRight'); RUN5.bind(); hold($('baDown'), 'ArrowDown'); hold($('baTnt'), 'KeyE'); hold($('baUtnt'), 'KeyR'); hold($('baTruck'), 'KeyT'); if ($('baTruck')) $('baTruck').addEventListener('pointerdown', () => { if (state === 'play') trkLatch55 = true; });
+    const baRoot = document.getElementById('blockaction');
+    if (baRoot && !baRoot.dataset.touch66) { baRoot.dataset.touch66 = '1';
+      baRoot.addEventListener('touchmove', e => { if (e.target.closest && e.target.closest('.ba-ov, input, textarea')) return; e.preventDefault(); }, { passive: false });
+      baRoot.addEventListener('contextmenu', e => e.preventDefault());
+    }
     const sndBtn = $('baSnd'); if (sndBtn) sndBtn.onclick = () => { const on = SFX.toggle(); sndBtn.textContent = on ? '🔊' : '🔇'; BGM.refresh(); if (!on) AFX.hum(0); };
     const musBtn = $('baMus'); if (musBtn) { const upd = () => { musBtn.textContent = BGM.isOn() ? '🎵' : '🎵'; musBtn.classList.toggle('off', !BGM.isOn()); }; upd(); musBtn.onclick = () => { AFX.warm(); BGM.toggle(); upd(); }; }
     document.addEventListener('visibilitychange', () => { if (document.hidden) { BGM.update(state, false); if (state === 'play') pause(); } });
@@ -12280,7 +12337,26 @@ const BlockAction = (() => {
 #ba583bar .tt{font:900 13px 'Segoe UI',sans-serif;color:#7fe8ff;text-shadow:0 0 8px #2ad4ff;margin-left:2px;}
 @media (hover:none) and (pointer:coarse){#ba583bar{display:none !important;}}
 /* ---------- touch controls: frosted glass circles ---------- */
-#blockaction{--sb583:env(safe-area-inset-bottom,0px);--sr583:env(safe-area-inset-right,0px);--sl583:env(safe-area-inset-left,0px);}
+#blockaction{--sb583:env(safe-area-inset-bottom,0px);--sr583:env(safe-area-inset-right,0px);--sl583:env(safe-area-inset-left,0px);--st583:env(safe-area-inset-top,0px);touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
+#blockaction .backbar{top:var(--st583);left:var(--sl583);padding-top:calc(12px + var(--st583));}
+#blockaction #baHud{top:calc(52px + var(--st583)) !important;left:calc(12px + var(--sl583)) !important;}
+#baRotate{display:none;position:absolute;left:50%;top:calc(128px + var(--st583));transform:translateX(-50%);z-index:11;pointer-events:none;padding:8px 14px;border-radius:999px;background:rgba(8,6,20,.78);color:#ffe7a8;font:800 14px system-ui,sans-serif;border:1px solid rgba(255,220,140,.45);text-align:center;max-width:min(280px,78vw);line-height:1.35;}
+@media (orientation:portrait) and (max-width:900px){#blockaction.ba-play #baRotate{display:block;}}
+#baCoach{display:none;position:absolute;left:50%;bottom:calc(168px + var(--sb583));transform:translateX(-50%);z-index:11;pointer-events:none;max-width:min(420px,86vw);padding:10px 16px;border-radius:16px;background:rgba(8,6,22,.82);color:#fff;font:800 18px system-ui,sans-serif;border:1px solid rgba(180,200,255,.45);text-align:center;}
+#baCoach.on{display:block;}
+@media (orientation:landscape) and (max-height:520px){
+  #blockaction.ba-touch #baJump.g583{width:118px !important;height:118px !important;}
+  #blockaction.ba-touch #baDash.g583{width:82px !important;height:82px !important;}
+  #blockaction.ba-touch #baPad > #baLR584 > .k584{width:118px;height:104px;}
+  #blockaction.ba-touch.ctlb584 #baPad > #baLR584{width:calc(280px + var(--sl583)) !important;}
+  #blockaction.ba-touch #baPad > #baLR584 > .r584{left:calc(148px + var(--sl583));}
+  #blockaction.ba-touch #baHud{top:calc(6px + var(--st583)) !important;}
+  #blockaction.ba-touch .backbar{transform:scale(.9);transform-origin:top left;}
+}
+@media (orientation:portrait) and (max-width:520px){
+  #blockaction.ba-touch #baJump.g583{width:108px !important;height:108px !important;}
+  #blockaction.ba-touch #baPad > #baLR584 > .k584{width:104px;height:96px;}
+}
 #blockaction #baPad,#blockaction #baPadX{position:absolute !important;inset:0 !important;padding:0 !important;margin:0 !important;pointer-events:none !important;background:none !important;z-index:8;transition:opacity .6s;}
 #blockaction #baPad .ba-dpad{display:none !important;}
 #blockaction #baPad > div{position:static !important;display:block;width:0;height:0;margin:0;padding:0;}
@@ -12699,7 +12775,7 @@ const BlockAction = (() => {
     let mode = 'btn'; try { const v = localStorage.getItem(KEY); if (v === 'joy' || v === 'btn') mode = v; } catch (e) {}
     const touch = () => { try { return matchMedia('(pointer:coarse)').matches || (navigator.maxTouchPoints | 0) > 0; } catch (e) { return false; } };
     function apply() {
-      const root = document.getElementById('blockaction'); if (root) { root.classList.toggle('ctlb584', mode === 'btn'); root.classList.toggle('ctlj584', mode === 'joy'); }
+      const root = document.getElementById('blockaction'); if (root) { root.classList.toggle('ctlb584', mode === 'btn'); root.classList.toggle('ctlj584', mode === 'joy'); root.classList.toggle('ba-touch', touch()); }
       if (mode === 'btn') { try { STK583.joy && STK583.joy.end(); } catch (e) {} } else lrEnd584();
     }
     return { mode: () => mode, label: () => LBL[mode], touch, apply,
@@ -12767,11 +12843,15 @@ const BlockAction = (() => {
     z.addEventListener('pointerdown', e => { if (LR584.id !== null) return; e.preventDefault(); LR584.id = e.pointerId; try { z.setPointerCapture(e.pointerId); } catch (err) {} lrSet584(pick(e.clientX)); });
     z.addEventListener('pointermove', e => { if (e.pointerId !== LR584.id) return; e.preventDefault(); lrSet584(pick(e.clientX)); });   // slide between ← and → without lifting
     ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => z.addEventListener(t, e => { if (e.pointerId === LR584.id) lrEnd584(); }));
+    window.addEventListener('pointerup', e => { if (e.pointerId === LR584.id) lrEnd584(); });
+    window.addEventListener('pointercancel', e => { if (e.pointerId === LR584.id) lrEnd584(); });
     z.addEventListener('contextmenu', e => e.preventDefault());
     const dn = document.createElement('div'); dn.id = 'baDn584'; dn.innerHTML = arrow('M4.5 8.5 L12 17.5 L19.5 8.5 Z'); PAD.insertBefore(dn, PAD.firstChild); LR584.dn = dn;
     let did = null; const dup = e => { if (e.pointerId !== did) return; did = null; keys.ArrowDown = false; dn.classList.remove('on'); };
     dn.addEventListener('pointerdown', e => { if (did !== null) return; e.preventDefault(); did = e.pointerId; try { dn.setPointerCapture(did); } catch (err) {} keys.ArrowDown = true; dn.classList.add('on'); vib(6); });
-    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => dn.addEventListener(t, dup)); dn.addEventListener('contextmenu', e => e.preventDefault());
+    ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => dn.addEventListener(t, dup));
+    window.addEventListener('pointerup', dup); window.addEventListener('pointercancel', dup);
+    dn.addEventListener('contextmenu', e => e.preventDefault());
     CTL584.apply();
   }
   function lrTick584() { if (LR584.el) LR584.el.classList.toggle('sp584', RUN5.sprinting()); if (LR584.dir && !keys[LR584.dir] && LR584.id !== null) keys[LR584.dir] = true; }
@@ -12800,7 +12880,7 @@ const BlockAction = (() => {
     let at = typeof save.node === 'number' ? save.node : 0; if (!nodeOpen5(at)) at = 0;
     MAP.at = at; MAP.walk = null; MAP.path = []; MAP.hx = MAPN5[at].x; MAP.hz = MAPN5[at].z; MAP.cx = MAP.hx; MAP.leaving = false;
     if (o.celebrate !== undefined && nodeOpen5(o.celebrate)) { MAP.at = Math.max(0, o.celebrate - 2); MAP.hx = MAPN5[MAP.at].x; MAP.hz = MAPN5[MAP.at].z; MAP.cx = MAP.hx; walkTo5(o.celebrate); }
-    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59(); dreamAuto62(); spaceAuto595();
+    refreshMap5(); state = 'map'; modeClass5('map'); D.map.classList.add('show'); coachDone(); { const root = document.getElementById('blockaction'); if (root) root.classList.remove('ba-play'); } mapPanel5(); mapHeroFix583(true); finHide583(); mapCrown583(); finAuto583(); bookAuto59(); dreamAuto62(); spaceAuto595();
     if (MAP.exp0 === undefined) MAP.exp0 = renderer.toneMappingExposure;
   }
   function walkTo5(target) {
@@ -13028,8 +13108,9 @@ const BlockAction = (() => {
       if (!el) return;
       el.addEventListener('pointerdown', ev => { ev.preventDefault(); try { el.setPointerCapture(ev.pointerId); } catch (e) {} let s = ptr.get(ev.pointerId); if (!s) { s = new Set(); ptr.set(ev.pointerId, s); } s.cur = code; if (!s.has(code)) { s.add(code); apply(code); } else if (code === 'Space') { jp = Math.min(3, jp + 1); vib(8); } });
       el.addEventListener('pointermove', ev => { const s = ptr.get(ev.pointerId); if (!s) return; const c = hit(ev.clientX, ev.clientY); if (c && !s.has(c)) { s.add(c); apply(c); } else if (c === 'Space' && s.cur !== 'Space') { jp = Math.min(3, jp + 1); vib(8); } s.cur = c; });
-      const up = ev => { if (ptr.delete(ev.pointerId)) apply(null); };
+      const up = ev => { if (ev && ptr.delete(ev.pointerId)) apply(null); };
       el.addEventListener('pointerup', up); el.addEventListener('pointercancel', up); el.addEventListener('lostpointercapture', up);
+      window.addEventListener('pointerup', up); window.addEventListener('pointercancel', up);
       el.addEventListener('contextmenu', e => e.preventDefault());
     }
     return {
