@@ -844,7 +844,7 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
       <h2>마인크래프트 마리오 · 스테이지 선택</h2>
       <p class="ba-hint">PC: ←→/A·D 이동 · Space 점프(길게=높이, 공중에서 한 번 더 = 2단 점프) · ↓/S 웅크리기·슬라이딩, 공중에서 ↓ = 내려찍기 · <b class="dk581">X</b> 달리기/불덩이(K·J·F도 가능) · E TNT · R 울트라 TNT · T 사이버트럭 소환 · <b>1~5 보관 아이템</b>(🍄🔥🔱🧪❤️) · Esc 일시정지 · 1~4 선택</p>
       <p class="ba-hint ba-touch">폰: 왼쪽 ←→ 버튼 이동(두 번 누르면 질주 · ↓ = 웅크리기, 공중 = 내려찍기 · ⏸ 메뉴/지도 설정에서 조이스틱으로 바꿀 수 있어요) · 큰 버튼 점프(길게=높이, 공중에서 다시 = 2단) · 대시 = 달리기/불덩이/🔱 삼지창 · 🧨 TNT · ✴ 울트라 · 트럭 소환 · 위쪽 아이템 칸 탭 = 보관 아이템 사용</p>
-      <div class="ba-skin ba-diff">난이도 <button type="button" data-diff="easy">🌱 쉬움</button><button type="button" data-diff="normal">⚔️ 보통</button><button type="button" data-diff="hard">🔥 어려움</button><button type="button" class="sv" onclick="SaveCode57.open()">💾 기록 옮기기</button></div>
+      <div class="ba-skin ba-diff">난이도 <button type="button" data-diff="easy">🌱 쉬움</button><button type="button" data-diff="normal">⚔️ 보통</button><button type="button" data-diff="hard">🔥 어려움</button><button type="button" id="baWardrobe">👕 옷장</button><button type="button" class="sv" onclick="SaveCode57.open()">💾 기록 옮기기</button></div>
       <p class="ba-hint ba-rot">📱 가로로 돌리면 캐릭터가 더 크게 보여요</p>
       <div class="ba-cards"></div>
     </div>
@@ -940,6 +940,9 @@ window.__mob620=window.__mob620||{t0:Date.now(),app:/BlockGamesApp/.test(navigat
   .ba-nm{font-size:20px;font-weight:900;margin:4px 0 4px;}
   .ba-sub{font-size:12.5px;opacity:.8;line-height:1.35;}
   .ba-best{margin-top:8px;font-size:12.5px;font-weight:700;color:#fde68a;}
+  .ba-starrow{margin-top:6px;letter-spacing:3px;font-size:18px;line-height:1;}
+  .ba-starrow i{font-style:normal;color:rgba(255,255,255,.28);}
+  .ba-starrow i.on{color:#ffd54a;text-shadow:0 0 8px rgba(255,210,80,.85);}
   .ba-small{width:min(420px,100%);background:linear-gradient(160deg,rgba(60,46,130,.85),rgba(14,10,36,.92));border:1px solid rgba(200,180,255,.35);border-radius:22px;padding:22px 18px;box-shadow:0 20px 50px rgba(0,0,0,.55);}
   .ba-small p{margin:8px 0 14px;font-size:15px;line-height:1.7;}
   .ba-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;}
@@ -6217,6 +6220,8 @@ const BlockAction = (() => {
     const armSide = hmat('arm', { roughness: 0.75 }), armM = [armSide, armSide, hmat('shirtCap', { roughness: 0.85 }), hmat('skinPlain', skinOpts), armSide, armSide];
     const legSide = hmat('leg', { roughness: 0.8 }), legM = [legSide, legSide, hmat('pantsCap'), hmat('bootSole', { roughness: 0.95 }), legSide, legSide];
     const tint = [bodyS, bodyM[2], bodyM[4], bodyM[5], armSide, armM[2], headM[2], headM[4], headSide, headM[5]];
+    const cloth = [bodyS, bodyM[2], bodyM[4], bodyM[5], armSide, armM[2], legSide, legM[2]];
+    cloth.forEach(m => { if (!m.userData) m.userData = {}; m.userData.baseMap = m.map; m.userData.slot = (m === legSide || m === legM[2]) ? 'pants' : 'shirt'; });
     const torso = new THREE.Group(); torso.position.y = 12 * P; model.add(torso);   // pivot at the hips (breathing / lean)
     const body = new THREE.Mesh(bevelBox(8 * P, 12 * P, 4 * P, R), bodyM); body.position.y = 6 * P; torso.add(body);
     const neck = new THREE.Group(); neck.position.y = 12 * P; torso.add(neck);        // head pivot (head tracking)
@@ -6236,6 +6241,7 @@ const BlockAction = (() => {
     g.userData.limbs = { armL, armR, legL, legR, body: torso, head: neck };
     g.userData.model = model;
     g.userData.tint = tint;
+    g.userData.cloth = cloth;
     g.userData.P = P;
     return g;
   };
@@ -6309,7 +6315,7 @@ const BlockAction = (() => {
   const C = { walk: 0.092, run: 0.156, accW: 0.0066, accR: 0.008, fric: 0.0102, skid: 0.0165, air: 0.0066,
     gUp: 0.0092, gDown: 0.028, gFall: 0.031, gMax: -0.36, hang: 0.5, hangV: 0.045, jump: 0.272, jumpRun: 0.045, coyote: 7, buffer: 8 };
   const SAVE_KEY = 'ba_stages_v1';
-  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595', 'pw621'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1 }; }
+  function loadSave() { try { const s = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); if (s && typeof s.unlocked === 'number') { const o = { unlocked: Math.max(1, Math.min(40, s.unlocked)), best: s.best || {}, skin: 'steve', story: s.story && typeof s.story === 'object' ? s.story : {}, node: typeof s.node === 'number' ? s.node : 0 }; ['w3seen', 'w4seen', 'wv', 'djTip', 'tntSeen', 'v58', 'shop', 'st583', 'w5seen', 'v59', 'wo', 'v595', 'orph595', 'pw621', 'outfit66', 'owned66'].forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); if (!o.v58) migrate58(o); o.unlocked = Math.max(1, Math.min(40, o.unlocked)); if (!Array.isArray(o.owned66)) o.owned66 = ['steve']; if (!o.outfit66) o.outfit66 = 'steve'; return o; } } catch (e) {} return { unlocked: 1, best: {}, v58: 1, outfit66: 'steve', owned66: ['steve'] }; }
   function saveSave() { try { wo595Stamp(save); } catch (e) {} try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch (e) {} }
   let save = loadSave();
 
@@ -7299,6 +7305,7 @@ const BlockAction = (() => {
       land: () => { noise(0.08, 0.14, 'lowpass', 700, 140); tone(120, 55, 0.07, 'sine', 0.14); },
       stomp: () => { tone(160, 48, 0.13, 'sine', 0.22); tone(380, 90, 0.08, 'square', 0.07); noise(0.09, 0.16, 'lowpass', 800, 160); },
       coin: () => { tone(988, 1175, 0.055, 'square', 0.07); tone(1568, 1860, 0.16, 'triangle', 0.055, 0.045); },
+      star: () => { [784, 988, 1319, 1568].forEach((f, i) => tone(f, f * 1.02, 0.16, 'triangle', 0.07, i * 0.07)); noise(0.12, 0.03, 'highpass', 2400, 5000, 0.12); },
       brick: () => { noise(0.22, 0.22, 'lowpass', 2400, 300); tone(160, 60, 0.14, 'triangle', 0.14); noise(0.12, 0.1, 'highpass', 3000, 1200, 0.05); },
       power: () => { [523, 659, 784, 1047, 1319].forEach((f, i) => tone(f, f * 1.015, 0.11, 'triangle', 0.06, i * 0.055)); noise(0.18, 0.03, 'highpass', 2200, 4200, 0.04); },
       hurt: () => { tone(240, 70, 0.16, 'sawtooth', 0.09); tone(130, 48, 0.18, 'square', 0.05); noise(0.12, 0.09, 'bandpass', 420, 160); },
@@ -9196,7 +9203,7 @@ const BlockAction = (() => {
     if (!player) { player = makeHero(); scene.add(player); }
     player.visible = true; player.rotation.set(0, 0, 0);
     pl = { x: sp[0], y: sp[1], vx: 0, vy: 0, hw: 0.28, h: 0.9, face: 1, ground: false, coy: 0, buf: 0, jumping: false, power: 0, inv: 0, ride: null, grow: 0, phase: 0, fireCd: 0, prevY: sp[1] };
-    setPower(pw621(), true); stage57();   // v6.2.1: power carried from the last goal (dying resets it)
+    setPower(pw621(), true); stage57(); applyOutfit66();   // v6.2.1: power carried from the last goal (dying resets it)
     G.ticks = 0; G.timeLeft = def.time; G.stageScore0 = G.score; G.over = false; G.w582 = null;
     cam.lockX = null; cam.fy = pl.y; cam.x = pl.x; cam.shake = 0;
     placeCamera(true);
@@ -9210,10 +9217,52 @@ const BlockAction = (() => {
   }
   // v6.2.1: Mario-style power carry-over. save.pw621 = power at the last goal (0 small · 1 big · 2 fire); a death resets it.
   const pw621 = () => { const v = save && save.pw621 | 0; return v >= 2 ? 2 : v > 0 ? 1 : 0; };
+  const SKINS66 = [
+    { id: 'steve', name: '기본 스티브', shirt: 0xffffff, pants: 0xffffff, price: 0, stars: 0, a: '#22a3a6', b: '#3b3a9c' },
+    { id: 'mint', name: '민트 조끼', shirt: 0x5dffb0, pants: 0x1d6b45, price: 120, stars: 0, a: '#5dffb0', b: '#1d6b45' },
+    { id: 'sunset', name: '노을', shirt: 0xff7a32, pants: 0x6a2430, price: 220, stars: 0, a: '#ff7a32', b: '#6a2430' },
+    { id: 'forest', name: '숲지기', shirt: 0x3ecf4a, pants: 0x4a3014, price: 360, stars: 0, a: '#3ecf4a', b: '#4a3014' },
+    { id: 'sea', name: '바다', shirt: 0x3aa0ff, pants: 0x14306a, price: 520, stars: 0, a: '#3aa0ff', b: '#14306a' },
+    { id: 'gold', name: '황금', shirt: 0xffd24a, pants: 0xc48a12, price: 0, stars: 6, glow: 0x6a4a10, a: '#ffd24a', b: '#c48a12' },
+    { id: 'nether', name: '네더', shirt: 0xff3a3a, pants: 0x2a1014, price: 0, stars: 15, glow: 0x6a1010, a: '#ff3a3a', b: '#2a1014' },
+    { id: 'moon', name: '달빛', shirt: 0xe4d4ff, pants: 0x3a2868, price: 0, stars: 24, glow: 0x403060, a: '#e4d4ff', b: '#3a2868' }
+  ];
+  const skinDef66 = id => SKINS66.find(s => s.id === id) || SKINS66[0];
+  function starTotal66() { let n = 0; const B = save && save.best || {}; for (const id in B) n += (B[id] && B[id].stars) | 0; return n; }
+  function starMask66(b) { if (!b) return 0; if (b.starMask) return b.starMask | 0; const n = Math.max(0, Math.min(3, b.stars | 0)); return n ? (1 << n) - 1 : 0; }
+  function evalStars66() {
+    const def = STAGES[stageIdx] || { time: 300 };
+    const coins = (L && L.coins) ? L.coins : [];
+    const got = coins.filter(c => c.taken).length, tot = coins.length;
+    const left = G && G.tl53 !== undefined ? G.tl53 : (G && G.timeLeft) || 0;
+    const need = Math.ceil((def.time || 0) * 0.5);
+    const s1 = true, s2 = tot === 0 || got / tot >= 0.6, s3 = left >= need;
+    return { s1, s2, s3, got, tot, left, need, mask: (s1 ? 1 : 0) | (s2 ? 2 : 0) | (s3 ? 4 : 0) };
+  }
+  function commitStars66(id, mask) {
+    const b = save.best[id] || (save.best[id] = { clear: true });
+    let prev = b.starMask | 0;
+    if (!prev && b.stars) prev = (1 << Math.min(3, b.stars | 0)) - 1;
+    b.starMask = prev | mask;
+    b.stars = [1, 2, 4].reduce((n, bit) => n + ((b.starMask & bit) ? 1 : 0), 0);
+    return b;
+  }
+  function applyOutfit66(id) {
+    if (!player) return;
+    const sk = skinDef66(id || (save && save.outfit66) || 'steve');
+    const fire = pl && pl.power === 2;
+    const cloth = player.userData.cloth || [];
+    cloth.forEach(m => {
+      const base = m.userData && m.userData.baseMap;
+      if (fire || sk.id === 'steve') { m.map = base || m.map; m.color.setHex(fire ? 0xff9a80 : 0xffffff); if (m.emissive) { m.emissive.setHex(0); m.emissiveIntensity = 0; } }
+      else { m.map = null; m.color.setHex(m.userData && m.userData.slot === 'pants' ? sk.pants : sk.shirt); if (m.emissive) { m.emissive.setHex(sk.glow || 0); m.emissiveIntensity = sk.glow ? 0.4 : 0; } }
+      m.needsUpdate = true;
+    });
+    (player.userData.tint || []).forEach(m => { if (cloth.indexOf(m) >= 0) return; m.color.setHex(fire ? 0xff9a80 : 0xffffff); });
+  }
   function setPower(p, instant) {
     pl.power = p; if (p > 0) pl.half57 = 0; pl.hB = p > 0 ? 1.28 : 0.9; if (!pl.truck) pl.h = pl.crouch ? pl.hB * 0.6 : pl.hB; if (p > (pl.power0 || 0) && !instant && typeof BGM !== 'undefined') BGM.jingle('power'); pl.power0 = p; pl.grow = instant ? 0 : 40;
-    const tint = player.userData.tint || [];
-    tint.forEach(m => m.color.setHex(p === 2 ? 0xff9a80 : 0xffffff));
+    applyOutfit66();
     const d = document.getElementById('baDash'); if (d && !d.dataset.s583) d.textContent = p === 2 ? '대시🔥' : '대시';
   }
 
@@ -9692,6 +9741,7 @@ const BlockAction = (() => {
     const unlockedNow = !side62 && stageIdx + 2 > save.unlocked && stageIdx + 1 < STAGES.length && !(STAGES[stageIdx + 1] && STAGES[stageIdx + 1].wk === 'dream');
     if (!side62) save.unlocked = Math.min(STAGES.length, Math.max(save.unlocked, stageIdx + 2));
     save.pw621 = Math.max(0, Math.min(2, pl.power | 0));   // v6.2.1: keep the goal power for the next stage
+    G.stars66 = evalStars66(); commitStars66(def.id, G.stars66.mask);
     saveSave();
     try { G.w582 = shopBank582(def, !b.clear); } catch (e) {}
     if (afterClear5(def, { gained, newBest, unlockedNow })) return;
@@ -10171,6 +10221,7 @@ const BlockAction = (() => {
   function recBest57(id, old) {
     const b = save.best[id]; if (!b) return;
     if (old && old.stars) b.stars = old.stars;
+    if (old && old.starMask) b.starMask = old.starMask;
     const td = Object.assign({}, (old && old.td) || {}), d = G.d57 || DIFF, t = +G.clearTime.toFixed(1);
     td[d] = td[d] ? Math.min(td[d], t) : t; b.td = td;
     const ds = Object.assign({}, (old && old.ds) || {}); ds[d] = Math.max(ds[d] || 0, b.score || 0); b.ds = ds;
@@ -10314,10 +10365,12 @@ const BlockAction = (() => {
     STAGES.forEach((s, i) => {
       const locked = !stageOpen62(i), b = save.best[s.id];
       const c = document.createElement('button'); c.type = 'button'; c.className = 'ba-card th-' + s.theme + (locked ? ' locked' : '') + (b && b.clear ? ' cleared' : '');
-      c.innerHTML = `<div class="ba-id"></div><div class="ba-nm"></div><div class="ba-sub"></div><div class="ba-best"></div>`;
+      c.innerHTML = `<div class="ba-id"></div><div class="ba-nm"></div><div class="ba-sub"></div><div class="ba-starrow"></div><div class="ba-best"></div>`;
       c.querySelector('.ba-id').textContent = (locked ? '🔒 ' : b && b.clear ? '⭐ ' : '') + 'STAGE ' + s.id;
       c.querySelector('.ba-nm').textContent = s.name;
       c.querySelector('.ba-sub').textContent = locked ? (s.wk === 'dream' && !dreamOn62() ? '월드 3 크레용 나라를 클리어하면 열려요' : '이전 스테이지를 클리어하면 열려요') : s.sub;
+      const sm = starMask66(b);
+      c.querySelector('.ba-starrow').innerHTML = [1, 2, 4].map(bit => '<i class="' + ((sm & bit) ? 'on' : '') + '">★</i>').join('');
       c.querySelector('.ba-best').textContent = b && b.clear ? `최고 ${b.score.toLocaleString()}점 · ${fmtTime(b.time)}` : locked ? '' : '아직 기록 없음';
       c.disabled = locked;
       c.onclick = () => { if (!locked) { SFX && snd('select'); shopGo582(i, () => newRun(i)); } };
@@ -10333,7 +10386,7 @@ const BlockAction = (() => {
     buildWorld(STAGES[pv]);
     if (!player) { player = makeHero(); scene.add(player); }
     pl = { x: L.start[0] + 2, y: L.start[1], vx: 0, vy: 0, hw: 0.28, h: 0.9, face: 1, ground: true, power: 0, inv: 0, grow: 0 };
-    player.visible = true; cam.fy = pl.y; placeCamera(true);
+    player.visible = true; cam.fy = pl.y; placeCamera(true); applyOutfit66();
   }
   function showOver(kind, info) {
     const el = $('baOver'); if (!el) return;
@@ -10350,14 +10403,14 @@ const BlockAction = (() => {
       if (G.w582) { const W = G.w582, d = document.createElement('div'); d.className = 'w582'; d.dataset.earn = W.earn; d.dataset.w = W.w; p.appendChild(d); const t0 = performance.now(); const f = now => { if (!d.isConnected) return; const k = Math.min(1, Math.max(0, (now - t0 - 900) / 900)); d.textContent = `🪙 +${Math.round(W.earn * k)} 코인 → 지갑 ${(W.w - W.earn + Math.round(W.earn * k)).toLocaleString()}${W.first ? ' (첫 클리어 +20)' : ''}`; if (k < 1) requestAnimationFrame(f); }; requestAnimationFrame(f); }
       if (stageIdx + 1 < STAGES.length && stageOpen62(stageIdx + 1) && !(def.wk !== 'dream' && STAGES[stageIdx + 1].wk === 'dream')) add('다음 스테이지 ▶', () => shopGo582(stageIdx + 1, () => { stageIdx++; cpReached = false; startStage(true); }), 'pri');
       add('다시 하기', () => shopGo582(stageIdx, () => { cpReached = false; G.score = G.stageScore0; startStage(true); }));
-      add('🗺 월드맵', () => showMap5()); add('🛒 상점', () => shopOpen582());
+      add('🗺 월드맵', () => showMap5()); add('👕 옷장', () => wardrobeOpen66()); add('🛒 상점', () => shopOpen582());
     } else if (kind === 'over') {
       h.textContent = '게임 오버'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
       add('다시 도전', () => shopGo582(stageIdx, () => newRun(stageIdx)), 'pri'); add('🗺 월드맵', () => showMap5());
     } else if (kind === 'pause') {
       h.textContent = '일시정지'; p.innerHTML = ''; const d = document.createElement('div'); d.textContent = `${def.id} ${def.name} · 목숨 ${G.lives} · 점수 ${G.score.toLocaleString()}`; p.appendChild(d);
       add('계속하기', resume, 'pri'); add(BGM.isOn() ? '🎵 음악 끄기' : '🎵 음악 켜기', () => { BGM.toggle(); const mb = $('baMus'); if (mb) { mb.textContent = BGM.isOn() ? '🎵' : '🎵'; mb.classList.toggle('off', !BGM.isOn()); } showOver('pause'); });
-      add('음악 볼륨: ' + (BGM.vol() < 0.3 ? '작게' : BGM.vol() < 0.5 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.3 ? 0.4 : v < 0.5 ? 0.6 : 0.2); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); if (CTL584.touch()) add('📱 이동 조작: ' + CTL584.label(), () => { CTL584.cycle(); showOver('pause'); }); add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); showOver('pause'); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); showOver('pause'); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open()); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
+      add('음악 볼륨: ' + (BGM.vol() < 0.3 ? '작게' : BGM.vol() < 0.5 ? '보통' : '크게'), () => { const v = BGM.vol(); BGM.vol(v < 0.3 ? 0.4 : v < 0.5 ? 0.6 : 0.2); showOver('pause'); }); add('대사 음성: ' + VOICE.label(), () => { VOICE.cycle(); showOver('pause'); }); if (CTL584.touch()) add('📱 이동 조작: ' + CTL584.label(), () => { CTL584.cycle(); showOver('pause'); }); add('달리기 방식: ' + RUN5.label(), () => { RUN5.cycle(); showOver('pause'); }); add('난이도: ' + diffLbl57(), () => { cycleDiff57(); showOver('pause'); }); add('💾 기록 내보내기/불러오기', () => SaveCode57.open()); add('👕 옷장', () => wardrobeOpen66()); add('처음부터', () => { cpReached = false; G.score = G.stageScore0; startStage(true); }); add('🗺 월드맵', () => showMap5());
     }
     el.dataset.kind = kind; el.classList.add('show'); setPad(false);
     if (kind === 'clear') results53(el, info);
@@ -10442,6 +10495,7 @@ const BlockAction = (() => {
     bindInput();
     window.addEventListener('resize', onResize);
     dom5();
+    const wb66 = document.getElementById('baWardrobe'); if (wb66) wb66.onclick = () => wardrobeOpen66();
     if (portalFirst66()) portalStart66();
     else { showSelect(); showMap5(); }
     if (window.__BA_DEBUG) { installDebug(); installDebug5(); installDebug51(); installDebug52(); installDebug53(); installDebug54(); installDebug56(); installDebug57(); installDebug58(); installDebug59(); installDebug595(); }
@@ -12062,7 +12116,35 @@ const BlockAction = (() => {
     if (!(s.v >= 2)) { s.inv.tnt = Math.floor(+s.inv.tnt || 0) * 2; s.v = 2; }   // v5.8.3: v1 stored 'TNT x2' packs, v2 stores bombs
     s.w = Math.max(0, Math.min(999999, Math.floor(+s.w || 0)));
     SHOP582.items.forEach(it => { s.inv[it.id] = Math.max(0, Math.min(it.mx, Math.floor(+s.inv[it.id] || 0))); });
+    if (!Array.isArray(save.owned66)) save.owned66 = ['steve'];
+    if (!save.outfit66 || !SKINS66.some(k => k.id === save.outfit66)) save.outfit66 = 'steve';
     return s;
+  }
+  function wardrobeOpen66() {
+    shopCss582();
+    let el = document.getElementById('baWard66');
+    const root = document.getElementById('blockaction'); if (!root) return;
+    if (!el) { el = document.createElement('div'); el.id = 'baWard66'; root.appendChild(el); }
+    const s = shopSt582(), owned = save.owned66, eq = save.outfit66, stars = starTotal66();
+    const cards = SKINS66.map(sk => {
+      const have = owned.indexOf(sk.id) >= 0 || sk.price === 0 && sk.stars === 0;
+      const need = sk.stars && stars < sk.stars;
+      const cost = sk.stars ? '★ ' + sk.stars + ' (보유 ' + stars + ')' : (sk.price ? '🪙 ' + sk.price : '기본');
+      const act = have ? (sk.id === eq ? '장착 중' : '장착') : (need ? '별이 부족해요' : (s.w < sk.price ? '코인이 부족해요' : '구매'));
+      return '<button type="button" class="sk' + (sk.id === eq ? ' on' : '') + '" data-id="' + sk.id + '" data-have="' + (have ? 1 : 0) + '"' + ((need || (!have && s.w < sk.price)) ? ' disabled' : '') + '><i style="background:linear-gradient(180deg,' + sk.a + ',' + sk.b + ')"></i><b>' + sk.name + '</b><small>' + cost + '</small><em>' + act + '</em></button>';
+    }).join('');
+    el.innerHTML = '<div class="pn"><div class="hd"><h3>👕 옷장</h3><div class="wl">🪙 ' + s.w.toLocaleString() + ' · ★ ' + stars + '</div><button type="button" class="x" data-x>✕</button></div><p class="sub">코인은 스테이지를 클리어할 때 지갑에 들어와요. 별이 필요한 옷은 모은 별의 합으로 열립니다.</p><div class="gr">' + cards + '</div></div>';
+    el.classList.add('show');
+    el.querySelector('[data-x]').onclick = () => { el.classList.remove('show'); applyOutfit66(); snd('select'); };
+    el.querySelectorAll('.sk').forEach(btn => btn.onclick = () => {
+      const id = btn.dataset.id, sk = skinDef66(id), have = save.owned66.indexOf(id) >= 0 || (sk.price === 0 && sk.stars === 0);
+      applyOutfit66(id);
+      if (have) { save.outfit66 = id; saveSave(); snd('power'); wardrobeOpen66(); return; }
+      const wal = shopSt582();
+      if (sk.stars && starTotal66() < sk.stars) return;
+      if (wal.w < sk.price) return;
+      wal.w -= sk.price; save.owned66.push(id); save.outfit66 = id; saveSave(); snd('power'); wardrobeOpen66();
+    });
   }
   function shopSlots582(d) { return (d || DIFF) === 'hard' ? 1 : 2; }
   function shopBank582(def, firstClear) {
@@ -12104,6 +12186,22 @@ const BlockAction = (() => {
 #ba582 .fly{position:fixed;z-index:99;font-size:22px;pointer-events:none;transition:transform .55s cubic-bezier(.3,.0,.6,1),opacity .55s;}
 #ba582 .toast{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#2f9a40;color:#fff;font-weight:900;padding:6px 14px;border-radius:999px;opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:2;}
 #ba582 .toast.on{opacity:1;}
+#baWard66{position:absolute;inset:0;z-index:13;display:none;align-items:center;justify-content:center;background:rgba(5,3,14,.72);padding:16px;box-sizing:border-box;}
+#baWard66.show{display:flex;}
+#baWard66 .pn{width:min(640px,100%);max-height:100%;overflow:auto;background:#1a1230;border:3px solid #f8e7b0;border-radius:22px;padding:14px;color:#fff;font-family:system-ui,sans-serif;}
+#baWard66 .hd{display:flex;align-items:center;gap:8px;}
+#baWard66 h3{margin:0;flex:1;font-size:22px;}
+#baWard66 .wl{font-weight:900;background:#ffe58a;color:#3a2300;border-radius:999px;padding:6px 12px;}
+#baWard66 .x{width:48px;height:48px;border:0;border-radius:14px;background:#3a3058;color:#fff;font-size:20px;font-weight:900;}
+#baWard66 .sub{font-size:13px;opacity:.85;line-height:1.4;}
+#baWard66 .gr{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+#baWard66 .sk{display:flex;flex-direction:column;align-items:center;gap:4px;min-height:132px;border-radius:16px;border:2px solid #c99a3c;background:#2a2148;color:#fff;font-weight:900;padding:10px;}
+#baWard66 .sk i{width:54px;height:54px;border-radius:14px;display:block;box-shadow:inset 0 -12px 0 rgba(0,0,0,.25);}
+#baWard66 .sk small{font-size:12px;opacity:.85;}
+#baWard66 .sk em{font-style:normal;font-size:14px;background:#3d8f4a;border-radius:999px;padding:4px 10px;}
+#baWard66 .sk.on{outline:3px solid #ffd54a;}
+#baWard66 .sk:disabled{opacity:.55;}
+@media (max-width:520px){#baWard66 .gr{grid-template-columns:1fr;}#baWard66 .sk{min-height:88px;flex-direction:row;justify-content:flex-start;gap:12px;}}
 #ba582 .em{padding:20px;text-align:center;opacity:.8;}
 .w582{margin-top:6px;font-weight:900;color:#fde68a;font-size:15px;}
 @media (max-width:560px){#ba582 .gr{grid-template-columns:repeat(2,1fr);gap:8px;}#ba582 .cd .ic{font-size:32px;}#ba582 .cd .ds{font-size:11px;min-height:28px;}#ba582 .pn{padding:12px 10px 12px;}}
@@ -13524,10 +13622,13 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
 #baOver[data-kind="pause"]{background:rgba(8,6,22,.38);backdrop-filter:blur(9px) saturate(.7) brightness(.85);-webkit-backdrop-filter:blur(9px) saturate(.7) brightness(.85);}
 #baOver[data-kind="pause"] .ba-panel{background:rgba(20,16,46,.55);border:1px solid rgba(255,255,255,.18);border-radius:22px;padding:18px 16px 20px;box-shadow:0 20px 50px rgba(0,0,0,.4);}
 .r53{margin:4px auto 12px;max-width:420px;}
-.r53 .st{display:flex;justify-content:center;gap:14px;margin:4px 0 12px;}
-.r53 .st i{font-style:normal;font-size:44px;line-height:1;color:rgba(255,255,255,.16);text-shadow:none;transform:scale(.4);opacity:.5;transition:transform .35s cubic-bezier(.2,1.9,.4,1),opacity .2s;}
-.r53 .st i.on{color:#ffd54a;opacity:1;transform:scale(1);text-shadow:0 0 16px rgba(255,210,80,.85),0 3px 0 #b07a10;}
-.r53 .st i.off{opacity:1;transform:scale(.86);}
+.r53 .st{display:flex;justify-content:center;gap:10px;margin:4px 0 12px;flex-wrap:wrap;}
+.r53 .st span{display:flex;flex-direction:column;align-items:center;width:108px;gap:4px;}
+.r53 .st i{font-style:normal;font-size:52px;line-height:1;color:rgba(255,255,255,.18);text-shadow:none;transform:scale(.35) rotate(-18deg);opacity:.45;}
+.r53 .st b{font-size:11px;font-weight:800;line-height:1.25;opacity:.85;text-align:center;}
+.r53 .st i.on{color:#ffd54a;opacity:1;transform:scale(1) rotate(0deg);text-shadow:0 0 18px rgba(255,210,80,.95),0 4px 0 #b07a10;animation:starPop66 .5s cubic-bezier(.2,1.7,.3,1);}
+.r53 .st i.off{opacity:.55;transform:scale(.7);filter:grayscale(1);}
+@keyframes starPop66{0%{transform:scale(.2) rotate(-30deg)}55%{transform:scale(1.35) rotate(10deg)}100%{transform:scale(1) rotate(0deg)}}
 .r53 .row{display:flex;justify-content:space-between;align-items:center;padding:7px 14px;margin:5px 0;border-radius:12px;background:rgba(255,255,255,.08);font-weight:700;font-variant-numeric:tabular-nums;opacity:0;transform:translateY(8px);transition:opacity .25s,transform .25s;}
 .r53 .row.on{opacity:1;transform:none;}
 .r53 .row b{font-size:20px;color:#fde68a;}
@@ -13596,18 +13697,18 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
     try {
       css53();
       const def = STAGES[stageIdx], p = el.querySelector('p'); if (!p) return;
-      const coins = (L && L.coins) ? L.coins : [], got = coins.filter(c => c.taken).length, tot = coins.length;
-      const tl = G.tl53 !== undefined ? G.tl53 : 0, tf = def.time ? tl / def.time : 0;
-      const stars = [true, tot === 0 || got / tot >= 0.6, tf >= 0.5];
-      const b = save.best[def.id] || {}; const ns = stars.filter(Boolean).length; if (!(b.stars >= ns)) { b.stars = ns; save.best[def.id] = b; saveSave(); }
+      const ev = G.stars66 || evalStars66();
+      const stars = [ev.s1, ev.s2, ev.s3];
+      const b = save.best[def.id] || {};
+      const labels = ['클리어', '코인 ' + ev.got + '/' + ev.tot + ' · 60%', '남은 시간 ' + ev.left + '≥' + ev.need + '초'];
       [...p.children].slice(0, 3).forEach(d => { d.style.display = 'none'; });
       const box = document.createElement('div'); box.className = 'r53';
-      box.innerHTML = '<div class="st"><i>★</i><i>★</i><i>★</i></div>' +
+      box.innerHTML = '<div class="st">' + stars.map((on, i) => '<span><i class="' + (on ? 'win' : 'lose') + '">★</i><b>' + labels[i] + '</b></span>').join('') + '</div>' +
         '<div class="row"><span>⏱ 클리어 시간</span><b data-k="t">0.0</b></div>' +
-        '<div class="row"><span>🪙 코인</span><b data-k="c">0<small>/ ' + tot + '</small></b></div>' +
-        '<div class="row"><span>🏁 스테이지 점수</span><b data-k="s">0</b></div><div class="nb">' + (info && info.newBest ? '🏆 최고 기록!' : '') + '</div>';
+        '<div class="row"><span>🪙 코인</span><b data-k="c">0<small>/ ' + ev.tot + '</small></b></div>' +
+        '<div class="row"><span>🏁 스테이지 점수</span><b data-k="s">0</b></div><div class="nb">' + (info && info.newBest ? '🏆 최고 기록! ' : '') + '최고 ★'.repeat(b.stars | 0 || stars.filter(Boolean).length) + '</div>';
       p.insertBefore(box, p.firstChild);
-      const rows = box.querySelectorAll('.row'), st = box.querySelectorAll('.st i'), T = { t: G.clearTime || 0, c: got, s: info ? info.gained : 0 };
+      const rows = box.querySelectorAll('.row'), st = box.querySelectorAll('.st i'), T = { t: G.clearTime || 0, c: ev.got, s: info ? info.gained : 0 };
       const val = { t: box.querySelector('[data-k=t]'), c: box.querySelector('[data-k=c]'), s: box.querySelector('[data-k=s]') };
       const t0 = performance.now(); let lastTick = 0;
       const step = now => {
@@ -13619,12 +13720,12 @@ body.hold53 #tc53 .bar{animation:none!important;transform:skewX(-8deg);}
         val.c.firstChild.nodeValue = String(Math.round(T.c * f(1, 0.6)));
         val.s.textContent = Math.round(T.s * f(2, 0.9)).toLocaleString();
         if (e < 2.0 && now - lastTick > 70) { lastTick = now; snd('coin'); }
-        st.forEach((s, i) => { if (e > 1.6 + i * 0.32 && !s.dataset.done) { s.dataset.done = 1; s.classList.add(stars[i] ? 'on' : 'off'); if (stars[i]) snd('pickup'); } });
+        st.forEach((s, i) => { if (e > 1.15 + i * 0.38 && !s.dataset.done) { s.dataset.done = 1; s.classList.add(stars[i] ? 'on' : 'off'); if (stars[i]) snd('star'); } });
         if (e > 2.8) box.querySelector('.nb').classList.add('on');
-        if (e < 3.2) requestAnimationFrame(step);
+        if (e < 3.4) requestAnimationFrame(step);
       };
       requestAnimationFrame(step);
-      box.dataset.stars = ns;
+      box.dataset.stars = String(stars.filter(Boolean).length);
     } catch (e) { slog5 && slog5('results53', String(e && e.message)); }
   }
   // ---- boss intro: brief freeze while the camera pushes in on the boss, then eases back ----
